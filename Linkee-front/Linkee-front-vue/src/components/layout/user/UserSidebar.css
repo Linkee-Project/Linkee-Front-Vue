@@ -1,10 +1,15 @@
 /* 전체 사이드바 영역 */
 .sidebar-container {
     width: 337px;
-    height: 100vh;
-
+    height: calc(100vh - 110px);
     background: rgba(255, 255, 255, 0.6);
 
+}
+.content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden; /* 부모 영역 벗어나지 않도록 */
 }
 
 /*----------------------------------------------------------------------------*/
