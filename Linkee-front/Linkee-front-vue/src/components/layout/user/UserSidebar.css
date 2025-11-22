@@ -1,0 +1,204 @@
+/* 전체 사이드바 영역 */
+.sidebar-container {
+    width: 337px;
+    height: 100vh;
+
+    background: rgba(255, 255, 255, 0.6);
+
+}
+
+/*----------------------------------------------------------------------------*/
+/* 친구 목록 */
+.section-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 14px;
+    font-weight: 700;
+
+}
+
+.section-header .title {
+    position: absolute;
+    opacity: 1;
+    top: 38px;
+    left: 94px;
+    font-size: 20px;
+    color: #0094F6;
+    text-shadow: 4px 4px 4px rgba(0, 148, 246, 0.25);
+    font-weight: 700;
+}
+
+.section-header .count {
+    position: absolute;
+    opacity: 1;
+    top: 69px;
+    left: 234px;
+    font-size: 11px;
+    color: #0094F6; /* 흐린 색으로 보조 정보 표시 */
+}
+/*----------------------------------------------------------------------------*/
+/* 친구 카드 리스트 */
+
+.friend-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 98px;
+    margin-left: 35px;
+}
+
+.friend-card {
+    width: 267px;
+    height: 98px;
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: 16px;
+    background: rgba(217, 218, 219, 0.7);
+    border: none;
+
+    cursor: pointer;
+    transition: 0.2s;  /* hover 애니메이션 */
+}
+
+.friend-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 5px 5px 34px rgba(0, 148, 246, 0.20);
+}
+
+.friend-card.online {
+    background: #FFFFFF;
+}
+
+.friend-card .avatar {
+    width: 42px;
+    height: 42px;
+    margin-left: 25px;
+}
+
+
+.friend-card .info {
+    margin-left: 16px;
+}
+
+.friend-card .name {
+    font-size: 16px;
+    font-weight: 900;
+    margin: 0;
+}
+
+.status-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+.status-color {
+    width: 7px;
+    height: 7px;
+}
+
+.status {
+    font-size: 12px;
+    margin: 0;
+}
+
+/* 새 채팅방 만들기 버튼 */
+.button-area {
+    display: flex;
+    justify-content: center;
+    margin-top: 214px;
+}
+
+/* BaseButton.vue의 btn--blue + btn--medium 타겟팅 */
+.button-area .btn.btn--blue.btn--medium {
+    width: 267px !important;
+    height: 50px !important;
+    font-size: 16px !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    box-shadow: 0px 14px 32px rgba(0, 148, 246, 0.1) !important;
+
+    border: none !important;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.button-area .btn.btn--blue.btn--medium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 14px 32px rgba(0, 148, 246, 0.30) !important;
+}
+
+/*     내 채팅방    */
+
+.myroom-wrapper {
+    width: 288px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 20px 0 20px 0;
+    margin: 0 auto;           /* 가운데 정렬 */
+    margin-top: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+/* 내 채팅방 제목 */
+.myroom-header {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.myroom-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0094F6;
+    text-shadow: 4px 4px 4px rgba(0, 148, 246, 0.25);
+}
+
+
+.room-list {
+    display: flex;
+    flex-direction: column; /* 세로 목록 */
+    gap: 10px;              /* 카드 간격 */
+    align-items: center;
+}
+
+.room-card {
+    width: 245px;
+    height: 74px;
+    display: flex;
+    align-items: center;
+    background: linear-gradient(90deg, rgba(0, 148, 246, 0.30) 0%, rgba(178, 229, 251, 0.30) 100%);
+    padding: 12px;
+    border-radius: 16px;
+    border: none;
+
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.room-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 5px 5px 34px rgba(0, 148, 246, 0.3);
+}
+
+/* 방 아이콘 */
+.room-icon {
+    width: 50px;
+    height: 50px;
+}
+
+/* 방 제목 */
+.room-text {
+    margin-left: 10px; /* 아이콘과 텍스트 간 간격 */
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* 추가 상단 마진 */
+.mt-20 {
+    margin-top: 20px;
+}
