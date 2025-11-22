@@ -1,14 +1,18 @@
 <script>
 import UserNavbar from "@/components/layout/user/UserNavbar.vue";
 import UserSidebar from "@/components/layout/user/UserSidebar.vue";
+import BaseButton from "@/components/base/button/BaseButton.vue";
 
 export default {
   name: "App",
   components: {
+    BaseButton,
     UserNavbar,
     UserSidebar
   },
 };
+
+
 </script>
 
 <template>
@@ -19,6 +23,34 @@ export default {
     <div class="main-layout">
       <div class="router-view-container">
         <router-view />
+
+        <!-- Small 버튼 줄 -->
+        <div class="button-row">
+          <BaseButton color="blue" size="small">small</BaseButton>
+          <BaseButton color="emerald" size="small">small</BaseButton>
+          <BaseButton color="white" size="small">small</BaseButton>
+          <BaseButton color="gray" size="small">small</BaseButton>
+          <BaseButton color="orange" size="small">small</BaseButton>
+        </div>
+        <br>
+        <!-- Medium 버튼 줄 -->
+        <div class="button-row">
+          <BaseButton color="gray" size="medium">Medium</BaseButton>
+          <BaseButton color="blue" size="medium">Medium</BaseButton>
+          <BaseButton color="orange" size="medium">Medium</BaseButton>
+          <BaseButton color="emerald" size="medium">Medium</BaseButton>
+          <BaseButton color="white" size="medium">Medium</BaseButton>
+        </div>
+        <br>
+        <!-- Large 버튼 줄 -->
+        <div class="button-row">
+          <BaseButton color="white" size="large">Large</BaseButton>
+          <BaseButton color="orange" size="large">Large</BaseButton>
+          <BaseButton color="blue" size="large">Large</BaseButton>
+          <BaseButton color="gray" size="large">Large</BaseButton>
+          <BaseButton color="emerald" size="large">Large</BaseButton>
+        </div>
+        <br>
       </div>
 
       <UserSidebar />
@@ -46,6 +78,7 @@ export default {
   /* router-view가 남는 공간 차지 */
   width: 100%;
 }
+
 
 .router-view-container {
   flex: 1; /* 메인 콘텐츠가 남은 공간 다 차지함 */
