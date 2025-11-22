@@ -28,7 +28,6 @@ export default {
         <router-link to="/">
           <button>메인 페이지로 이동</button>
         </router-link>
-
       </div>
       <UserSidebar />
     </div>
@@ -38,18 +37,24 @@ export default {
 
 <style scoped>
 
+body{
+  margin: 0 !important;
+}
+
 html, body, #app {
   height: 100%;
-  margin: 0;
+  margin: 0 !important;
   padding: 0;
   overflow: hidden; /* 스크롤 완전 제거 */
 }
+
 
 /* 전체 페이지 기본 스타일 */
 #app {
   font-family: "Noto Sans KR", sans-serif;
   background: #D4EBF5;
-  height: 100vh;
+  height: 100%;
+  overflow: hidden; /* 스크롤 완전 제거 */
 }
 
 /* 메인 컨텐츠 + 사이드바 배치 */
