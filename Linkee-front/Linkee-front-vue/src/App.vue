@@ -60,17 +60,27 @@ export default {
 </template>
 
 <style scoped>
+
+html, body, #app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* 스크롤 완전 제거 */
+}
+
 /* 전체 페이지 기본 스타일 */
 #app {
   font-family: "Noto Sans KR", sans-serif;
   background: #D4EBF5;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 /* 메인 컨텐츠 + 사이드바 배치 */
 .main-layout {
+  flex: 1;
   display: flex;
   flex-direction: row;
+  overflow: hidden;
 
   /* 사이드바를 오른쪽 끝으로 밀어냄 */
   justify-content: flex-start;
