@@ -4,20 +4,18 @@ import {reactive, ref} from "vue";
 import UserNavbar from "@/components/layout/user/UserNavbar.vue";
 import UserSidebar from "@/components/layout/user/UserSidebar.vue";
 import BaseButton from "@/components/base/button/BaseButton.vue";
-import BaseInput from "@/components/base/input/BaseInput.vue";
 import SearchForm from "@/components/base/SearchForm.vue";
 
 
 
 
 
-
+/** 검색용 */
 // 검색 키워드
 const keyword = ref('');
 
-// 검색 버튼 눌렀을 때
-const handleSearch = () => {
-
+const handleSearch = (value) => {
+  console.log('검색어 전달됨:', value);
 };
 
 
@@ -63,9 +61,9 @@ const handleSearch = () => {
       </div>
 
       <div>
-        <div>
-          <SearchForm @search="handleSearch" />
-        </div>
+        <h2>검색 테스트</h2>
+        <SearchForm v-model="keyword" @search="handleSearch" />
+        <p>입력값 확인: {{ keyword }}</p>
       </div>
 
       <UserSidebar />
