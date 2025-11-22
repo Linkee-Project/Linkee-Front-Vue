@@ -10,42 +10,46 @@
 /*----------------------------------------------------------------------------*/
 /* 친구 목록 */
 .section-header {
-    position: relative;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    margin-bottom: 14px;
+    margin-top: 40px;
+    margin-bottom: 20px;
     font-weight: 700;
-
 }
 
 .section-header .title {
-    position: absolute;
-    opacity: 1;
-    top: 38px;
-    left: 94px;
     font-size: 20px;
     color: #0094F6;
     text-shadow: 4px 4px 4px rgba(0, 148, 246, 0.25);
     font-weight: 700;
+    margin-bottom: 6px;
 }
 
+
 .section-header .count {
-    position: absolute;
-    opacity: 1;
-    top: 69px;
-    left: 234px;
     font-size: 11px;
-    color: #0094F6; /* 흐린 색으로 보조 정보 표시 */
+    color: #0094F6;
+    opacity: 0.9;
+    align-self: flex-end;
+    margin-right: 10px;
 }
 /*----------------------------------------------------------------------------*/
 /* 친구 카드 리스트 */
+.friend-scroll-area {
+    max-height: 300px; /* ✔ 친구 목록이 이 범위 안에서만 스크롤 */
+    overflow-y: auto;
+    margin-left: 35px;   /* 기존 friend-list margin 옮김 */
+    margin-top: 10px;
+    padding-right: 10px; /* 스크롤바 공간 확보 */
+}
+
 
 .friend-list {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    margin-top: 98px;
-    margin-left: 35px;
+
 }
 
 .friend-card {
@@ -109,10 +113,9 @@
 .button-area {
     display: flex;
     justify-content: center;
-    margin-top: 214px;
+    margin-top: 70px;
 }
 
-/* BaseButton.vue의 btn--blue + btn--medium 타겟팅 */
 .button-area .btn.btn--blue.btn--medium {
     width: 267px !important;
     height: 50px !important;
@@ -140,10 +143,11 @@
     background: #ffffff;
     border-radius: 20px;
     padding: 20px 0 20px 0;
-    margin: 0 auto;           /* 가운데 정렬 */
-    margin-top: 20px;
+    margin: 0 auto;
+    margin-top: 40px;
     box-shadow: 0 0 20px rgba(0,0,0,0.05);
 }
+
 
 /* 내 채팅방 제목 */
 .myroom-header {
@@ -158,6 +162,11 @@
     text-shadow: 4px 4px 4px rgba(0, 148, 246, 0.25);
 }
 
+.room-scroll-area {
+    max-height: 260px;        /* 원하는 높이 */
+    overflow-y: auto;         /* 스크롤 활성화 */
+    padding-right: 10px;      /* 스크롤바 공간 */
+}
 
 .room-list {
     display: flex;

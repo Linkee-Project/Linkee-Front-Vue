@@ -2,12 +2,50 @@
 //버튼 컴포넌트 가져오기
 import BlueButton from "@/components/base/button/BaseButton.vue";
 import "./UserSidebar.css";
+import profileImg from "@/assets/profile_img.svg";
+import onlineIcon from "@/assets/online.svg";
+import offlineIcon from "@/assets/offline.svg";
+
 
 //채팅방 여러개 만들기
 const rooms = [
   { id: 1, title: "코딩 전채틀, 알고리즘 스터디" },
   { id: 2, title: "코딩 전채틀, 알고리즘 스터디" },
-  { id: 3, title: "코딩 전채틀, 알고리즘 스터디" }
+  { id: 3, title: "코딩 전채틀, 알고리즘 스터디" },
+  { id: 4, title: "코딩 전채틀, 알고리즘 스터디" }
+];
+
+//친구 여러개 만들기
+// ✔ 친구 4명 데이터
+const friends = [
+  {
+    id: 1,
+    name: "김폭주기관차",
+    status: "접속중",
+    online: true,
+    avatar: profileImg
+  },
+  {
+    id: 2,
+    name: "김 이길까 말까",
+    status: "20분전 마지막 접속",
+    online: false,
+    avatar: profileImg
+  },
+  {
+    id: 3,
+    name: "코딩하는 햄찌",
+    status: "5시간 전 마지막 접속",
+    online: false,
+    avatar: profileImg
+  },
+  {
+    id: 4,
+    name: "주말만 기다리는 중",
+    status: "접속중",
+    online: true,
+    avatar: profileImg
+  }
 ];
 </script>
 
@@ -22,32 +60,36 @@ const rooms = [
       </div>
 
       <!-- 친구 카드 리스트 영역 -->
-      <div class="friend-list">
-        <!-- 나중에 수정!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  -->
-        <button class="friend-card online">
-          <img class="avatar" src="@/assets/profile_img.svg" alt="friend avatar" />
+      <div class="friend-scroll-area">
+        <div class="friend-list">
 
-          <div class="info">
-            <p class="name">김폭주기관차</p>
-            <div class="status-row">
-              <img class="status-color" src="@/assets/online.svg" alt="online"/>
-              <span class="status">접속중</span>
-            </div>
-          </div>
-        </button>
+          <!-- ✔ v-for로 친구 목록 반복 렌더링 -->
+          <button
+              class="friend-card"
+              :class="{ online: friend.online }"
+              v-for="friend in friends"
+              :key="friend.id"
+          >
+            <img class="avatar" :src="friend.avatar" alt="friend avatar" />
 
-        <!-- 오프라인 -->
-        <button class="friend-card">
-          <img class="avatar" src="@/assets/profile_img.svg" alt="friend avatar" />
-          <div class="info">
-            <p class="name">김 이길까 말까</p>
-            <div class="status-row">
-              <img class="status-color" src="@/assets/offline.svg" alt="online"/>
-              <span class="status">20분전 마지막 접속</span>
+            <div class="info">
+              <p class="name">{{ friend.name }}</p>
+
+              <div class="status-row">
+                <!-- 온라인/오프라인 색상 아이콘 자동 변경 -->
+                <img
+                    class="status-color"
+                    :src="friend.online ? onlineIcon : offlineIcon"
+                    alt="status icon"
+                />
+                <span class="status">{{ friend.status }}</span>
+              </div>
             </div>
-          </div>
-        </button>
+          </button>
+
+        </div>
       </div>
+
 
       <!-- 새 채팅방 만들기 버튼 -->
       <div class="button-area">
@@ -61,11 +103,13 @@ const rooms = [
           <span class="myroom-title">🤝 내 채팅방</span>
         </div>
 
-        <div class="room-list">
-          <button class="room-card" v-for="room in rooms" :key="room.id">
-            <img class="room-icon" src="@/assets/chat_room_img.svg" alt="room icon" />
-            <p class="room-text">{{ room.title }}</p>
-          </button>
+        <div class="room-scroll-area">
+          <div class="room-list">
+            <button class="room-card" v-for="room in rooms" :key="room.id">
+              <img class="room-icon" src="@/assets/chat_room_img.svg" alt="room icon" />
+              <p class="room-text">{{ room.title }}</p>
+            </button>
+          </div>
         </div>
 
       </div>
