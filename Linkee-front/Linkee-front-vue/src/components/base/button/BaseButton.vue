@@ -92,7 +92,7 @@ const sizeClass = computed(() => {
    회색 버튼
  */
 .btn--gray {
-  background: #e4e4e4;
+  background: linear-gradient(90deg, #e4e4e4, #dadada);
   color: black;
   box-shadow: 0 6px 14px rgba(128, 128, 128, 0.1);
 }
