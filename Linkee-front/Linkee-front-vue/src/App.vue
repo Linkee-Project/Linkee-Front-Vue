@@ -1,12 +1,10 @@
 <script>
 import UserNavbar from "@/components/layout/user/UserNavbar.vue";
 import UserSidebar from "@/components/layout/user/UserSidebar.vue";
-import ComponentTest from "@/views/ComponentTest.vue";
 
 export default {
   name: "App",
   components: {
-    ComponentTest,
     UserNavbar,
     UserSidebar
   },
