@@ -65,31 +65,10 @@
 
     <!-- 페이지네이션 -->
     <section class="free-board__pagination">
-      <button
-          class="pagination-btn"
-          :disabled="page === 1"
-          @click="page--"
-      >
-        ‹
-      </button>
-
-      <button
-          v-for="p in totalPages"
-          :key="p"
-          class="pagination-page"
-          :class="{ 'pagination-page--active': p === page }"
-          @click="page = p"
-      >
-        {{ p }}
-      </button>
-
-      <button
-          class="pagination-btn"
-          :disabled="page === totalPages"
-          @click="page++"
-      >
-        ›
-      </button>
+      <PaginationButton
+          v-model:currentPage="page"
+          :total-pages="totalPages"
+      />
     </section>
   </div>
 </template>
@@ -98,6 +77,7 @@
 import { ref, computed } from 'vue';
 import BaseButton from '@/components/base/button/BaseButton.vue';
 import SearchForm from '@/components/base/form/SearchForm.vue';
+import PaginationButton from "@/components/base/button/PaginationButton.vue";
 
 const keyword = ref('');
 const page = ref(1);
