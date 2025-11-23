@@ -24,7 +24,7 @@
 
       <!-- 검색 + 방 만들기 -->
       <section class="free-board__search">
-        <SearchForm v-model="keyword" @search="handleSearch" />
+        <SearchForm v-model="keyword" @search="handleSearch"/>
         <BaseButton
             size="small"
             color="orange"
@@ -76,11 +76,11 @@
     <div class="modal-form">
       <label>
         제목
-        <BaseInput v-model="newRoom.title" type="text" placeholder="방 제목 입력" />
+        <BaseInput v-model="newRoom.title" type="text" placeholder="방 제목 입력"/>
       </label>
       <label>
         비밀번호 (선택)
-        <BaseInput v-model="newRoom.password" type="password" placeholder="비밀번호" />
+        <BaseInput v-model="newRoom.password" type="password" placeholder="비밀번호"/>
       </label>
 
       <!-- 카테고리 카드 선택 -->
@@ -109,7 +109,7 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from "vue";
+import {ref, computed, reactive} from "vue";
 import BaseButton from "@/components/base/button/BaseButton.vue";
 import SearchForm from "@/components/base/form/SearchForm.vue";
 import PaginationButton from "@/components/base/button/PaginationButton.vue";
@@ -122,19 +122,19 @@ const pageSize = 12;
 const isModalOpen = ref(false);
 
 const categories = ref([
-  { id: null, name: "ALL" },
-  { id: 1, name: "카테고리1" },
-  { id: 2, name: "카테고리2" },
-  { id: 3, name: "카테고리3" },
-  { id: 4, name: "카테고리4" },
-  { id: 5, name: "카테고리5" },
+  {id: null, name: "ALL"},
+  {id: 1, name: "카테고리1"},
+  {id: 2, name: "카테고리2"},
+  {id: 3, name: "카테고리3"},
+  {id: 4, name: "카테고리4"},
+  {id: 5, name: "카테고리5"},
 ]);
 
 const selectedCategory = ref(null);
 
 const rooms = ref([
-  { id: 32, title: "너 자신을 알라딘", memberCount: 4, maxMemberCount: 5, categoryId: 1, categoryName: "카테고리" },
-  ...Array.from({ length: 20 }).map((_, idx) => ({
+  {id: 32, title: "너 자신을 알라딘", memberCount: 4, maxMemberCount: 5, categoryId: 1, categoryName: "카테고리"},
+  ...Array.from({length: 20}).map((_, idx) => ({
     id: idx + 1,
     title: "방제목",
     memberCount: 3,
@@ -144,7 +144,7 @@ const rooms = ref([
   })),
 ]);
 
-const newRoom = reactive({ title: "", password: "", categoryId: null });
+const newRoom = reactive({title: "", password: "", categoryId: null});
 
 // --- 클릭 이벤트 핸들러 ---
 const selectCategory = (id) => {
@@ -169,7 +169,7 @@ const createRoom = () => {
     return;
   }
 
-  const category = categories.value.find(c => c.id === newRoom.categoryId) || { name: "ALL" };
+  const category = categories.value.find(c => c.id === newRoom.categoryId) || {name: "ALL"};
   const id = rooms.value.length ? Math.max(...rooms.value.map(r => r.id)) + 1 : 1;
 
   rooms.value.unshift({
@@ -221,188 +221,163 @@ const pagedRooms = computed(() => {
 </script>
 
 <style scoped>
-.free-board {
-  display: flex;
-  flex-direction: column;
-  min-height: calc(100vh - 110px); /* 화면 높이 채우기 */
-}
-
+/* 전체 페이지 (레이아웃 안에서 공간 채움) */
 .free-board-header {
-  padding: 5px 10px;
-  background: #7dbef2;
+  padding: 0 10px;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
+  background: #7DBEF2;
 }
 
 .free-board-header h5 {
-  margin: 3px 0;
   font-weight: 900;
+  margin: 8px 0;
 }
 
 .free-board-header p {
-  margin: 3px 0;
   font-size: 11px;
   font-weight: bold;
   color: white;
+  margin: 8px 0;
 }
+
+.free-board {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* 본문(전체 스크롤 담당) */
 
 .free-board-body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  border-bottom-left-radius: 15px;
-  border-bottom-right-radius: 15px;
   background: #f7f7f7;
   gap: 24px;
-  padding: 24px 32px 40px;
+  padding: 24px 32px 20px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
 }
 
-
-/* 카테고리 영역 */
-.free-board__category {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  gap: 16px;
-}
-
-.free-board__category-btn {
-  min-width: 140px;
-  height: 97px;
-}
-
-
-/* 검색 영역 */
-.free-board__search {
-  display: flex;
-  background: #ffffff;
-  margin-left: -32px;
-  margin-right: -32px;
-  padding-left: 32px; /* 선택: 내부 여백 유지하고 싶으면 추가 */
-  padding-right: 32px;
-  align-content: center;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 4px;
-}
-
-.free-board__rooms-create-btn {
-  height: fit-content;
-}
-
-/* 카드 리스트 */
+/* 방 리스트 */
 .free-board__rooms {
-  flex: 1;
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4열, 각 칸 똑같이 */
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px 24px;
   margin-top: 8px;
-  grid-auto-rows: 120px; /* 모든 행 높이 동일 */
+  flex: none;
+  overflow: visible;
 }
 
-/* BaseButton에 얹는 카드 스타일 */
+/* 방 카드 */
 .room-card-btn {
   display: flex;
-  flex-direction: column; /* 세로 정렬 */
+  flex-direction: column;
   justify-content: space-between;
-
-  width: 90%;
-  height: 100%; /* 행 높이에 맞게 꽉 채우기 */
+  width: 70%;
   padding: 13px;
   border-radius: 16px;
   background: linear-gradient(135deg, #f7fbff, #e3f3ff);
   box-shadow: 0 12px 24px rgba(0, 148, 246, 0.12);
-  cursor: pointer;
-  text-align: left;
-}
-
-.room-card-btn:hover:not(:disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 32px rgba(0, 148, 246, 0.18);
 }
 
 .room-card__header {
   display: flex;
-  justify-content: space-between; /* 방번호 왼쪽, 카테고리 오른쪽 */
+  justify-content: space-between; /* 좌우 배치 */
   align-items: center;
   width: 100%;
   font-size: 11px;
-  color: #7a8ca3;
-}
-
-.room-card__badge {
-  min-width: 22px;
-  height: 22px;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 10px;
-}
-
-.room-card__category {
-  font-size: 10px;
+  padding-bottom: 5px;
   color: #7a8ca3;
 }
 
 .room-card__title {
-  margin-top: 3px;
-  margin-bottom: 15px;
+  margin-top: 6px;
+  margin-bottom: 12px;
   font-size: 16px;
   font-weight: 600;
   color: #1c3757;
+  padding-bottom: 5px;
+  text-align: center;
 }
 
 .room-card__footer {
   font-size: 12px;
   color: #7a8ca3;
-}
-
-.room-card-empty {
-  grid-column: 1 / -1;
   text-align: center;
-  padding: 40px 0;
-  border-radius: 16px;
-  background: #f6f8fb;
-  color: #9aa8bf;
 }
 
-/* 페이지네이션 */
+.free-board__category {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  gap: 12px;
+
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 4px;
+
+  scrollbar-width: thin;
+}
+
+/* 카테고리 버튼 크기 줄여서 한 줄 정렬 적합 */
+.free-board__category-btn {
+  min-width: 120px;
+  height: 80px;
+  flex-shrink: 0; /* 🔥 절대 줄어들지 않게 */
+}
+
+
+/* 검색 영역 - 완전 한 줄 */
+.free-board__search {
+  display: flex;
+  flex-direction: row; /* 무조건 한 줄 */
+  align-items: center;
+  justify-content: space-between;
+
+  background: #ffffff;
+
+  margin-left: -32px;
+  margin-right: -32px;
+  padding: 8px 32px;
+  gap: 12px;
+}
+
+/* 검색 input 크기 줄어들도록 설정 */
+.free-board__search :deep(.search-form) {
+  min-width: 150px;
+}
+
+.free-board__rooms-create-btn {
+  flex-shrink: 0;
+}
+
+/* 페이지네이션 고정 (스크롤해도 따라 내려가지 않도록) */
 .free-board__pagination {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 6px;
-  margin-top: 8px;
+
+  flex-shrink: 0;
+  padding-bottom: 8px;
+  margin-top: 20px;
 }
 
-.pagination-btn,
-.pagination-page {
-  border: none;
-  outline: none;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 8px;
-  border-radius: 999px;
-  font-size: 12px;
-  cursor: pointer;
-  background: #f0f4fa;
-  color: #7688a3;
-  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
-}
 
-.pagination-btn:disabled {
-  cursor: default;
-  opacity: 0.4;
+/* 모달 관련 스타일 */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 100%;
 }
-
-.pagination-page--active {
-  background: #0094f6;
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
 
 
 .modal-form {
@@ -429,21 +404,20 @@ const pagedRooms = computed(() => {
 }
 
 
-
 .modal-category-cards {
   display: flex;
-  gap: 6px;          /* 버튼 간 간격 */
+  gap: 6px; /* 버튼 간 간격 */
   margin-top: 6px;
-  flex-wrap: nowrap;  /* 한 줄에 배치 */
+  flex-wrap: nowrap; /* 한 줄에 배치 */
   justify-content: space-between; /* 한 줄에 균등 배치 */
 }
 
 .modal-category-card {
-  flex: 1;            /* 모든 버튼이 균등하게 너비 차지 */
-  height: 50px;       /* 버튼 높이 줄임 */
-  font-size: 11px;    /* 글자 크기 줄임 */
-  padding: 4px 6px;   /* 안쪽 여백 조정 */
-  min-width: 50px;    /* 너무 작아지지 않도록 최소 너비 */
+  flex: 1; /* 모든 버튼이 균등하게 너비 차지 */
+  height: 50px; /* 버튼 높이 줄임 */
+  font-size: 11px; /* 글자 크기 줄임 */
+  padding: 4px 6px; /* 안쪽 여백 조정 */
+  min-width: 50px; /* 너무 작아지지 않도록 최소 너비 */
   text-align: center;
 }
 </style>
