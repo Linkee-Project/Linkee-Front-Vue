@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import ComponentTest from "@/views/ComponentTest.vue";
 import HomeView from "@/views/HomeView.vue";
 import ChatGameListView from "@/views/chat-view/ChatGameListView.vue";
+import ProblemListView from '@/views/problem-view/ProblemListView.vue';
 
 
 const routes = [
@@ -21,7 +22,16 @@ const routes = [
         path: '/chat/game/rooms',
         name : 'ChatGameList',
         component: ChatGameListView
+    },
+    {
+        path: '/problem',
+        name: 'problem-list',
+        component: ProblemListView,
+        meta: { hideSidebar: true },    //사이드바 숨김
     }
+
+
+
 ];
 
 

@@ -33,7 +33,8 @@ export default {
           <button>chat 페이지 이동</button>
         </router-link>
       </div>
-      <UserSidebar />
+      <!-- 문제게시판 sidebar 숨김 : meta.hideSidebar 가 true 이면 사이드바 숨김 -->
+      <UserSidebar v-if="!$route.meta?.hideSidebar" />
     </div>
 
   </div>
