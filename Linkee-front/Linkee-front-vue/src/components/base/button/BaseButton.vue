@@ -2,62 +2,38 @@
 import { computed } from "vue";
 
 const props = defineProps({
-  color: {
-    type: String,
-    default: 'white', // 'blue' | 'gray' | 'orange'
-  },
-  label: {
-    type: String,
-    default: '',
-  },
-  size: {
-    type: String,
-    default: 'medium', // 'small' | 'medium' | 'large'
-  },
+  color: { type: String, default: 'white' }, // 'white' | 'gray' | 'orange' | 'emerald' | 'blue'
+  size: { type: String, default: 'medium' }, // 'small' | 'medium' | 'large'
+  label: { type: String, default: '' },
 });
 
-// 색상 결정
 const colorClass = computed(() => {
   switch (props.color) {
-    case 'white':
-      return 'btn--white'
-    case 'gray':
-      return 'btn--gray';
-    case 'orange':
-      return 'btn--orange';
-    case  'emerald':
-      return 'btn--emerald'
-    case 'blue':
-      return 'btn--blue';
-    default:
-      return 'btn--blue'
-
+    case 'white': return 'btn--white';
+    case 'gray': return 'btn--gray';
+    case 'orange': return 'btn--orange';
+    case 'emerald': return 'btn--emerald';
+    case 'blue': return 'btn--blue';
+    default: return 'btn--blue';
   }
 });
 
-// 크기 결정
 const sizeClass = computed(() => {
   switch (props.size) {
-    case 'small':
-      return 'btn--small';
-    case 'large':
-      return 'btn--large';
-    case 'medium':
-    default:
-      return 'btn--medium';
+    case 'small': return 'btn--small';
+    case 'large': return 'btn--large';
+    default: return 'btn--medium';
   }
 });
 </script>
 
 <template>
-  <button
-      class="btn"
-      :class="[colorClass, sizeClass]"
-      @click="$emit('click')"
-  >
+  <button class="btn" :class="[colorClass, sizeClass]">
     <slot>{{ label }}</slot>
   </button>
 </template>
+
+
 
 <style scoped>
 .btn {
