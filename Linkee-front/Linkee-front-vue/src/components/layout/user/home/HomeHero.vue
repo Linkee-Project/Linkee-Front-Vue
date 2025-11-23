@@ -107,6 +107,22 @@ body{
   font-size:2.2rem; line-height:1.25; margin:.8rem 0 .4rem;
   color:#0e2a4a; text-shadow:0 0 24px rgba(79,195,247,.35);
   font-weight:800;
+
+  /*둥둥 떠다니는 애니메이션*/
+  animation: floatUpDown 2s ease-in-out infinite;
+}
+
+/* ⬆⬇ 위아래로 천천히 움직이는 애니메이션 */
+@keyframes floatUpDown {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0);
+  }
 }
 .subhead{color:var(--text-sub); font-weight:600}
 
