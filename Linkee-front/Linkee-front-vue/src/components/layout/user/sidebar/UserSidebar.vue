@@ -5,6 +5,7 @@ import "./UserSidebar.css";
 import profileImg from "@/assets/profile_img.svg";
 import onlineIcon from "@/assets/online.svg";
 import offlineIcon from "@/assets/offline.svg";
+import FriendModal from "/src/components/common/modal/ChoiceModal.vue";
 
 
 //채팅방 여러개 만들기
@@ -47,6 +48,56 @@ const friends = [
     avatar: profileImg
   }
 ];
+
+import { ref } from "vue";
+
+// 모달 관련 상태
+const isModalOpen = ref(false);
+const modalX = ref(0);
+const modalY = ref(0);
+const selectedFriend = ref(null);
+const modalType = ref("friend");
+
+
+// 친구 클릭 -> 모달 열기
+const openFriendModal = (event, friend) => {
+  selectedFriend.value = friend;
+
+  const card = event.currentTarget;
+  const rect = card.getBoundingClientRect();
+
+  // 모달 위치는 "카드 왼쪽 중앙"
+  modalX.value = rect.left - 160; // 모달 width + 여백
+  modalY.value = rect.top + rect.height / 2 - 70; // 모달 height 절반만큼 조정
+
+  isModalOpen.value = true;
+};
+
+
+const openRoomModal = (event, room) => {
+  selectedFriend.value = room;
+
+  const card = event.currentTarget;
+  const rect = card.getBoundingClientRect();
+
+  modalX.value = rect.left - 160;
+  modalY.value = rect.top + rect.height / 2 - 70;
+
+  isModalOpen.value = true;
+};
+
+
+
+// 모달 닫기
+const closeModal = () => {
+  isModalOpen.value = false;
+};
+
+// 모달에서 선택한 버튼 실행
+const handleAction = (type) => {
+  console.log("선택한 기능:", type, selectedFriend.value.name);
+  isModalOpen.value = false;
+};
 </script>
 
 <template>
@@ -69,6 +120,7 @@ const friends = [
               :class="{ online: friend.online }"
               v-for="friend in friends"
               :key="friend.id"
+              @click="event => openFriendModal(event, friend)"
           >
             <img class="avatar" :src="friend.avatar" alt="friend avatar" />
 
@@ -105,8 +157,12 @@ const friends = [
 
         <div class="room-scroll-area">
           <div class="room-list">
-            <button class="room-card" v-for="room in rooms" :key="room.id">
-              <img class="room-icon" src="@/assets/chat_room_img.svg" alt="room icon" />
+            <button class="room-card"
+                    v-for="room in rooms"
+                    :key="room.id"
+                    @click="event => openRoomModal(event, room)"
+            >
+              <img class="room-icon" src="../../../../assets/chat_room_img.svg" alt="room icon" />
               <p class="room-text">{{ room.title }}</p>
             </button>
           </div>
@@ -115,5 +171,16 @@ const friends = [
       </div>
     </div>
   </aside>
+
+  <FriendModal
+      :type="modalType"
+      :data="selectedFriend"
+      :show="isModalOpen"
+      :x="modalX"
+      :y="modalY"
+      @close="closeModal"
+      @action="handleAction"
+  />
+
 </template>
 

@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import HomeHero from "@/components/layout/user/HomeHero.vue";
+import HomeHero from "@/components/layout/user/home/HomeHero.vue";
 </script>
 
 <style scoped>

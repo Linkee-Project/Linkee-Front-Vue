@@ -11,7 +11,7 @@
     <div class="logo-container">
       <!-- 로고 이미지 -->
       <img
-        src="@/assets/linkee_character.svg"
+        src="../../../../assets/linkee_character.svg"
         alt="Linkee Logo"
         class="logo-img"
       />
@@ -42,12 +42,12 @@
     <div class="right-section">
       <!-- 알림 버튼 -->
       <button class="icon-btn">
-        <img src="@/assets/bell.svg" class = "icon-img" />
+        <img src="../../../../assets/bell.svg" class = "icon-img" />
       </button>
 
       <!-- 프로필 버튼 -->
       <button class="profile-btn">
-        <img src="@/assets/profile_img.svg" class="profile-img" />
+        <img src="../../../../assets/profile_img.svg" class="profile-img" />
         <span class="profile-name"> 김명지니어스<!--pinia 사용시 유저 이름 바꿔줌{{ userStore.nickname }}--></span>
       </button>
     </div>
