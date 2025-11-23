@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import ComponentTest from "@/views/ComponentTest.vue";
 import HomeView from "@/views/home-view/HomeView.vue";
 import ChatGameListView from "@/views/chat-view/ChatGameListView.vue";
+import ChatGameRoom from "@/views/chat-view/ChatGameRoom.vue";
 import LoginView from "@/views/login-view/LoginView.vue";
 import SignUpView from "@/views/signup-view/SignUpView.vue";
 
@@ -27,6 +28,13 @@ const routes = [
         path: '/chat/game/rooms',
         name : 'ChatGameList',
         component: ChatGameListView
+    },
+    {
+        path: '/game/:roomId',
+        name: 'ChatGameRoom',
+        component: ChatGameRoom,
+        meta: { hideLayout: true }
+
     },
     {
         path: "/login",

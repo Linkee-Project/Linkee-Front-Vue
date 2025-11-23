@@ -115,7 +115,9 @@ import SearchForm from "@/components/base/form/SearchForm.vue";
 import PaginationButton from "@/components/base/button/PaginationButton.vue";
 import BaseModal from "@/components/base/modal/BaseModal.vue";
 import BaseInput from "@/components/base/input/BaseInput.vue";
+import {useRouter} from "vue-router";
 
+const router = useRouter();
 const keyword = ref("");
 const page = ref(1);
 const pageSize = 12;
@@ -192,6 +194,11 @@ const createRoom = () => {
 
 const handleRoomClick = (room) => {
   console.log("방 클릭", room);
+  router.push({
+    name: "ChatGameRoom",
+    params: { roomId: room.id },
+    query: { title: room.title }
+  });
 };
 
 const handleSearch = (value) => {
@@ -310,6 +317,7 @@ const pagedRooms = computed(() => {
   font-size: 12px;
   color: #7a8ca3;
   text-align: center;
+  padding-bottom: 5px;
 }
 
 .free-board__category {
