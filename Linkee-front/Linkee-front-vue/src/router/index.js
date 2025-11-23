@@ -3,6 +3,7 @@ import ComponentTest from "@/views/ComponentTest.vue";
 import HomeView from "@/views/home-view/HomeView.vue";
 import ChatGameListView from "@/views/chat-view/ChatGameListView.vue";
 import ProblemListView from '@/views/problem-view/ProblemListView.vue';
+import ProblemDetailView from "@/views/problem-view/ProblemDetailView.vue";
 
 
 const routes = [
@@ -25,8 +26,14 @@ const routes = [
     },
     {
         path: '/problem',
-        name: 'problem-list',
+        name: 'ProblemList',
         component: ProblemListView,
+        meta: { hideSidebar: true },    //사이드바 숨김
+    },
+    {
+        path: '/problem/detail',       // 임시로 detail로 적용, 이후 :id 로 바꿀 예정.
+        name: 'ProblemDetail',
+        component: ProblemDetailView,
         meta: { hideSidebar: true },    //사이드바 숨김
     }
 
