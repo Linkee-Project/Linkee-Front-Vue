@@ -1,48 +1,41 @@
-<script>
+<script setup>
+import { useRoute } from "vue-router";
 import UserNavbar from "@/components/layout/user/navbar/UserNavbar.vue";
 import UserSidebar from "@/components/layout/user/sidebar/UserSidebar.vue";
 
-export default {
-  name: "App",
-  components: {
-    UserNavbar,
-    UserSidebar,
-  },
-};
-
-
+const route = useRoute();
 </script>
 
 <template>
   <div id="app">
-    <!-- 여기서 헤더를 전체 레이아웃에 추가! -->
-    <UserNavbar v-if="!$route.meta.hideLayout"/>
 
-    <div class="main-layout" v-if="!$route.meta.hideLayout">
+    <!-- 로그인 페이지가 아니면 Navbar 표시 -->
+    <UserNavbar v-if="route.name !== 'Login' && route.name !=='SignUp'" />
+
+    <div class="main-layout">
+
       <div class="router-view-container">
-        <router-view/>
-
-
+        <router-view />
       </div>
-      <UserSidebar/>
+
+      <!-- 로그인 페이지가 아니면 Sidebar 표시 -->
+      <UserSidebar v-if="route.name !== 'Login' && route.name !=='SignUp'" />
     </div>
 
-    <router-view v-else/>
   </div>
 </template>
 
+
 <style scoped>
 
-body {
+body{
   margin: 0 !important;
 }
 
 html, body, #app {
   height: 100%;
   margin: 0 !important;
-  padding: 0;
-  overflow: hidden; /* 스크롤 완전 제거 */
-}
+  padding: 0;}
 
 
 /* 전체 페이지 기본 스타일 */
@@ -50,7 +43,6 @@ html, body, #app {
   font-family: "Noto Sans KR", sans-serif;
   background: #D4EBF5;
   height: 100%;
-  overflow: hidden; /* 스크롤 완전 제거 */
 }
 
 /* 메인 컨텐츠 + 사이드바 배치 */

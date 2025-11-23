@@ -3,15 +3,21 @@ import ComponentTest from "@/views/ComponentTest.vue";
 import HomeView from "@/views/home-view/HomeView.vue";
 import ChatGameListView from "@/views/chat-view/ChatGameListView.vue";
 import ChatGameRoom from "@/views/chat-view/ChatGameRoom.vue";
+import LoginView from "@/views/login-view/LoginView.vue";
+import SignUpView from "@/views/signup-view/SignUpView.vue";
 
 
 const routes = [
 // {} 라우터 설정
 
+    /*{
+        path: '/',
+        redirect: '/login'
+    },*/
     {
-        path: '/',           // 기본 경로
+        path: '/',
         name: 'Home',
-        component: HomeView // App.vue에서 보여줄 초기 페이지
+        component: HomeView
     },
     {
         path: '/component-test',   // 원하는 URL 경로
@@ -28,7 +34,18 @@ const routes = [
         name: 'ChatGameRoom',
         component: ChatGameRoom,
         meta: { hideLayout: true }
-    }
+
+    },
+    {
+        path: "/login",
+        name: 'Login',
+        component: LoginView
+    },
+    {
+        path: "/signUp",
+        name: 'SignUp',
+        component: SignUpView
+    },
 ];
 
 
