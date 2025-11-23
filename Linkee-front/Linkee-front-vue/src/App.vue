@@ -16,23 +16,24 @@ export default {
 <template>
   <div id="app">
     <!-- 여기서 헤더를 전체 레이아웃에 추가! -->
-    <UserNavbar />
+    <UserNavbar v-if="!$route.meta.hideLayout"/>
 
-    <div class="main-layout">
+    <div class="main-layout" v-if="!$route.meta.hideLayout">
       <div class="router-view-container">
-        <router-view />
+        <router-view/>
 
 
       </div>
-      <UserSidebar />
+      <UserSidebar/>
     </div>
 
+    <router-view v-else/>
   </div>
 </template>
 
 <style scoped>
 
-body{
+body {
   margin: 0 !important;
 }
 
