@@ -2,8 +2,7 @@
   <div class="search-form">
     <div class="input-wrapper">
       <BaseInput
-          :value="modelValue"
-          @input="onInput"
+          v-model="localValue"
           placeholder="검색어를 입력하세요"
           @keyup.enter="onSearchClick"
       />
@@ -29,7 +28,7 @@
 
 <script setup>
 
-
+import {nextTick, ref, watch} from 'vue';
 import BaseInput from "@/components/base/input/BaseInput.vue";
 import BaseButton from "@/components/base/button/BaseButton.vue";
 
@@ -38,14 +37,27 @@ const props = defineProps({
 });
 const emit = defineEmits(['update:modelValue', 'search']);
 
-// BaseInput v-model 연결
-const onInput = (value) => {
-  emit('update:modelValue', value);  // 부모 keyword와 동기화
-};
+// 로컬 상태로 v-model 관리
+const localValue = ref(props.modelValue);
 
-const onSearchClick = () => {
-  emit('search', props.modelValue);  // 부모로 검색어 전달
-  emit('update:modelValue', '');     // 입력 초기화
+// watch 스킵 플래그
+let skipWatch = false;
+
+// 입력 실시간 반영용 watch
+watch(localValue, (newVal) => {
+  if (skipWatch) return;      // 엔터/클릭 시 watch 무시
+  emit('update:modelValue', newVal);
+  emit('search', newVal);
+});
+
+// 엔터/검색 버튼 클릭 시
+const onSearchClick = async () => {
+  skipWatch = true;                       // watch 무시
+  emit('update:modelValue', localValue.value);  // 검색 실행
+  emit('search', localValue.value);
+  localValue.value = '';                  // 입력창 초기화
+  await nextTick();                       // DOM 갱신 후
+  skipWatch = false;                      // watch 다시 활성화
 };
 </script>
 
