@@ -69,7 +69,7 @@ export default {
 
 /* 전체 상단바 스타일 */
 .header-container { width: 100%; /* 전체 너비 */
-  height: 110px; /* 피그마 기준 헤더 높이 */
+  height: 90px; /* 피그마 기준 헤더 높이 */
   background: #ffffff; /* 하얀색 배경 */
   display: flex; /* 가로 배치 */
   align-items: center; /* 세로 가운데 정렬 */
@@ -93,26 +93,12 @@ export default {
   align-items: center;
   gap: 10px; /* 로고 이미지와 텍스트 간격 */
 
-  /*!*둥둥 떠다니는 애니메이션*!
-  animation: floatUpDown 3s ease-in-out infinite;*/
 }
 
-/*!* ⬆⬇ 위아래로 천천히 움직이는 애니메이션 *!
-@keyframes floatUpDown {
-  0% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
-  100% {
-    transform: translateY(0);
-  }
-}*/
 
 .logo-img {
-  width: 80px;
-  height: 75px;
+  width: 60px;
+  height: 55px;
 }
 
 .nav-menu {

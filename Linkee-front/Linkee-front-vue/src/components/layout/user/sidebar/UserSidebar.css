@@ -1,7 +1,7 @@
 /* 전체 사이드바 영역 */
 .sidebar-container {
     width: 337px;
-    height: calc(100vh - 110px);
+    height: calc(100vh - 90px);
     background: rgba(255, 255, 255, 0.6);
 
 }
