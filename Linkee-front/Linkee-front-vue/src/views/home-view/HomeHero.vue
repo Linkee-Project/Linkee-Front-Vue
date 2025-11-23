@@ -1,6 +1,5 @@
 <script setup lang="ts">
-// 현재 이 컴포넌트는 로직 없이 순수 UI만 담당하므로 비어 있습니다.
-// 추후 클릭 이벤트, Pinia 연동이 필요하면 이.script 영역에서 구현합니다.
+
 </script>
 
 <template>
