@@ -36,9 +36,13 @@
           </a>
 
           <!-- 자율방 이동 버튼 -->
-          <a class="gbtn g2"  aria-label="자율방 입장">
+          <router-link
+              to="/chat/game/rooms"
+              class="gbtn g2"
+              aria-label="자율방 입장"
+          >
             💬 자율방 입장
-          </a>
+          </router-link>
 
         </div>
       </section>
