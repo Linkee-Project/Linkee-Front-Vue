@@ -217,5 +217,93 @@ const totalPages = ref(5)
   color: #fff;
   border-color: transparent;
 }
+/* ------------------- 반응형 영역 ------------------- */
+
+/* 태블릿 이하 (<= 1024px) */
+@media (max-width: 1024px) {
+  .page-inner {
+    margin: 60px auto 60px;
+    padding: 0 16px;
+  }
+
+  .page-title {
+    font-size: 22px;
+  }
+
+  .problem-list-card {
+    padding: 16px 16px;
+  }
+
+  .problem-table th,
+  .problem-table td {
+    padding: 10px 6px;
+    font-size: 13px;
+  }
+}
+
+/* 모바일 (<= 768px) */
+@media (max-width: 768px) {
+  .page-inner {
+    margin: 40px auto 40px;
+    padding: 0 12px;
+  }
+
+
+  .problem-header {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+  /* 카테고리 탭: 글자 조금 줄이고 줄 바꿈 허용 */
+  .category-tabs {
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+
+  .tab {
+    font-size: 14px;
+  }
+
+  /* 검색창 폭 100% 사용 */
+  .search-row {
+    max-width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .search-row :deep(.search-form) {
+    justify-content: flex-start;
+  }
+
+  .search-row :deep(.input-wrapper) {
+    width: 100%;
+  }
+
+  /* 등록 버튼 여백 줄이기 */
+  .action-row {
+    margin-bottom: 16px;
+  }
+
+  /* 카드 안 패딩 줄이기 */
+  .problem-list-card {
+    padding: 12px 12px;
+    border-radius: 12px;
+  }
+
+  /* 테이블 폰트 더 줄이기 */
+  .problem-table th,
+  .problem-table td {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+
+  .pagination-row {
+    margin-top: 16px;
+  }
+}
 </style>
 
