@@ -23,15 +23,6 @@ export default {
         <router-view />
 
 
-        <router-link to="/">
-          <button>메인 페이지로 이동</button>
-        </router-link>
-        <router-link to="/component-test">
-          <button>TEST 페이지 이동</button>
-        </router-link>
-        <router-link to="/chat/game/rooms">
-          <button>chat 페이지 이동</button>
-        </router-link>
       </div>
       <UserSidebar />
     </div>

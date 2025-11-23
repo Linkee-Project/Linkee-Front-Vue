@@ -13,6 +13,7 @@
       </footer>
     </div>
   </div>
+
 </template>
 
 <script setup>
@@ -92,7 +93,7 @@ const close = () => {
 
 .modal-footer {
   margin-top: 15px;
-  text-align: right;
+  text-align: center;
   padding: 8px;
 }
 </style>

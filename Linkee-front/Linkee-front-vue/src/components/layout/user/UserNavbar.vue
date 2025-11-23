@@ -8,7 +8,8 @@
       로고 영역
       사이트 브랜드 역할. 클릭 시 보통 홈으로 이동함.
     -->
-    <div class="logo-container">
+    <router-link to="/" class="logo-link">
+    <div class="logo-container ">
       <!-- 로고 이미지 -->
       <img
         src="@/assets/linkee_character.svg"
@@ -16,10 +17,12 @@
         class="logo-img"
       />
 
+
       <!-- 텍스트 로고 (사이트 이름) -->
       <span class="logo-text">Linkee</span>
 
     </div>
+    </router-link>
 
     <!--
       가운데 메뉴(nav)
@@ -77,6 +80,14 @@ export default {
 }
 
 /* 로고 영역 */
+.logo-link {
+  display: flex;
+  align-items: center;
+  cursor: pointer; /* 손가락 모양 */
+  text-decoration: none; /* 밑줄 제거 */
+  color: inherit; /* 글자색 유지 */
+}
+
 .logo-container {
   display: flex;
   align-items: center;
@@ -107,9 +118,7 @@ export default {
 .nav-menu {
   display: flex;
   gap: 41px; /* 버튼 간 간격 */
-
   flex: 1;
-
   justify-content: center;
 }
 .logo-text {
