@@ -25,6 +25,7 @@ const route = useRoute();
       <!-- hideLayout === true 면 Sidebar 숨김 -->
       <UserSidebar
           v-if="!route.meta.hideLayout
+               && !route.meta.hideSidebar   //문제게시판 사이드바 제거 숨김 필요해서 추가했습니다
                && route.name !== 'Login'
                && route.name !== 'SignUp'"
       />
