@@ -1,12 +1,12 @@
 <script>
-import UserNavbar from "@/components/layout/user/UserNavbar.vue";
-import UserSidebar from "@/components/layout/user/UserSidebar.vue";
+import UserNavbar from "@/components/layout/user/navbar/UserNavbar.vue";
+import UserSidebar from "@/components/layout/user/sidebar/UserSidebar.vue";
 
 export default {
   name: "App",
   components: {
     UserNavbar,
-    UserSidebar
+    UserSidebar,
   },
 };
 
