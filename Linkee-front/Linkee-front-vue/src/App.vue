@@ -1,12 +1,12 @@
 <script>
-import UserNavbar from "@/components/layout/user/UserNavbar.vue";
-import UserSidebar from "@/components/layout/user/UserSidebar.vue";
+import UserNavbar from "@/components/layout/user/navbar/UserNavbar.vue";
+import UserSidebar from "@/components/layout/user/sidebar/UserSidebar.vue";
 
 export default {
   name: "App",
   components: {
     UserNavbar,
-    UserSidebar
+    UserSidebar,
   },
 };
 
@@ -23,15 +23,6 @@ export default {
         <router-view />
 
 
-        <router-link to="/">
-          <button>메인 페이지로 이동</button>
-        </router-link>
-        <router-link to="/component-test">
-          <button>TEST 페이지 이동</button>
-        </router-link>
-        <router-link to="/chat/game/rooms">
-          <button>chat 페이지 이동</button>
-        </router-link>
       </div>
       <!-- 문제게시판 sidebar 숨김 : meta.hideSidebar 가 true 이면 사이드바 숨김 -->
       <UserSidebar v-if="!$route.meta?.hideSidebar" />

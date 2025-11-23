@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import ComponentTest from "@/views/ComponentTest.vue";
-import HomeView from "@/views/HomeView.vue";
+import HomeView from "@/views/home-view/HomeView.vue";
 import ChatGameListView from "@/views/chat-view/ChatGameListView.vue";
 import ProblemListView from '@/views/problem-view/ProblemListView.vue';
 
