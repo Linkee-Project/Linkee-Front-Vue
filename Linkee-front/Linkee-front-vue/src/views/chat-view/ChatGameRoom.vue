@@ -1,87 +1,166 @@
 <template>
   <div class="game-room">
 
-    <!-- 🔵 중앙 래퍼(전체 UI 박스) -->
-    <div class="chat-wrapper">
+    <!-- 방 정보 -->
+    <header class="room-header">
+      <div class="left">
+        <span class="room-number">{{ roomId }}번방 :</span>
+        <span class="room-title">{{ roomTitle }}</span>
+        <img src="/src/assets/icon/people.png" alt="인원 아이콘" class="icon"/>
+        <span class="user-count">{{ users.length }} / {{ maxUsers }}</span>
+      </div>
 
-      <!-- 타이틀 영역 -->
-      <header class="game-header">
-        <div class="header-inner">
-          <div class="header-left">
-            <span class="room-number">{{ roomId }}번방</span>
-            <span class="colon">:</span>
-            <span class="room-title">{{ roomTitle }}</span>
-          </div>
+      <!-- 초대 / 나가기 -->
+      <div class="right header-actions">
+        <BaseButton color="blue" size="small" @click="showInviteModal = true"
+                    style="min-width: 25px; height: 35px; border-radius: 15px">
+          <img src="/src/assets/icon/invite.png" alt="초대 아이콘" style="width: 20px; height: 22px" />
+        </BaseButton>
 
-          <div class="header-right">
-            👥 {{ users.length }} / {{ maxUsers }}
-          </div>
+        <BaseButton color="white" size="small" @click="leaveRoom"
+                    style="min-width: 25px; height: 35px; border-radius: 15px;
+                    background: linear-gradient(90deg, rgb(0,191,24), #56f14b);">
+          <img src="/src/assets/icon/leave.png" alt="나가기" style="width: 20px; height: 19px" />
+        </BaseButton>
+      </div>
+    </header>
+
+    <!-- 2단 구조 -->
+    <div class="game-layout">
+
+      <!-- 왼쪽 유저 리스트 -->
+      <aside class="user-list">
+        <div
+            v-for="user in displayUsers"
+            :key="user.slot"
+            class="user-item"
+            @click="!user.isEmpty && openUserModal($event, user)"
+        >
+          <img
+              :src="user.avatar"
+              class="user-avatar"
+              :style="user.isEmpty ? 'filter: grayscale(100%) brightness(70%); opacity: 0.5;' : ''"
+          />
+          <p class="user-name" :class="{ empty: user.isEmpty }">{{ user.name }}</p>
         </div>
-      </header>
+      </aside>
 
-      <!-- 전체 레이아웃 -->
-      <div class="game-layout">
+      <!-- 중앙 채팅 + 문제 -->
+      <main class="chat-panel">
+        <div class="chat-panel-logo">
+          <img src="/src/assets/linkee_character.svg" alt="logo">
+        </div>
 
-        <!-- 왼쪽 유저 리스트 -->
-        <aside class="user-list">
-          <div
-              v-for="user in displayUsers"
-              :key="user.slot"
-              class="user-item"
-          >
-            <img
-                :src="user.avatar"
-                class="user-avatar"
-                alt="게임 캐릭터"
-                :style="user.isEmpty ? 'filter: grayscale(100%) brightness(70%); opacity: 0.5;' : ''"
-            />
+        <div class="chat-content">
 
-            <p class="user-name" :class="{ empty: user.isEmpty }">
-              {{ user.name }}
-            </p>
+          <!-- 채팅 영역 -->
+          <div class="chat-area">
+
+            <div class="chat-box">
+              <div
+                  v-for="msg in messages"
+                  :key="msg.id"
+                  class="chat-message"
+                  :class="{ system: msg.user === 'SYSTEM' }"
+              >
+                <strong>{{ msg.user }} :</strong> {{ msg.text }}
+              </div>
+            </div>
+
+            <!-- 게임 버튼 -->
+            <div class="game-actions">
+              <BaseButton color="blue" size="small" @click="showProblemModal = true">문제 출제</BaseButton>
+              <BaseButton color="orange" size="small" @click="revealAnswer">정답 공개</BaseButton>
+            </div>
+
+            <!-- 입력창 -->
+            <div class="chat-input">
+              <BaseInput v-model="message" placeholder="메시지를 입력하세요"
+                         @keydown.enter="sendMessage"/>
+              <BaseButton color="white" size="small" @click="sendMessage">입력</BaseButton>
+            </div>
+
+            <!-- 문제 출제 모달 -->
+            <BaseModal v-model="showProblemModal" title="문제 출제">
+              <div class="problem-modal-body">
+
+                <div class="modal-section">
+                  <div class="modal-label">문제</div>
+                  <textarea v-model="newProblem.title" class="modal-textarea" placeholder="문제를 입력하세요"></textarea>
+                </div>
+
+                <div class="modal-section">
+                  <div class="modal-label">정답</div>
+                  <textarea v-model="newProblem.answer" class="modal-textarea" placeholder="정답을 입력하세요"></textarea>
+                </div>
+
+              </div>
+
+              <template #footer>
+                <BaseButton color="orange" @click="addProblem">제출</BaseButton>
+              </template>
+            </BaseModal>
+
           </div>
-        </aside>
 
-        <!-- 중앙 채팅 영역 -->
-        <main class="chat-area">
+          <!-- 문제 목록 -->
+          <aside class="problem-list">
+            <h4 class="problem-title-header">문제 목록</h4>
+            <div class="problem-card-list">
 
-          <!-- 채팅 박스 -->
-          <div class="chat-box">
-            <div v-for="msg in messages" :key="msg.id" class="chat-message">
-              <strong>{{ msg.user }} :</strong> {{ msg.text }}
+              <div v-for="p in problems" :key="p.id" class="problem-card">
+                <div class="problem-title">{{ p.id }}. {{ p.title }}</div>
+                <div class="problem-desc">{{ p.desc }}</div>
+
+                <div class="problem-user">출제자: {{ p.user }}</div>
+
+                <div v-if="p.revealed" class="problem-answer">
+                  정답: {{ p.answer }}
+                </div>
+              </div>
+
+            </div>
+          </aside>
+        </div>
+
+        <!-- 친구 초대 모달 -->
+        <BaseModal v-model="showInviteModal" title="친구 초대">
+          <div class="invite-content">
+            <p>초대할 친구를 선택하세요.</p>
+            <div v-for="friend in friends" :key="friend.id" class="invite-item">
+              <span>{{ friend.name }}</span>
+              <BaseButton size="small" color="blue" @click="invite(friend)">초대하기</BaseButton>
             </div>
           </div>
+        </BaseModal>
 
-          <!-- 입력창 -->
-          <div class="chat-input">
-            <BaseInput v-model="message" placeholder="메시지를 입력하세요" class="chat-input-box" />
-            <BaseButton color="white" size="small" @click="sendMessage">입력</BaseButton>
-          </div>
+        <!-- 🔥 작은 친구 모달 -->
+        <ChoiceModal
+            :type="modalType"
+            :data="selectedFriend"
+            :show="isModalOpen"
+            :x="modalX"
+            :y="modalY"
+            @close="closeModal"
+            @action="handleAction"
+        />
 
-          <!-- 게임 버튼 -->
-          <div class="game-actions">
-            <BaseButton color="blue" size="small">문제 출제</BaseButton>
-            <BaseButton color="orange" size="small">정답 공개</BaseButton>
-          </div>
+        <!-- 🔥 신고 모달 -->
+        <ReportModal
+            v-model="isReportModal"
+            :target="reportTarget"
+            @submit="handleReportSubmit"
+        />
 
-        </main>
+        <!-- 🔥 1:1 채팅 모달 -->
+        <ChattingModal
+            v-model="isChatModal"
+            :room="currentRoom"
+            :members="currentRoom?.members"
+            :messages="roomMessages"
+        />
 
-        <!-- 오른쪽 문제 목록 -->
-        <aside class="problem-list">
-          <h4>문제 목록</h4>
-
-          <div
-              v-for="p in problems"
-              :key="p.id"
-              class="problem-card"
-          >
-            <div class="problem-title">{{ p.id }}. {{ p.title }}</div>
-            <div class="problem-desc">{{ p.desc }}</div>
-            <div class="problem-user">{{ p.user }}</div>
-          </div>
-        </aside>
-
-      </div>
+      </main>
     </div>
   </div>
 </template>
@@ -92,50 +171,43 @@ import { useRoute } from "vue-router";
 
 import BaseInput from "@/components/base/input/BaseInput.vue";
 import BaseButton from "@/components/base/button/BaseButton.vue";
+import BaseModal from "@/components/base/modal/BaseModal.vue";
+
+import ChoiceModal from "@/components/common/modal/ChoiceModal.vue";
+import ReportModal from "@/components/home/modal/ReportModal.vue";
+import ChattingModal from "@/components/home/modal/ChattingModal.vue";
 
 const route = useRoute();
 
-// 방 정보
 const roomId = route.params.roomId;
 const roomTitle = route.query.title;
 
-// 고정 캐릭터 이미지
-const avatarImg = "/src/assets/퀴즈방 캐릭터.svg";
+/* ==============================
+   유저 목록
+============================== */
 
-// 최대 유저 수 (5칸 고정)
+const avatarImg = "/src/assets/퀴즈방 캐릭터.svg";
 const maxUsers = 5;
 
-// 접속 유저
 const users = ref([
   { id: 1, name: "김진", avatar: avatarImg },
   { id: 2, name: "김이김", avatar: avatarImg },
   { id: 3, name: "김비김", avatar: avatarImg }
 ]);
 
-// 유저 슬롯 5개 고정
 const displayUsers = computed(() => {
-  const arr = users.value.map((u, index) => ({
-    ...u,
-    slot: index,
-    isEmpty: false
-  }));
-
-  while (arr.length < maxUsers) {
-    arr.push({
-      slot: arr.length,
-      id: null,
-      name: "",
-      avatar: avatarImg,
-      isEmpty: true
-    });
-  }
-
+  const arr = users.value.map((u, i) => ({ ...u, slot: i, isEmpty: false }));
+  while (arr.length < maxUsers)
+    arr.push({ slot: arr.length, isEmpty: true, avatar: avatarImg });
   return arr;
 });
 
-// 채팅 관련
+/* ==============================
+   채팅
+============================== */
+
 const messages = ref([
-  { id: 1, user: "System", text: "입장하셨습니다." },
+  { id: 1, user: "SYSTEM", text: "입장하셨습니다." },
   { id: 2, user: "김진", text: "어서오세요" }
 ]);
 
@@ -153,161 +225,383 @@ const sendMessage = () => {
   message.value = "";
 };
 
-// 문제 리스트
+/* ==============================
+   문제 출제
+============================== */
+
 const problems = ref([
-  { id: 1, title: "Stack이란?", desc: "LIFO 구조", user: "김진" },
-  { id: 2, title: "싱글톤이란?", desc: "하나의 인스턴스", user: "김비김" }
+  { id: 1, title: "Stack이란?", desc: "LIFO 구조", answer: "LIFO", user: "김진", revealed: false },
+  { id: 2, title: "싱글톤이란?", desc: "하나의 인스턴스", answer: "유일 객체", user: "김비김", revealed: false }
 ]);
+
+const showProblemModal = ref(false);
+
+const newProblem = ref({ title: "", desc: "", answer: "" });
+
+const addProblem = () => {
+  if (!newProblem.value.title.trim()) return;
+
+  const newId = problems.value.length + 1;
+
+  problems.value.push({
+    id: newId,
+    title: newProblem.value.title,
+    desc: newProblem.value.desc,
+    answer: newProblem.value.answer,
+    user: "나",
+    revealed: false
+  });
+
+  messages.value.push({
+    id: Date.now(),
+    user: "SYSTEM",
+    text: `${newId}번 문제가 출제되었습니다.`
+  });
+
+  newProblem.value = { title: "", desc: "", answer: "" };
+  showProblemModal.value = false;
+};
+
+const revealAnswer = () => {
+  const last = problems.value[problems.value.length - 1];
+  if (!last) return;
+
+  last.revealed = true;
+
+  messages.value.push({
+    id: Date.now(),
+    user: "SYSTEM",
+    text: `${last.id}번 문제의 정답이 공개되었습니다.`
+  });
+};
+
+/* ==============================
+   친구 초대
+============================== */
+
+const showInviteModal = ref(false);
+
+const friends = ref([
+  { id: 101, name: "김비김비김" },
+  { id: 102, name: "김명지니" },
+  { id: 103, name: "진진돌이" }
+]);
+
+const invite = (friend) => {
+  alert(friend.name + " 님을 초대했습니다.");
+  showInviteModal.value = false;
+};
+
+/* ==============================
+   방 나가기
+============================== */
+
+const leaveRoom = () => window.location.href = "/chat/game/rooms";
+
+/* ==============================
+   🔥 작은 유저 모달 (ChoiceModal)
+============================== */
+
+const isModalOpen = ref(false);
+const modalX = ref(0);
+const modalY = ref(0);
+const selectedFriend = ref(null);
+const modalType = ref("friend");
+
+const openUserModal = (event, user) => {
+  selectedFriend.value = user;
+  modalType.value = "friend";
+
+  const rect = event.currentTarget.getBoundingClientRect();
+
+  modalX.value = rect.right + 10;
+  modalY.value = rect.top + rect.height / 2 - 70;
+
+  isModalOpen.value = true;
+};
+
+const closeModal = () => (isModalOpen.value = false);
+
+/* ==============================
+   🔥 신고 모달
+============================== */
+
+const isReportModal = ref(false);
+const reportTarget = ref(null);
+
+const handleReportSubmit = (data) => {
+  console.log("신고 접수됨:", data);
+};
+
+/* ==============================
+   🔥 1:1 채팅 모달
+============================== */
+
+const isChatModal = ref(false);
+const currentRoom = ref(null);
+const roomMessages = ref([]);
+
+const me = { id: 999, name: "나" };
+
+/* ==============================
+   🔥 ChoiceModal → 기능 실행
+============================== */
+
+const handleAction = (type) => {
+  isModalOpen.value = false;
+
+  // 신고하기
+  if (type === "report") {
+    reportTarget.value = selectedFriend.value;
+    isReportModal.value = true;
+    return;
+  }
+
+  // 1:1 채팅하기
+  if (type === "chat") {
+    const friend = selectedFriend.value;
+
+    currentRoom.value = {
+      id: Date.now(),
+      title: `${friend.name}님과 대화`,
+      members: [me, friend],
+      messages: []
+    };
+
+    roomMessages.value = [];
+    isChatModal.value = true;
+  }
+};
 </script>
 
+
+
 <style scoped>
+.icon {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle; /* ⭐ 글자 중앙 정렬 */
+  padding-left: 15px;
+}
 
-/* =========================================================
-   배  경
-=========================================================*/
-
+/* (기존 스타일 그대로 유지 - 생략하지 않음) */
 .game-room {
   width: 100%;
   height: 100vh;
   background-image: url('@/assets/game-room-background.svg');
   background-size: cover;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* =========================================================
-   중앙 박스
-=========================================================*/
-.chat-wrapper {
-  width: 88%;
-  height: 90%;
-  background: white;
-  border-radius: 22px;
-  border: 4px solid #9cd0ff;
-  overflow: hidden;
-
+  background-position: center;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
-/* =========================================================
-   상단 헤더
-=========================================================*/
-.game-header {
-  background: #D3ECFF;
-  padding: 16px 24px;
-  border-bottom: 2px solid #A6D1F5;
-}
-
-.header-inner {
+.room-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 13px 30px;
+  background: rgb(255, 255, 255);
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.room-number { font-size: 28px; font-weight: 800; color: #0B7EE3; }
-.colon { font-size: 28px; font-weight: 800; color: #244B73; }
-.room-title { font-size: 28px; font-weight: 800; color: #244B73; }
-
-.header-right {
+.room-number, .room-title {
   font-size: 20px;
-  font-weight: 700;
-  color: #0B7EE3;
+  font-weight: 900;
+  color: #505050;
 }
 
-/* =========================================================
-   메인 레이아웃
-=========================================================*/
+
+.user-count {
+  gap: 6px; /* 아이콘과 글자 사이 */
+  padding-left: 5px;
+  font-size: 12px;
+  font-weight: 900;
+  color: #505050;
+}
+
 .game-layout {
+  position: relative;
   display: grid;
-  grid-template-columns: 240px 1fr 340px;
-  height: 100%;
+  grid-template-columns: 150px 1fr;
+  height: calc(100vh - 110px);
+  padding: 25px 40px;
+  gap: 20px;
 }
 
-/* =========================================================
-   유저 리스트 (왼쪽)
-=========================================================*/
 .user-list {
-  background: transparent;
-  padding: 20px 10px;
-
+  padding-top: 10px;
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  align-items: center;
+  text-align: center;
+  gap: 18px;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.24);
+  border-radius: 10px;
+  border: 1px solid #d2e9f3;
 }
 
 .user-item {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .user-avatar {
-  width: 70px;
-  height: 70px;
+  width: 75px;
+  height: 75px;
 }
 
 .user-name {
-  margin-top: 6px;
-  height: 20px;
-  font-size: 15px;
+  margin: 0;
+  width: 70px;
+  height: 22px;
+  background: white;
+  border-radius: 6px;
+  font-size: 11px;
   font-weight: 600;
   color: #333;
+  line-height: 22px;
+  overflow: hidden;
 }
 
 .user-name.empty {
+  background: #e5e5e5;
   color: transparent;
 }
 
-/* =========================================================
-   중앙 채팅
-=========================================================*/
+.chat-panel {
+
+  background: white;
+  border: 4px solid #92ccfd;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.chat-panel-logo {
+  position: absolute;
+  top: -2%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  padding: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.chat-panel-logo img {
+  width: 38px;
+  height: 38px;
+  display: block;
+  z-index: 9999;
+  pointer-events: none;
+  animation: floatUpDown 2s ease-in-out infinite;
+}
+
+@keyframes floatUpDown {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.chat-content {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  height: 100%;
+
+}
+
 .chat-area {
   display: flex;
   flex-direction: column;
-  background: #ffffff;
-  border-left: 2px solid #b2dfff;
   border-right: 2px solid #b2dfff;
-  padding-bottom: 15px;
+  height: 100%;
+  overflow: hidden;
+
 }
 
 .chat-box {
-  flex: 1;
-  overflow-y: auto;
+  flex: 1; /* 남은 공간 채움 */
   padding: 16px;
+  overflow-y: auto; /* ⭐ 스크롤 */
+  min-height: 0; /* ⭐ flex 내부 스크롤 필수 */
 }
 
 .chat-input {
   display: flex;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 10px;
+  padding: 16px;
 }
 
-.chat-input input {
-  flex: 1;
+.chat-message.system {
+  color: #e4ce8c;          /* SYSTEM 메시지 글자색 */
+  font-weight: 500;
+
 }
 
-/* =========================================================
-   문제 리스트 (오른쪽)
-=========================================================*/
+.chat-message.system strong {
+  color: #e88d54;          /* SYSTEM : 부분 */
+}
+
+
+
+.game-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 5px 18px;
+  gap: 15px;
+  flex-direction: row;
+}
+
 .problem-list {
   background: #f7fbff;
-  padding: 18px;
-  overflow-y: auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 17px;
+
+}
+
+.problem-title-header {
+  background: #DFF2FF;
+  font-size: 20px;
+  font-weight: 700;
+  color: #2a6c9e;
+  text-align: center;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  padding: 10px 0 14px;
+  margin: 0;
+}
+
+.problem-card-list {
+  flex: 1;
+  overflow-y: auto; /* ⭐ 스크롤 */
+  min-height: 0; /* ⭐ flex 스크롤 필수 */
+  padding: 10px;
 }
 
 .problem-card {
-  background: #ffffff;
-  border-radius: 12px;
+  background: white;
   padding: 14px;
-  margin-bottom: 14px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  border-radius: 12px;
+  margin-top: 7px;
+  margin-bottom: 7px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
 .problem-title {
@@ -315,13 +609,83 @@ const problems = ref([
   margin-bottom: 4px;
 }
 
-/* =========================================================
-   버튼
-=========================================================*/
-.game-actions {
+.problem-desc {
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.problem-user {
+  font-size: 12px;
+  color: #666;
+}
+.problem-answer{
+  font-size: 12px;
+  color: rgba(2, 145, 69, 0.88);
+}
+
+.problem-modal-body {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 25px;
+  padding: 10px 5px;
+}
+
+.modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-label {
+  width: 100%;
+  text-align: center;
+  background: #e9f5ff;
+  padding: 6px 0;
+  border-radius: 8px;
+  font-weight: 700;
+  color: #3b75a5;
+  font-size: 14px;
+}
+
+.modal-textarea {
+  width: 94%;
+  height: 120px;
+  border: 1px solid #c8dff5;
+  border-radius: 10px;
+  padding: 10px;
+  resize: none;
+  font-size: 14px;
+  font-family: inherit;
+  background: white;
+  transition: border-color 0.2s ease; /* 부드럽게 */
+}
+
+.modal-textarea:focus {
+  border-color: #71beff; /* 연한 하늘색 */
+  outline: none; /* 기본 파란 외곽선 제거 */
+}
+
+
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  padding-right: 12px;
+  gap: 10px;
+}
+
+.invite-content {
+  display: flex;
+  flex-direction: column;
   gap: 14px;
-  margin-top: 10px;
+  padding: 10px;
+}
+
+.invite-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f3faff;
+  border-radius: 8px;
 }
 </style>
