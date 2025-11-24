@@ -31,7 +31,8 @@
     <nav class="nav-menu">
 
       <!--마이페이지 버튼-->
-      <button class="nav-item">👤 마이페이지</button>
+<!--      <button class="nav-item">👤 마이페이지</button>-->
+      <router-link to="/mypage/profile" class="nav-item">👤 마이페이지</router-link>
 
       <!--문제게시판 버튼-->
       <button class="nav-item">📜 문제 게시판</button>
@@ -135,6 +136,9 @@ export default {
 
   cursor: pointer;
   transition: 0.2s;  /* hover 애니메이션 */
+
+  box-sizing: border-box; /* 패딩이 크기에 영향을 주지 않도록 설정 */
+  text-decoration: none;  /* 링크 밑줄 제거 */
 }
 
 /* Hover 시 떠오르는 효과 */
