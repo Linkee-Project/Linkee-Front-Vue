@@ -1,5 +1,16 @@
+<script setup>
+import { useRouter } from 'vue-router'; // Import useRouter
+
+const level = 14;
+const router = useRouter(); // Initialize router
+
+const navigateToGrade = () => {
+  router.push('/mypage/grade'); // Navigate to the grade page
+};
+</script>
+
 <template>
-  <div class="level-box">
+  <div class="level-box" @click="navigateToGrade"> <!-- Add click handler for navigation -->
     <h3>나의 등급</h3>
 
     <div class="badge">
@@ -14,10 +25,6 @@
     </div>
   </div>
 </template>
-
-<script setup>
-const level = 14;
-</script>
 
 <style scoped>
 .level-box {

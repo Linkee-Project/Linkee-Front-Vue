@@ -10,6 +10,8 @@ import QuestionView from '../views/mypage/QuestionView.vue'
 import ProfilePage from "@/components/layout/mypage/profile/ProfilePage.vue";
 import InquiryView from '@/views/mypage/InquiryView.vue'
 import BookmarkView from '@/views/mypage/BookmarkView.vue'
+import HistoryView from '@/views/mypage/HistoryView.vue'
+import GradeView from '@/views/mypage/GradeView.vue'
 
 
 const routes = [
@@ -51,7 +53,6 @@ const routes = [
         name: 'SignUp',
         component: SignUpView
     },
-    },
     {
         path: '/mypage',
         name: 'MyPage',
@@ -83,7 +84,12 @@ const routes = [
             {
                 path: 'history',
                 name: 'MyHistory',
-                component: ProfilePage, // 임시로 ProfilePage 연결
+                component: HistoryView, // HistoryView 연결
+            },
+            {
+                path: 'grade', // 새로운 나의 등급 페이지 경로
+                name: 'MyGrade',
+                component: GradeView, // GradeView 연결
             },
         ]
     }

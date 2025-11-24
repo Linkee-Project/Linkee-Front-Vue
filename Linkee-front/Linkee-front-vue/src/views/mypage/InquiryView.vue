@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 import InquiryListItem from '@/components/layout/mypage/inquiry/InquiryListItem.vue';
 import PaginationButton from '@/components/base/button/PaginationButton.vue';
-import BaseModal from '@/components/base/modal/BaseModal.vue'; // BaseModal import
+import MyPageDetailModal from '@/components/layout/mypage/modal/MyPageDetailModal.vue'; // MyPageDetailModal import
 
 // 더미 문의 데이터 (페이지네이션 확인용) - 'type' 속성 제거
 const allInquiries = ref([
@@ -77,27 +77,29 @@ const closeModal = () => {
     </div>
 
     <!-- 문의 상세 모달 -->
-    <BaseModal v-model:modelValue="isModalOpen" title="문의 상세">
-      <div v-if="selectedInquiry" class="inquiry-detail-content">
-        <p><strong>제목:</strong> {{ selectedInquiry.subject }}</p>
-        <p><strong>등록일:</strong> {{ selectedInquiry.date }}</p>
-        <p><strong>상태:</strong> {{ selectedInquiry.status }}</p>
+    <MyPageDetailModal v-model:modelValue="isModalOpen" title="문의 상세">
+      <div v-if="selectedInquiry"> <!-- Added wrapper div here -->
+        <div class="inquiry-detail-content">
+          <p><strong>제목:</strong> {{ selectedInquiry.subject }}</p>
+          <p><strong>등록일:</strong> {{ selectedInquiry.date }}</p>
+          <p><strong>상태:</strong> {{ selectedInquiry.status }}</p>
 
-        <div class="inquiry-content-box mt-3">
-          <p class="content-title">문의 내용</p>
-          <p>{{ selectedInquiry.content }}</p>
-        </div>
+          <div class="inquiry-content-box mt-3">
+            <p class="content-title">문의 내용</p>
+            <p>{{ selectedInquiry.content }}</p>
+          </div>
 
-        <div class="inquiry-content-box mt-3">
-          <p class="content-title">답변 내용</p>
-          <p v-if="selectedInquiry.answer">{{ selectedInquiry.answer }}</p>
-          <p v-else class="no-answer">아직 답변이 등록되지 않았습니다.</p>
+          <div class="inquiry-content-box mt-3">
+            <p class="content-title">답변 내용</p>
+            <p v-if="selectedInquiry.answer">{{ selectedInquiry.answer }}</p>
+            <p v-else class="no-answer">아직 답변이 등록되지 않았습니다.</p>
+          </div>
         </div>
       </div>
       <template #footer>
         <button class="modal-close-btn" @click="closeModal">닫기</button>
       </template>
-    </BaseModal>
+    </MyPageDetailModal>
   </div>
 </template>
 
@@ -197,39 +199,7 @@ const closeModal = () => {
   background-color: #007bbd;
 }
 
-/* --- 문의 상세 모달 내용 스타일 --- */
-.inquiry-detail-content p {
-  margin-bottom: 10px;
-  font-size: 15px;
-  line-height: 1.5;
-  color: #333;
-}
 
-.inquiry-content-box {
-  background-color: #f9f9f9;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  padding: 15px;
-  margin-top: 15px;
-  max-height: 200px; /* 내용이 길어질 경우 스크롤 */
-  overflow-y: auto;
-  white-space: pre-wrap; /* 공백 및 줄바꿈 유지 */
-}
-
-.inquiry-content-box.mt-3 {
-  margin-top: 20px; /* 문의 내용과 답변 내용 사이 간격 */
-}
-
-.content-title {
-  font-weight: bold;
-  color: #0094F6;
-  margin-bottom: 8px;
-}
-
-.no-answer {
-  color: #888;
-  font-style: italic;
-}
 
 /* --- 반응형 --- */
 @media (max-width: 768px) {
