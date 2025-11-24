@@ -4,22 +4,24 @@
       <h1 class="logo">🔗 Linkee</h1>
       <p class="subtitle">계정으로 로그인하거나 네이버 계정을 이용해 로그인하세요</p>
 
-      <form @submit.prevent="handleLogin">
-        <input v-model="email" type="email" placeholder="이메일" required />
-        <input v-model="password" type="password" placeholder="비밀번호" required />
+      <form @submit.prevent>
+        <input v-model="email" type="email" placeholder="이메일" />
+        <input v-model="password" type="password" placeholder="비밀번호" />
 
-        <button type="submit" class="btn-primary glow">로그인</button>
+        <button type="submit" class="btn-primary glow">
+          로그인
+        </button>
       </form>
 
       <div class="divider">또는</div>
 
       <!-- 네이버 로그인 -->
-      <a href="/oauth2/authorization/naver" class="btn-naver">
+      <button class="btn-naver">
         <img src="https://static.nid.naver.com/oauth/small_g_in.PNG" alt="네이버 로고" />
         네이버로 로그인
-      </a>
+      </button>
 
-      <p class="message">{{ message }}</p>
+      <p class="message"></p>
 
       <p class="signup-link">
         아직 계정이 없나요?
@@ -31,62 +33,13 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 const email = ref('');
 const password = ref('');
-const message = ref('');
-const router = useRouter();
-
-
-const API_BASE = "/api/v1/auth/login";
-
-const handleLogin = async () => {
-  message.value = "";
-
-  if (!email.value || !password.value) {
-    message.value = "이메일과 비밀번호를 입력해주세요.";
-    return;
-  }
-
-  try {
-    const res = await fetch(API_BASE, {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        userEmail: email.value,
-        password: password.value,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.accessToken) {
-      message.value = "로그인 실패: 이메일 또는 비밀번호를 확인해주세요.";
-      return;
-    }
-
-    // JWT 저장
-    localStorage.setItem("accessToken", data.accessToken);
-    localStorage.setItem("refreshToken", data.refreshToken);
-
-    message.value = "로그인 성공! 페이지로 이동 중...";
-
-    setTimeout(() => {
-      router.push("/home");  // 홈 화면으로 이동
-    }, 1000);
-
-  } catch (err) {
-    console.error(err);
-    message.value = "서버 연결 오류가 발생했습니다.";
-  }
-};
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Noto+Sans+KR:wght@400;700&display=swap');
-
-/* --- 아래부터 login.css 내용 그대로 삽입 --- */
 
 body {
   margin: 0;
@@ -100,20 +53,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-/* 전체 login.css 그대로 복붙해도 됨 */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Noto+Sans+KR:wght@400;700&display=swap');
-
-body {
-  margin: 0;
-  font-family: "Poppins", "Noto Sans KR", sans-serif;
-  background: linear-gradient(135deg, #0094f6, #4fc3f7, #e1f5fe);
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
 }
 
 /* ✨ 움직이는 빛 배경 */
@@ -244,6 +183,9 @@ input:focus {
   font-weight: 600;
   transition: background-color 0.2s;
   font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  margin: 0 auto;
 }
 
 .btn-naver:hover {
@@ -255,11 +197,9 @@ input:focus {
   margin-right: 8px;
 }
 
-/* 메시지 */
+/* 메시지 placeholder */
 .message {
   margin-top: 1rem;
-  color: #ff5252;
-  font-size: 0.9rem;
   height: 1.2rem;
 }
 
@@ -279,5 +219,4 @@ input:focus {
 .signup-link a:hover {
   text-decoration: underline;
 }
-
 </style>
