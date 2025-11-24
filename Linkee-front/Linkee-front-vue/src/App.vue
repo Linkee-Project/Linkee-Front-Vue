@@ -25,9 +25,13 @@ const route = useRoute();
       <!-- hideLayout === true 면 Sidebar 숨김 -->
       <UserSidebar
           v-if="!route.meta.hideLayout
-               && route.name !== 'Login'
-               && route.name !== 'SignUp'"
+             && route.name !== 'Login'
+             && route.name !== 'SignUp'
+             && route.name !== 'Notice'
+             && route.name !== 'NoticeDetail'
+"
       />
+
     </div>
 
   </div>
