@@ -274,7 +274,6 @@ watch(filteredProblems, () => {
   overflow: auto;
 }
 
-/* 가운데 정렬 */
 .page-inner {
   max-width: 1113px;
   margin: 80px auto 80px;
@@ -344,7 +343,7 @@ watch(filteredProblems, () => {
   margin-top: 0;
 }
 
-/* 등록 버튼 안의 아이콘 */
+
 .creat-btn-icon {
   width: 16px;
   height: 16px;
@@ -352,7 +351,7 @@ watch(filteredProblems, () => {
   display: inline-block;
 }
 
-/* 등록 버튼 오른쪽 정렬 */
+
 .action-row {
   display: flex;
   justify-content: flex-end;
