@@ -22,14 +22,31 @@
             </div>
           </div>
 
-          <!-- 북마크 버튼 -->
-          <button
-              class="bookmark-btn"
-              :class="{ active: problem.bookmarked }"
-              @click="toggleBookmark"
-          >
-            <img class="bookmark-icon" :src="problemBookMarkIcon" alt="북마크" />
-          </button>
+          <!-- 오른쪽: 소유자이면 수정/삭제, 비소유자이면 북마크 -->
+          <div class="detail-right">
+
+            <!-- 북마크 버튼 -->
+            <button
+                v-if="!isOwner"
+                class="bookmark-btn"
+                :class="{ active: problem.bookmarked }"
+                @click="toggleBookmark"
+            >
+              <img class="bookmark-icon" :src="problemBookMarkIcon" alt="북마크" />
+            </button>
+
+            <!-- 작성자일 때만 수정/삭제 -->
+            <div class="detail-actions" v-if="isOwner">
+              <BaseButton color="gray" size="small" @click="goEdit">
+                수정
+              </BaseButton>
+              <BaseButton color="orange" size="small" @click="handleDelete">
+                삭제
+              </BaseButton>
+            </div>
+          </div>
+
+
         </header>
 
         <!-- 문제 내용 -->
@@ -175,7 +192,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import BaseButton from '@/components/base/button/BaseButton.vue'
 
 //icon
@@ -185,15 +202,21 @@ import profileImg from '@/assets/profile_img.svg'
 
 
 const router = useRouter()
+const route = useRoute()
+
+// 로그인 된 유저 ID (더미 데이터)
+const currentUserId = ref('USER-123')
 
 // TODO: 실제 API 연동 시 교체
 
 const problem = ref({
+  id: Number(route.params.id),
   category: '네트워크',
   title: 'TCP 3-way handshake 흐름을 묻는 문제',
   writer: '김명지니어스',
   createdAt: '2025-11-17',
   views: 15,
+  writerId: 'USER-123',
   bookmarked: false,
   content:
       'TCP 3-way handshake의 각 단계(SYN, SYN+ACK, ACK)를 순서대로 설명하세요.',
@@ -205,6 +228,11 @@ const problem = ref({
   ],
   answer: 2
 })
+
+// 작성자 본인인지 여부
+const isOwner = computed(
+    () => problem.value.writerId === currentUserId.value
+)
 
 const currentUserName = ref('김이긴')
 
@@ -236,9 +264,22 @@ const newComment = ref('')
 const replyTargetId = ref(null)   // 어느 댓글에 대댓글을 다는지
 const replyText = ref('')
 
-// 수정
-const editingId = ref(null)
-const editText = ref('')
+const editingId = ref(null)      // 지금 수정 중인 댓글 id
+const editText = ref('')         // 수정 입력값
+
+
+// 수정 이동
+const goEdit = () => {
+  router.push({ name: 'ProblemEdit', params: { id: problem.value.id } })
+}
+// 삭제 처리
+const handleDelete = () => {
+  if (!confirm('정말 삭제하시겠습니까?')) return
+
+  console.log('삭제 요청:', problem.value.id)
+
+  router.push({ name: 'ProblemList' })
+}
 
 // 상단 "목록으로" 이동
 const goList = () => {
@@ -431,6 +472,18 @@ const deleteComment = (id) => {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.detail-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 수정 / 삭제 버튼 묶음 */
+.detail-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .bookmark-icon {
@@ -685,5 +738,153 @@ const deleteComment = (id) => {
   gap: 8px;
   font-size: 12px;
 }
+/* ====== 반응형 ====== */
+
+/* 태블릿 (<= 1024px) */
+@media (max-width: 1024px) {
+  .page-inner {
+    max-width: 100%;
+    margin: 60px auto 60px;
+    padding: 0 16px;
+  }
+
+  .problem-detail-card {
+    padding: 20px 20px;
+  }
+
+  .comment-form {
+    border-radius: 16px;
+  }
+}
+
+/* 모바일 (<= 768px) */
+@media (max-width: 768px) {
+  .page-inner {
+    margin: 40px auto 40px;
+    padding: 0 12px;
+  }
+
+  .problem-header {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .page-title {
+    font-size: 20px;
+  }
+
+
+  .problem-detail-card {
+    padding: 16px 16px;
+  }
+
+
+  .detail-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .detail-right {
+    margin-top: 8px;
+  }
+
+  .detail-title {
+    font-size: 18px;
+  }
+
+  .detail-meta {
+    font-size: 11px;
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+
+  .section-content {
+    font-size: 13px;
+  }
+
+
+  .option-box {
+    padding: 12px 12px;
+  }
+
+
+  .comment-form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    border-radius: 12px;
+  }
+
+  .comment-user-block {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    min-width: auto;
+  }
+
+  .comment-user-name {
+    font-size: 13px;
+  }
+
+  .comment-form input {
+    font-size: 13px;
+  }
+
+  .comment-submit {
+    align-self: flex-end;
+    margin-left: 0;
+  }
+
+
+  .comment-item {
+    padding-left: 0;
+  }
+
+  .comment-thread .reply {
+    margin-left: 16px;
+  }
+
+  .comment-item.reply {
+    margin-left: 16px;
+  }
+
+  .comment-header {
+    font-size: 11px;
+  }
+
+  .comment-content {
+    font-size: 13px;
+  }
+
+  .reply-form input {
+    font-size: 13px;
+  }
+}
+
+/* 모바일 보다 더작게 (<= 480px)  */
+/*@media (max-width: 480px) {
+  .page-inner {
+    margin: 32px auto 32px;
+    padding: 0 10px;
+  }
+
+  .problem-detail-card {
+    padding: 14px 14px;
+  }
+
+  .detail-title {
+    font-size: 17px;
+  }
+
+  .detail-meta {
+    font-size: 10px;
+  }
+
+  .comment-form {
+    padding: 8px 12px;
+  }
+}*/
+
 
 </style>

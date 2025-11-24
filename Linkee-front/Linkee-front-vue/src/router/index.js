@@ -8,6 +8,7 @@ import SignUpView from "@/views/signup-view/SignUpView.vue";
 import ProblemListView from '@/views/problem-view/ProblemListView.vue';
 import ProblemDetailView from "@/views/problem-view/ProblemDetailView.vue";
 import ProblemCreateView from "@/views/problem-view/ProblemCreateView.vue";
+import ProblemEditView from "@/views/problem-view/ProblemEditView.vue";
 
 
 const routes = [
@@ -56,7 +57,7 @@ const routes = [
         meta: { hideSidebar: true },    //사이드바 숨김
     },
     {
-        path: '/problem/detail',       // 임시로 detail로 적용, 이후 :id 로 바꿀 예정.
+        path: '/problem/:id',
         name: 'ProblemDetail',
         component: ProblemDetailView,
         meta: { hideSidebar: true },    //사이드바 숨김
@@ -65,6 +66,12 @@ const routes = [
         path: '/problem/create',
         name: 'ProblemCreate',
         component: ProblemCreateView,
+        meta: { hideSidebar: true },    //사이드바 숨김
+    },
+    {
+        path: '/problem/:id/edit',
+        name: 'ProblemEdit',
+        component: ProblemEditView,
         meta: { hideSidebar: true },    //사이드바 숨김
     }
 

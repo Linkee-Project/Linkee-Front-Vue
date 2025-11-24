@@ -1,18 +1,17 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 
 const props = defineProps({
-  /* 선택된 카테고리 */
+  /* v-model 값 */
   modelValue: {
     type: String,
     default: ''
   },
-  /* 카테고리 목록 */
+  /* 옵션 목록 */
   options: {
     type: Array,
     default: () => []
   },
-
   placeholder: {
     type: String,
     default: '카테고리를 선택하세요.'
@@ -24,6 +23,17 @@ const emit = defineEmits(['update:modelValue'])
 const isOpen = ref(false)
 const rootEl = ref(null)
 
+
+const selected = ref(props.modelValue)
+
+/* 부모에서 값 바꾸는 경우(수정 페이지에서 초기값 주기 등) 동기화 */
+watch(
+    () => props.modelValue,
+    (val) => {
+      selected.value = val
+    }
+)
+
 const toggleOpen = () => {
   isOpen.value = !isOpen.value
 }
@@ -33,15 +43,16 @@ const close = () => {
 }
 
 const selectOption = (option) => {
+  selected.value = option
   emit('update:modelValue', option)
   close()
 }
 
 const displayLabel = computed(() =>
-    props.modelValue ? props.modelValue : props.placeholder
+    selected.value ? selected.value : props.placeholder
 )
 
-/* 바깥 클릭하면 드롭다운 닫기 */
+/* 바깥 클릭하면 닫기 */
 const handleClickOutside = (e) => {
   if (!rootEl.value) return
   if (!rootEl.value.contains(e.target)) {
@@ -60,7 +71,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="category-select" ref="rootEl">
-    <!-- 상단 토글 영역 -->
+    <!-- 상단 트리거 -->
     <button
         type="button"
         class="category-trigger"
@@ -68,7 +79,7 @@ onBeforeUnmount(() => {
     >
       <span
           class="category-label"
-          :class="{ placeholder: !modelValue }"
+          :class="{ placeholder: !selected }"
       >
         {{ displayLabel }}
       </span>
@@ -79,19 +90,19 @@ onBeforeUnmount(() => {
     </button>
 
     <!-- 옵션 리스트 -->
-    <transition name="fade">
       <ul v-if="isOpen" class="category-list">
         <li
             v-for="option in options"
             :key="option"
             class="category-item"
-            :class="{ active: option === modelValue }"
+            :class="{
+            active: option === selected,
+          }"
             @click.stop="selectOption(option)"
         >
           {{ option }}
         </li>
       </ul>
-    </transition>
   </div>
 </template>
 
@@ -101,13 +112,13 @@ onBeforeUnmount(() => {
   position: relative;
 }
 
-/* 카테고리 박스  */
+/* 카테고리 박스 */
 .category-trigger {
   width: 100%;
   height: 44px;
   padding: 0 16px;
   border-radius: 16px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #636464;
   background: #ffffff;
   display: flex;
   align-items: center;
@@ -135,7 +146,7 @@ onBeforeUnmount(() => {
   transform: rotate(0deg);
 }
 
-/* 카테고리 리스트 */
+/* 카테고리 리스트 박스 */
 .category-list {
   position: absolute;
   top: 52px;
@@ -158,33 +169,19 @@ onBeforeUnmount(() => {
 .category-item {
   font-size: 14px;
   color: #374151;
-  padding: 10px 12px;
-  cursor: pointer;
+  padding: 6px 12px;
   border-radius: 12px;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  cursor: pointer;
 }
 
-/* 마우스 올렸을 때 (hover) */
+/* 마우스 올렸을 때 */
 .category-item:hover {
-  background-color: #e1f2ff;
-  color: #111827;
+  background: #e5f2ff;
 }
 
-/* 선택된 항목 유지되는 상태 */
+/* 선택된 항목 */
 .category-item.active {
-  background-color: #d6edff;
-  color: #111827;
+  background: #dbefff;
   font-weight: 600;
-}
-
-
-/* 페이드 효과 */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.12s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
 }
 </style>
