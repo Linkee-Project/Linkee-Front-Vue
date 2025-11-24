@@ -29,6 +29,10 @@
           👥 초대하기
         </button>
 
+        <button class="modal-item" @click="select('out')">
+          🏃🏻 나가기
+        </button>
+
         <button class="modal-item danger" @click="select('report')">
           🚨 신고하기
         </button>
