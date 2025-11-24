@@ -9,8 +9,12 @@ const route = useRoute();
 <template>
   <div id="app">
 
-    <!-- 로그인 페이지가 아니면 Navbar 표시 -->
-    <UserNavbar v-if="route.name !== 'Login' && route.name !=='SignUp'" />
+    <!-- hideLayout === true 면 Navbar 숨김 -->
+    <UserNavbar
+        v-if="!route.meta.hideLayout
+             && route.name !== 'Login'
+             && route.name !== 'SignUp'"
+    />
 
     <div class="main-layout">
 
@@ -18,8 +22,12 @@ const route = useRoute();
         <router-view />
       </div>
 
-      <!-- 로그인 페이지가 아니면 Sidebar 표시 -->
-      <UserSidebar v-if="route.name !== 'Login' && route.name !=='SignUp'" />
+      <!-- hideLayout === true 면 Sidebar 숨김 -->
+      <UserSidebar
+          v-if="!route.meta.hideLayout
+               && route.name !== 'Login'
+               && route.name !== 'SignUp'"
+      />
     </div>
 
   </div>
