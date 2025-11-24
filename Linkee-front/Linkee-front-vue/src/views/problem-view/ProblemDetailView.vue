@@ -380,6 +380,8 @@ const deleteComment = (id) => {
 /* 전체 배경 */
 .problem-page {
   min-height: 100vh;
+  height: 100%;
+  overflow: auto;
 }
 
 /* 가운데 정렬 */
