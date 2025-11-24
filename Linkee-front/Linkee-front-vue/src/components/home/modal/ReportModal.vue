@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import BaseModal from "@/components/base/modal/BaseModal.vue";
-import { ref, defineProps, computed, defineEmits } from "vue";
+import { ref, defineProps, computed, defineEmits, inject } from "vue";
 import defaultRoomImg from "@/assets/chat_room_img.svg";
+
+/* toast */
+const toast = inject("toast");
 
 /* props */
 const props = defineProps({
@@ -12,20 +15,30 @@ const props = defineProps({
 /* emit */
 const emit = defineEmits(["update:modelValue", "submit"]);
 
-/* BaseModal v-model 연동 */
+/* BaseModal 연동 */
 const visible = computed({
   get: () => props.modelValue,
   set: (val) => emit("update:modelValue", val)
 });
 
-/* el-form 사용 */
+/* form */
 const formRef = ref(null);
 const form = ref({
   title: "",
-  content: ""
+  content: "",
+  type: ""  // 🔥 신고 유형 추가
 });
 
-/* 검증 rules */
+/* 신고 유형 리스트 */
+const reportTypes = [
+  { key: "chat", label: "채팅" },
+  { key: "comment", label: "댓글" },
+  { key: "user", label: "유저" },
+  { key: "post", label: "게시글" },
+  { key: "game", label: "게임" }
+];
+
+/* validation rules */
 const rules = {
   title: [
     { required: true, message: "신고 제목을 입력하세요.", trigger: "blur" },
@@ -42,11 +55,19 @@ const submitReport = () => {
   formRef.value.validate((valid) => {
     if (!valid) return;
 
+    if (!form.value.type) {
+      toast?.show("신고 유형을 선택해주세요 ❗");
+      return;
+    }
+
     emit("submit", {
       title: form.value.title,
       content: form.value.content,
+      type: form.value.type,
       target: props.target
     });
+
+    toast?.show("신고가 접수되었습니다. 📮");
 
     visible.value = false;
   });
@@ -55,6 +76,7 @@ const submitReport = () => {
 
 <template>
   <BaseModal v-model="visible" title="신고하기">
+
     <el-form
         ref="formRef"
         :model="form"
@@ -62,9 +84,9 @@ const submitReport = () => {
         label-width="0"
         @submit.prevent
     >
-      <!-- 입력 영역 -->
       <div class="form-area">
 
+        <!-- 제목 -->
         <el-form-item prop="title" class="item">
           <el-input
               v-model="form.title"
@@ -73,6 +95,7 @@ const submitReport = () => {
           />
         </el-form-item>
 
+        <!-- 내용 -->
         <el-form-item prop="content" class="item">
           <el-input
               type="textarea"
@@ -82,6 +105,23 @@ const submitReport = () => {
               class="textarea"
           />
         </el-form-item>
+
+        <!-- 신고 유형 선택 -->
+        <div class="type-area">
+          <span class="type-label">신고 유형 선택</span>
+
+          <div class="type-list">
+            <div
+                v-for="t in reportTypes"
+                :key="t.key"
+                class="type-card"
+                :class="{ active: form.type === t.key }"
+                @click="form.type = t.key"
+            >
+              {{ t.label }}
+            </div>
+          </div>
+        </div>
 
         <!-- 신고 대상 -->
         <div class="target-area">
@@ -102,29 +142,73 @@ const submitReport = () => {
 
     </el-form>
 
-    <!-- 완료 버튼 -->
     <template #footer>
-      <button class="submit-btn" @click="submitReport">제출하기</button>
+      <button class="submit-btn" @click="submitReport">
+        제출하기
+      </button>
     </template>
+
   </BaseModal>
 </template>
 
+
 <style scoped>
-/* 전체 정렬 */
 .form-area {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   margin-top: 10px;
 }
 
-/* input 스타일 */
+/* ==== 신고 유형 선택 ==== */
+.type-area {
+  width: 90%;
+}
+
+.type-label {
+  font-size: 13px;
+  font-weight: bold;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.type-list {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.type-card {
+  padding: 10px 17px;
+  border-radius: 14px;
+  background: #f4f8ff;
+  /*
+  border: 1.5px solid #d4e4ff;
+  */
+  font-size: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.22s;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.type-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+
+.type-card.active {
+  background: linear-gradient(90deg, #4FC3FC, #0094F6);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(0, 148, 246, 0.3);
+}
+
 .item .el-input,
 .item .el-textarea {
   width: 100%;
 }
 
-/* 신고 대상 영역 */
 .target-area {
   width: 90%;
 }
@@ -158,7 +242,6 @@ const submitReport = () => {
   font-size: 14px;
 }
 
-/* 제출하기 버튼 */
 .submit-btn {
   width: 100%;
   padding: 12px;
@@ -175,8 +258,4 @@ const submitReport = () => {
   opacity: 0.92;
 }
 
-/* textarea 높이 딱 이미지처럼 */
-.textarea ::v-deep textarea {
-  height: 140px !important;
-}
 </style>
