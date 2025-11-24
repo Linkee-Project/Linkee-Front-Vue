@@ -5,15 +5,16 @@ import "./UserSidebar.css";
 import profileImg from "@/assets/profile_img.svg";
 import onlineIcon from "@/assets/online.svg";
 import offlineIcon from "@/assets/offline.svg";
-import FriendModal from "/src/components/common/modal/ChoiceModal.vue";
+import ChoiceModal from "/src/components/common/modal/ChoiceModal.vue";
+import ReportModal from "@/views/home-view/modal/ReportModal.vue";
 
 
 //채팅방 여러개 만들기
 const rooms = [
-  { id: 1, title: "코딩 전채틀, 알고리즘 스터디" },
-  { id: 2, title: "코딩 전채틀, 알고리즘 스터디" },
-  { id: 3, title: "코딩 전채틀, 알고리즘 스터디" },
-  { id: 4, title: "코딩 전채틀, 알고리즘 스터디" }
+  { id: 1, title: "코딩 천재들, 알고리즘 스터디" },
+  { id: 2, title: "코딩 천재들, 알고리즘 스터디" },
+  { id: 3, title: "코딩 천재들, 알고리즘 스터디" },
+  { id: 4, title: "코딩 천재들, 알고리즘 스터디" }
 ];
 
 //친구 여러개 만들기
@@ -57,10 +58,13 @@ const modalX = ref(0);
 const modalY = ref(0);
 const selectedFriend = ref(null);
 const modalType = ref("friend");
+const isReportModal = ref(false);   // 신고 모달 ON/OFF
+const reportTarget = ref(null);     // 신고 대상
 
 
 // 친구 클릭 -> 모달 열기
 const openFriendModal = (event, friend) => {
+  modalType.value = "friend";
   selectedFriend.value = friend;
 
   const card = event.currentTarget;
@@ -75,6 +79,7 @@ const openFriendModal = (event, friend) => {
 
 
 const openRoomModal = (event, room) => {
+  modalType.value = "room";
   selectedFriend.value = room;
 
   const card = event.currentTarget;
@@ -97,6 +102,17 @@ const closeModal = () => {
 const handleAction = (type) => {
   console.log("선택한 기능:", type, selectedFriend.value.name);
   isModalOpen.value = false;
+
+  if (type === "report") {
+    // 신고 대상 저장
+    reportTarget.value = selectedFriend.value;
+
+    // 신고 모달 열기
+    isReportModal.value = true;
+  }
+};
+const handleReportSubmit = (data) => {
+  console.log("신고 접수됨:", data);
 };
 </script>
 
@@ -172,7 +188,7 @@ const handleAction = (type) => {
     </div>
   </aside>
 
-  <FriendModal
+  <ChoiceModal
       :type="modalType"
       :data="selectedFriend"
       :show="isModalOpen"
@@ -182,5 +198,10 @@ const handleAction = (type) => {
       @action="handleAction"
   />
 
+  <ReportModal
+      v-model="isReportModal"
+      :target="reportTarget"
+      @submit="handleReportSubmit"
+  />
 </template>
 
