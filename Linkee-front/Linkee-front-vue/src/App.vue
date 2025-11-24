@@ -11,7 +11,8 @@ const route = useRoute();
 
     <!-- hideLayout === true 면 Navbar 숨김 -->
     <UserNavbar
-        v-if="!route.meta.hideLayout
+        v-if="!route.path.startsWith('/admin')
+             && !route.meta.hideLayout
              && route.name !== 'Login'
              && route.name !== 'SignUp'"
     />
@@ -24,7 +25,8 @@ const route = useRoute();
 
       <!-- hideLayout === true 면 Sidebar 숨김 -->
       <UserSidebar
-          v-if="!route.meta.hideLayout
+          v-if="!route.path.startsWith('/admin')
+             && !route.meta.hideLayout
              && route.name !== 'Login'
              && route.name !== 'SignUp'
              && route.name !== 'Notice'
