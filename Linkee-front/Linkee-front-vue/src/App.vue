@@ -1,7 +1,5 @@
 <script setup>
-import { ref, provide } from "vue";
 import { useRoute } from "vue-router";
-
 import UserNavbar from "@/components/layout/user/navbar/UserNavbar.vue";
 import UserSidebar from "@/components/layout/user/sidebar/UserSidebar.vue";
 import BaseToast from "@/components/base/toast/BaseToast.vue";
@@ -28,10 +26,13 @@ provide("toast", {
            && route.name !== 'SignUp'"
     />
 
-    <div class="main-layout" v-if="!route.meta.hideLayout" >
+    <div class="main-layout"
+         v-if="!route.meta.hideLayout && !route.path.startsWith('/admin')">
 
-      <div class="router-view-container" >
-        <router-view />
+      <div
+          :class="{ 'router-view-container': !route.path.startsWith('/admin') }"
+      >
+        <router-view/>
       </div>
 
 
@@ -48,7 +49,7 @@ provide("toast", {
     </div>
 
     <div v-else class="full-screen-page">
-      <router-view />
+      <router-view/>
     </div>
 
     <!-- 전역 토스트 컴포넌트 위치 -->
@@ -59,14 +60,15 @@ provide("toast", {
 
 <style scoped>
 
-body{
+body {
   margin: 0 !important;
 }
 
 html, body, #app {
   height: 100%;
   margin: 0 !important;
-  padding: 0;}
+  padding: 0;
+}
 
 
 /* 전체 페이지 기본 스타일 */
