@@ -1,12 +1,18 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { inject } from "vue";
 import ProfileMenuModal from "@/components/home/modal/ProfileMenuModal.vue"; // ← 추가
+import InquiryModal from "@/components/home/modal/InquiryModal.vue";
 
 const router = useRouter();
 
 /* 프로필 모달 상태 */
 const isProfileModal = ref(false);
+/* 문의 모달 상태 */
+const isInquiryModal = ref(false);
+/*성공 토스트*/
+const toast = inject("toast");
 
 /* 로그인한 유저 정보 */
 // TODO: 로그인한 유저 가져오기
@@ -55,11 +61,14 @@ const handleProfileAction = (menu) => {
     return;
   }
 
-  // 하단 "문의하기" 버튼 (동일 라우트)
+  // "문의하기"
   if (menu === "inquiry") {
-    router.push("/inquiry");
-    return;
+    isProfileModal.value = false;
+    isInquiryModal.value = true;
   }
+};
+const handleInquirySubmit = (text) => {
+  toast.show("문의가 정상적으로 제출되었습니다! 🙌");
 };
 </script>
 
@@ -107,6 +116,12 @@ const handleProfileAction = (menu) => {
       v-model="isProfileModal"
       :user="user"
       @select="handleProfileAction"
+  />
+
+  <!-- 문의 모달 -->
+  <InquiryModal
+      v-model="isInquiryModal"
+      @submit="handleInquirySubmit"
   />
 </template>
 
