@@ -5,20 +5,22 @@ import "./UserSidebar.css";
 import profileImg from "@/assets/profile_img.svg";
 import onlineIcon from "@/assets/online.svg";
 import offlineIcon from "@/assets/offline.svg";
-import FriendModal from "/src/components/common/modal/ChoiceModal.vue";
+import ChoiceModal from "/src/components/common/modal/ChoiceModal.vue";
+import ReportModal from "@/components/home/modal/ReportModal.vue";
+import { ref } from "vue";
 
 
 //채팅방 여러개 만들기
-const rooms = [
-  { id: 1, title: "코딩 전채틀, 알고리즘 스터디" },
-  { id: 2, title: "코딩 전채틀, 알고리즘 스터디" },
-  { id: 3, title: "코딩 전채틀, 알고리즘 스터디" },
-  { id: 4, title: "코딩 전채틀, 알고리즘 스터디" }
-];
+const rooms = ref([
+  { id: 1, title: "코딩 천재들, 알고리즘 스터디" },
+  { id: 2, title: "코딩 천재들, 알고리즘 스터디" },
+  { id: 3, title: "코딩 천재들, 알고리즘 스터디" },
+  { id: 4, title: "코딩 천재들, 알고리즘 스터디" }
+]);
 
 //친구 여러개 만들기
 // ✔ 친구 4명 데이터
-const friends = [
+const friends = ref([
   {
     id: 1,
     name: "김폭주기관차",
@@ -47,9 +49,8 @@ const friends = [
     online: true,
     avatar: profileImg
   }
-];
+]);
 
-import { ref } from "vue";
 
 // 모달 관련 상태
 const isModalOpen = ref(false);
@@ -57,10 +58,13 @@ const modalX = ref(0);
 const modalY = ref(0);
 const selectedFriend = ref(null);
 const modalType = ref("friend");
+const isReportModal = ref(false);   // 신고 모달 ON/OFF
+const reportTarget = ref(null);     // 신고 대상
 
 
 // 친구 클릭 -> 모달 열기
 const openFriendModal = (event, friend) => {
+  modalType.value = "friend";
   selectedFriend.value = friend;
 
   const card = event.currentTarget;
@@ -75,6 +79,7 @@ const openFriendModal = (event, friend) => {
 
 
 const openRoomModal = (event, room) => {
+  modalType.value = "room";
   selectedFriend.value = room;
 
   const card = event.currentTarget;
@@ -97,6 +102,36 @@ const closeModal = () => {
 const handleAction = (type) => {
   console.log("선택한 기능:", type, selectedFriend.value.name);
   isModalOpen.value = false;
+
+  //신고
+  if (type === "report") {
+    // 신고 대상 저장
+    reportTarget.value = selectedFriend.value;
+
+    // 신고 모달 열기
+    isReportModal.value = true;
+  }
+
+  //방 나가기
+  if (type === "out") {
+    rooms.value = rooms.value.filter(room => room.id !== selectedFriend.value.id);
+  }
+};
+const handleReportSubmit = (data) => {
+  console.log("신고 접수됨:", data);
+};
+
+//----------------------------------------------------------------------
+//새 채팅방 만들기
+import CreateChatRoomModal from "@/components/home/modal/CreateChatRoomModal.vue";
+//새 채팅방 만들기 상태 on/off
+const isCreateRoomModal = ref(false);
+const addNewRoom = (roomData) => {
+  rooms.value.push({
+    id: rooms.value.length + 1,
+    title: roomData.roomName,
+    members: roomData.invited
+  });
 };
 </script>
 
@@ -145,7 +180,12 @@ const handleAction = (type) => {
 
       <!-- 새 채팅방 만들기 버튼 -->
       <div class="button-area">
-        <BlueButton color="blue" size="medium" label="💬 새 채팅 만들기" />
+        <BlueButton
+            color="blue"
+            size="medium"
+            label="💬 새 채팅 만들기"
+            @click="isCreateRoomModal = true"
+        />
       </div>
 
       <!-- 내 채팅방 -->
@@ -170,9 +210,10 @@ const handleAction = (type) => {
 
       </div>
     </div>
+
   </aside>
 
-  <FriendModal
+  <ChoiceModal
       :type="modalType"
       :data="selectedFriend"
       :show="isModalOpen"
@@ -182,5 +223,18 @@ const handleAction = (type) => {
       @action="handleAction"
   />
 
+<!--신고하기 모달-->
+  <ReportModal
+      v-model="isReportModal"
+      :target="reportTarget"
+      @submit="handleReportSubmit"
+  />
+
+<!--새채팅방 만들기 모달-->
+  <CreateChatRoomModal
+      v-model="isCreateRoomModal"
+      :friends="friends"
+      @create="addNewRoom"
+  />
 </template>
 
