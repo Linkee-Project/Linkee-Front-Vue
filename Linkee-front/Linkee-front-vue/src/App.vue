@@ -16,11 +16,12 @@ const route = useRoute();
              && route.name !== 'SignUp'"
     />
 
-    <div class="main-layout">
+    <div class="main-layout" v-if="!route.meta.hideLayout" >
 
-      <div class="router-view-container">
+      <div class="router-view-container" >
         <router-view />
       </div>
+
 
       <!-- hideLayout === true 면 Sidebar 숨김 -->
       <UserSidebar
@@ -28,6 +29,10 @@ const route = useRoute();
                && route.name !== 'Login'
                && route.name !== 'SignUp'"
       />
+    </div>
+
+    <div v-else class="full-screen-page">
+      <router-view />
     </div>
 
   </div>
@@ -70,6 +75,12 @@ html, body, #app {
 .router-view-container {
   flex: 1; /* 메인 콘텐츠가 남은 공간 다 차지함 */
   height: calc(100vh - 90px);
+  overflow: hidden;
+}
+
+.full-screen-page {
+  width: 100%;
+  height: 100vh;
   overflow: hidden;
 }
 </style>

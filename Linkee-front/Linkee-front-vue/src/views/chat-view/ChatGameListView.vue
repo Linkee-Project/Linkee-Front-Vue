@@ -325,6 +325,10 @@ const pagedRooms = computed(() => {
   text-align: center;
   padding-bottom: 3px;
 }
+.room-card-empty{
+  font-size: 12px;
+  color:grey;
+}
 
 .free-board__category {
   display: flex;
@@ -355,8 +359,6 @@ const pagedRooms = computed(() => {
 /* 검색 영역 - 완전 한 줄 */
 .free-board__search {
   margin-top: 0;         /* 🔥 카테고리 아래 딱 붙게 */
-
-
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -371,7 +373,7 @@ const pagedRooms = computed(() => {
 
 /* 검색 input 크기 줄어들도록 설정 */
 .free-board__search :deep(.search-form) {
-  min-width: 150px;
+  min-width: 230px;
 }
 
 .free-board__rooms-create-btn {
