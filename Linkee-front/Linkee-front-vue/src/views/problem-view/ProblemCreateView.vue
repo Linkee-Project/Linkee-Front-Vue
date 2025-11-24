@@ -65,13 +65,14 @@ const handleCancel = () => {
 <style scoped>
 /* 전체 배경 */
 .problem-page {
-  min-height: 100vh;
+  height: 100%;
+  overflow: auto;
 }
 
 /* 가운데 정렬 */
 .page-inner {
   max-width: 1113px;
-  margin: 80px auto 80px;
+  margin: 40px auto 40px;
 }
 
 /* 제목 영역 */

@@ -24,7 +24,7 @@
       </div>
 
       <!-- 등록 버튼 -->
-      <div class="action-row">
+      <div class="action-row" @click="goCreate">
         <BaseButton color="blue" size="medium">
           <img class="creat-btn-icon" :src="problemCreateIcon" alt="등록 아이콘" />
           <span>문제 등록하기</span>
@@ -69,6 +69,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import SearchForm from '@/components/base/form/SearchForm.vue'
 import BaseButton from '@/components/base/button/BaseButton.vue'
 import PaginationButton from '@/components/base/button/PaginationButton.vue'
@@ -81,12 +82,19 @@ import problemCreateIcon from '@/assets/problem_create_icon.svg'
 const page = ref(1)
 const totalPages = ref(5)
 
+const router = useRouter()
+
+const goCreate = () => {
+  router.push({ name: 'ProblemCreate' })
+}
+
 </script>
 
 <style scoped>
 /* 전체 배경 */
 .problem-page {
-  min-height: 100vh;
+  height: 100%;
+  overflow: auto;
 }
 
 /* 가운데 정렬 */

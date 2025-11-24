@@ -82,12 +82,13 @@ const handleCancel = () => {
 
 <style scoped>
 .problem-page {
-  min-height: 100vh;
+  height: 100%;
+  overflow: auto;
 }
 
 .page-inner {
   max-width: 1113px;
-  margin: 80px auto 80px;
+  margin: 40px auto 40px;
 }
 
 .problem-header {
