@@ -55,7 +55,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- 버튼 영역 -->
     <div class="button-area">
       <button class="delete-btn">회원탈퇴</button>
@@ -234,7 +234,7 @@ label {
   .edit-icon {
     right: calc(50% - 45px - 5px);
   }
-  
+
   .edit-icon img {
     width: 30px;
   }

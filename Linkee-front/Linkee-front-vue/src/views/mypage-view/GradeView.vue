@@ -1,67 +1,39 @@
 <script setup>
 import { ref } from 'vue';
-import GradeListItem from '@/components/mypage/grade/GradeListItem.vue'; // GradeListItem import
+import GradeListItem from '@/components/mypage/grade/GradeListItem.vue';
 
 // 더미 등급 데이터 (실제 백엔드 연동 시 교체)
 const gradeData = ref({
-  topGuidance: 'Linkee의 등급 시스템은 각 카테고리별 활동을 기반으로 부여됩니다. 꾸준한 학습과 퀴즈 참여로 더 높은 등급에 도전해 보세요!',
-  overallGuidance: '등급은 매월 1일에 갱신되며, 등급이 높을수록 더 많은 혜택이 제공됩니다. 나의 강점 카테고리를 파악하고 집중적으로 성장시켜보세요!',
+  // overallGuidance는 이제 템플릿에서 직접 각 등급별 조건을 설명하므로 제거
+  
   categories: [
     {
-      id: 'overall',
-      name: '전체 등급',
+      id: 1,
+      name: '알고리즘',
       currentLevel: 14,
       maxLevel: 20,
       badgeImage: '/src/assets/SILVER Grade.svg'
     },
     {
-      id: 'math',
-      name: '수학 등급',
+      id: 2,
+      name: '자료구조',
       currentLevel: 3,
       maxLevel: 10,
       badgeImage: '/src/assets/BRONZE Grade.svg'
     },
     {
-      id: 'science',
-      name: '과학 등급',
+      id: 3,
+      name: '네트워크',
       currentLevel: 7,
       maxLevel: 10,
-      badgeImage: '/src/assets/Yellow Grade.svg',
+      badgeImage: '/src/assets/SILVER Grade.svg'
     },
     {
-      id: 'history',
-      name: '역사 등급',
+      id: 4,
+      name: '데이터베이스',
       currentLevel: 1,
       maxLevel: 10,
-      badgeImage: '/src/assets/Red Grade.svg'
-    },
-    {
-      id: 'english',
-      name: '영어 등급',
-      currentLevel: 9,
-      maxLevel: 10,
       badgeImage: '/src/assets/GOLD Grade.svg'
-    },
-    {
-      id: 'programming',
-      name: '프로그래밍 등급',
-      currentLevel: 5,
-      maxLevel: 10,
-      badgeImage: '/src/assets/Pupple Grade.svg'
-    },
-    {
-      id: 'art',
-      name: '미술 등급',
-      currentLevel: 2,
-      maxLevel: 10,
-      badgeImage: '/src/assets/BRONZE Grade.svg'
-    },
-    {
-      id: 'music',
-      name: '음악 등급',
-      currentLevel: 6,
-      maxLevel: 10,
-      badgeImage: '/src/assets/Yellow Grade.svg'
     }
   ]
 });
@@ -72,9 +44,20 @@ const gradeData = ref({
     <h2 class="list-main-title">나의 등급</h2>
 
     <div class="grade-main-content">
-      <!-- 상단 등급 기준 안내 -->
-      <div class="guidance-box top-guidance">
-        <p>{{ gradeData.topGuidance }}</p>
+      <!-- 상단 등급 조건 설명 -->
+      <div class="grade-conditions-display">
+        <div class="grade-condition-item">
+          <img src="/src/assets/BRONZE Grade.svg" alt="브론즈 등급" class="grade-condition-badge" />
+          <p class="grade-condition-text">BRONZE: 1 ~ 10</p>
+        </div>
+        <div class="grade-condition-item">
+          <img src="/src/assets/SILVER Grade.svg" alt="실버 등급" class="grade-condition-badge" />
+          <p class="grade-condition-text">SILVER: 11 ~ 20</p>
+        </div>
+        <div class="grade-condition-item">
+          <img src="/src/assets/GOLD Grade.svg" alt="골드 등급" class="grade-condition-badge" />
+          <p class="grade-condition-text">GOLD: 21 이상</p>
+        </div>
       </div>
 
       <!-- 카테고리별 등급 목록 -->
@@ -86,9 +69,20 @@ const gradeData = ref({
         />
       </div>
 
-      <!-- 하단 전체 등급 안내 -->
-      <div class="guidance-box overall-guidance">
-        <p>{{ gradeData.overallGuidance }}</p>
+      <!-- 하단 추가 등급 설명 -->
+      <div class="grade-conditions-display bottom-grades">
+        <div class="grade-condition-item">
+          <img src="/src/assets/Yellow Grade.svg" alt="옐로우 등급" class="grade-condition-badge" />
+          <p class="grade-condition-text">Yellow: 0 ~ 25</p>
+        </div>
+        <div class="grade-condition-item">
+          <img src="/src/assets/Red Grade.svg" alt="레드 등급" class="grade-condition-badge" />
+          <p class="grade-condition-text">Red: 26 ~ 40</p>
+        </div>
+        <div class="grade-condition-item">
+          <img src="/src/assets/Pupple Grade.svg" alt="퍼플 등급" class="grade-condition-badge" />
+          <p class="grade-condition-text">Pupple: 41 이상</p>
+        </div>
       </div>
     </div>
   </div>
@@ -120,10 +114,52 @@ const gradeData = ref({
   gap: 30px; /* 섹션 간 간격 */
 }
 
-/* --- 안내 박스 공통 스타일 --- */
+/* --- 상단 등급 조건 표시 스타일 --- */
+.grade-conditions-display {
+  display: flex;
+  justify-content: space-around; /* 아이템들을 균등하게 분배 */
+  align-items: center;
+  background-color: #f0f8ff; /* 연한 배경색 */
+  border: 1px solid #cceeff; /* 테두리 */
+  border-radius: 10px;
+  padding: 15px 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  flex-wrap: wrap; /* 반응형을 위해 줄바꿈 허용 */
+}
+
+/* 하단 등급 조건 섹션의 상단 마진 조절 */
+.grade-conditions-display.bottom-grades {
+  margin-top: 20px;
+  margin-bottom: 0; /* 불필요한 하단 마진 제거 */
+}
+
+.grade-condition-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 5px 0; /* 아이템 간 상하 간격 */
+}
+
+.grade-condition-badge {
+  width: 40px; /* 이미지 크기 조정 */
+  height: auto;
+  flex-shrink: 0;
+}
+
+.grade-condition-text {
+  font-size: 15px;
+  color: #2c3e50;
+  margin: 0;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+}
+
+
+/* --- 안내 박스 공통 스타일 (기존 overall-guidance는 이제 사용하지 않음) --- */
+/*
 .guidance-box {
-  background-color: #e0f7fa; /* 연한 파란색 배경 */
-  border-left: 5px solid #00BCD4; /* 포인트 색상 */
+  background-color: #e0f7fa;
+  border-left: 5px solid #00BCD4;
   border-radius: 10px;
   padding: 18px 25px;
   font-size: 15px;
@@ -131,12 +167,10 @@ const gradeData = ref({
   line-height: 1.6;
 }
 
-.top-guidance {
-  margin-bottom: 20px;
-}
 .overall-guidance {
   margin-top: 20px;
 }
+*/
 
 /* --- 카테고리별 등급 Wrapper --- */
 .category-grades-wrapper {
@@ -147,9 +181,15 @@ const gradeData = ref({
 }
 
 /* 반응형 */
-@media (max-width: 1200px) { /* 더 넓은 화면에서 4개 유지, 그 이하에서 3개 */
+@media (max-width: 1200px) {
+  .grade-condition-badge {
+    width: 35px;
+  }
+  .grade-condition-text {
+    font-size: 14px;
+  }
   .category-grades-wrapper {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* 화면 축소 시 3개, 2개 등으로 자동 조절 */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 15px;
   }
 }
@@ -162,19 +202,37 @@ const gradeData = ref({
     font-size: 20px;
     margin-bottom: 20px;
   }
+  .grade-conditions-display {
+    flex-direction: column; /* 모바일에서 세로로 배치 */
+    align-items: flex-start; /* 왼쪽 정렬 */
+    padding: 10px 15px;
+    gap: 8px; /* 아이템 간 간격 */
+  }
+  .grade-condition-item {
+    width: 100%; /* 너비 100% */
+  }
+  .grade-condition-badge {
+    width: 30px;
+  }
+  .grade-condition-text {
+    font-size: 13px;
+  }
+  /* 기존 .guidance-box 스타일은 주석 처리 또는 제거 */
+  /*
   .guidance-box {
     font-size: 14px;
     padding: 15px 20px;
   }
+  */
   .category-grades-wrapper {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* 모바일에서 한 줄에 2개 등으로 자동 조절 */
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 10px;
   }
 }
 
 @media (max-width: 480px) {
   .category-grades-wrapper {
-    grid-template-columns: 1fr; /* 아주 작은 화면에서는 1개 */
+    grid-template-columns: 1fr;
   }
 }
 </style>
