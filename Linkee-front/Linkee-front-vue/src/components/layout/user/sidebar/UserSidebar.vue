@@ -162,47 +162,42 @@ const handleReportSubmit = (data) => {
 <template>
   <aside class="sidebar-container">
     <div class="content">
-      <!-- 상단: 친구 목록 타이틀 -->
-      <div class="section-header">
-        <span class="title">👥 친구 목록</span>
-        <!-- 나중에 수정 -->
-        <span class="count">접속 중인 친구 1/2</span>
-      </div>
 
-      <!-- 친구 카드 리스트 영역 -->
-      <div class="friend-scroll-area">
-        <div class="friend-list">
+      <!-- 친구 목록 -->
+      <div class="section-block">
+        <div class="section-header">
+          <span class="title">👥 친구 목록</span>
+          <span class="count">접속 중: 1 / 2</span>
+        </div>
 
-          <!-- ✔ v-for로 친구 목록 반복 렌더링 -->
-          <button
-              class="friend-card"
-              :class="{ online: friend.online }"
-              v-for="friend in friends"
-              :key="friend.id"
-              @click="event => openFriendModal(event, friend)"
-          >
-            <img class="avatar" :src="friend.avatar" alt="friend avatar" />
+        <!-- 🔥 CSS와 동일하게 scroll-area 사용 -->
+        <div class="scroll-area">
+          <div class="friend-list">
+            <button
+                class="friend-card"
+                :class="{ online: friend.online }"
+                v-for="friend in friends"
+                :key="friend.id"
+                @click="event => openFriendModal(event, friend)"
+            >
+              <img class="avatar" :src="friend.avatar" />
 
-            <div class="info">
-              <p class="name">{{ friend.name }}</p>
+              <div class="info">
+                <p class="name">{{ friend.name }}</p>
 
-              <div class="status-row">
-                <!-- 온라인/오프라인 색상 아이콘 자동 변경 -->
-                <img
-                    class="status-color"
-                    :src="friend.online ? onlineIcon : offlineIcon"
-                    alt="status icon"
-                />
-                <span class="status">{{ friend.status }}</span>
+                <div class="status-row">
+                  <img class="status-color"
+                       :src="friend.online ? onlineIcon : offlineIcon" />
+                  <span class="status">{{ friend.status }}</span>
+                </div>
               </div>
-            </div>
-          </button>
-
+            </button>
+          </div>
         </div>
       </div>
 
 
-      <!-- 새 채팅방 만들기 버튼 -->
+      <!-- 새 채팅 만들기 -->
       <div class="button-area">
         <BlueButton
             color="blue"
@@ -212,31 +207,33 @@ const handleReportSubmit = (data) => {
         />
       </div>
 
-      <!-- 내 채팅방 -->
-      <div class="myroom-wrapper mt-20">
 
-        <div class="myroom-header">
-          <span class="myroom-title">🤝 내 채팅방</span>
+      <!-- 내 채팅방 -->
+      <div class="section-block">
+        <div class="section-header">
+          <span class="title">🤝 내 채팅방</span>
         </div>
 
-        <div class="room-scroll-area">
+        <!-- 🔥 scroll-area로 통일 -->
+        <div class="scroll-area">
           <div class="room-list">
             <button class="room-card"
                     v-for="room in rooms"
                     :key="room.id"
                     @click="event => openRoomModal(event, room)"
             >
-              <img class="room-icon" src="../../../../assets/chat_room_img.svg" alt="room icon" />
+              <img class="room-icon" src="@/assets/chat_room_img.svg" />
               <p class="room-text">{{ room.title }}</p>
             </button>
           </div>
         </div>
-
       </div>
-    </div>
 
+    </div>
   </aside>
 
+
+  <!-- 공통 모달들 -->
   <ChoiceModal
       :type="modalType"
       :data="selectedFriend"
@@ -247,26 +244,23 @@ const handleReportSubmit = (data) => {
       @action="handleAction"
   />
 
-<!--신고하기 모달-->
   <ReportModal
       v-model="isReportModal"
       :target="reportTarget"
       @submit="handleReportSubmit"
   />
 
-<!--새채팅방 만들기 모달-->
   <CreateChatRoomModal
       v-model="isCreateRoomModal"
       :friends="friends"
       @create="addNewRoom"
   />
-<!--채팅방 초대 모달-->
+
   <InviteChatRoomModal
       v-model="isInviteModal"
       :friends="friends"
       :room="selectedRoom"
       @invite="handleInvite"
   />
-
 </template>
 
