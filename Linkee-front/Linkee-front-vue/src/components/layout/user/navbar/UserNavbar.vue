@@ -1,73 +1,173 @@
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { inject } from "vue";
+import ProfileMenuModal from "@/components/home/modal/ProfileMenuModal.vue"; // ← 추가
+import InquiryModal from "@/components/home/modal/InquiryModal.vue";
+import NotificationModal from "@/components/home/modal/NotificationModal.vue";
+const router = useRouter();
+
+/* 프로필 모달 상태 */
+const isProfileModal = ref(false);
+/* 문의 모달 상태 */
+const isInquiryModal = ref(false);
+/* 알림 모달 상태 */
+const isNotificationModal = ref(false);
+/*성공 토스트*/
+const toast = inject("toast");
+
+/* 로그인한 유저 정보 */
+// TODO: 로그인한 유저 가져오기
+const user = {
+  name: "김명지니어스",
+  profile: "/src/assets/profile_img.svg"
+};
+
+/* 메뉴 선택 시 실행 */
+const handleProfileAction = (menu) => {
+  console.log("선택한 메뉴:", menu);
+
+  if (menu === "logout") {
+    // TODO: 로그아웃 처리
+    console.log("로그아웃");
+    return;
+  }
+
+  // 계정 관리
+  if (menu === "account") {
+    router.push("/mypage/profile");
+    return;
+  }
+
+  // 나의 문제 조회
+  if (menu === "my-problem") {
+    router.push("/mypage/questions");
+    return;
+  }
+
+  // 나의 문의 조회
+  if (menu === "my-question") {
+    router.push("/mypage/inquiry");
+    return;
+  }
+
+  // 나의 북마크 조회
+  if (menu === "my-bookmark") {
+    router.push("/mypage/bookmark");
+    return;
+  }
+
+  // 나의 플레이 기록
+  if (menu === "my-record") {
+    router.push("/mypage/history");
+    return;
+  }
+
+  // "문의하기"
+  if (menu === "inquiry") {
+    isProfileModal.value = false;
+    isInquiryModal.value = true;
+  }
+};
+const handleInquirySubmit = (text) => {
+  toast.show("문의가 정상적으로 제출되었습니다! 🙌");
+};
+
+/*알람 박스*/
+/* 알림 테스트 데이터 */
+const notifications = ref([
+  {
+    user: "김 진",
+    message: "님이 친구 요청을 보냈습니다",
+    button: "수락"
+  },
+  {
+    user: "김 쪼푸기감자",
+    message: "님이 CS퀴즈대결방에 초대했습니다",
+    button: "수락"
+  },
+  {
+    user: "김 지니어스",
+    message: "님이 올리신",
+    title: "힌이라?",
+    button: "채택됨"
+  },
+  {
+    user: "김 지니어스",
+    message: "님이 문의하신",
+    title: "다크모드 어떻게 하면요?",
+    button: "답변 보기"
+  },
+  {
+    user: "김 지니어스",
+    message: "님이 올린",
+    title: "힌이라?",
+    button: "게시글 이동"
+  }
+]);
+</script>
+
 <template>
-  <!--
-    <header> : 페이지의 상단 영역(헤더)을 의미하는 시맨틱 태그.
-               여기에는 보통 로고, 내비게이션 메뉴, 사용자 정보 등이 위치함.
-  -->
   <header class="header-container">
-    <!--
-      로고 영역
-      사이트 브랜드 역할. 클릭 시 보통 홈으로 이동함.
-    -->
+
+    <!-- 로고 -->
     <router-link to="/" class="logo-link">
-    <div class="logo-container ">
-      <!-- 로고 이미지 -->
-      <img
-        src="../../../../assets/linkee_character.svg"
-        alt="Linkee Logo"
-        class="logo-img"
-      />
-
-
-      <!-- 텍스트 로고 (사이트 이름) -->
-      <span class="logo-text">Linkee</span>
-
-    </div>
+      <div class="logo-container">
+        <img src="../../../../assets/linkee_character.svg" class="logo-img"/>
+        <span class="logo-text">Linkee</span>
+      </div>
     </router-link>
 
-    <!--
-      가운데 메뉴(nav)
-      <nav> 태그는 페이지 이동 또는 메뉴 구조임을 알려주는 시맨틱 태그.
-    -->
+    <!-- 네비게이션 -->
     <nav class="nav-menu">
-
-      <!--마이페이지 버튼-->
-<!--      <button class="nav-item">👤 마이페이지</button>-->
       <router-link to="/mypage/profile" class="nav-item">👤 마이페이지</router-link>
 
       <!--문제게시판 버튼-->
-      <button class="nav-item">📜 문제 게시판</button>
-
+      <router-link to = "/problem" class="nav-item" >📜 문제 게시판</router-link>
       <!-- 공지사항 버튼 -->
       <router-link to="/notice" style="text-decoration: none">
         <button class="nav-item">📢 공지사항</button>
       </router-link>
-
-
     </nav>
 
-    <!-- 오른쪽 영역: 알림 + 프로필 -->
+    <!-- 오른쪽 버튼들 -->
     <div class="right-section">
-      <!-- 알림 버튼 -->
-      <button class="icon-btn">
-        <img src="../../../../assets/bell.svg" class = "icon-img" />
+
+      <!-- 알림 -->
+      <button class="icon-btn" @click="isNotificationModal = true">
+        <img src="../../../../assets/bell.svg" class="icon-img" />
       </button>
 
       <!-- 프로필 버튼 -->
-      <button class="profile-btn">
+      <button class="profile-btn" @click="isProfileModal = true">
         <img src="../../../../assets/profile_img.svg" class="profile-img" />
-        <span class="profile-name"> 김명지니어스<!--pinia 사용시 유저 이름 바꿔줌{{ userStore.nickname }}--></span>
+        <span class="profile-name">{{ user.name }}</span>
       </button>
     </div>
-
   </header>
+
+  <!-- 프로필 모달 추가 -->
+  <ProfileMenuModal
+      v-model="isProfileModal"
+      :user="user"
+      @select="handleProfileAction"
+  />
+
+  <!-- 문의 모달 -->
+  <InquiryModal
+      v-model="isInquiryModal"
+      @submit="handleInquirySubmit"
+  />
+
+<!--알람 모달 -->
+  <NotificationModal
+      v-model="isNotificationModal"
+      :notifications="notifications"
+      @action="(item) => console.log('클릭한 알림:', item)"
+  />
 
 </template>
 
-<script>
-export default {
-  name: "UserNavbar", // 컴포넌트 이름
-};
-</script>
 
 <style scoped>
 

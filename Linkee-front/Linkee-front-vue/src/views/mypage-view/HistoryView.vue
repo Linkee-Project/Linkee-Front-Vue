@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import PaginationButton from '@/components/base/button/PaginationButton.vue';
-import HistoryListItem from '@/components/layout/mypage/history/HistoryListItem.vue';
-import MyPageDetailModal from '@/components/layout/mypage/modal/MyPageDetailModal.vue'; // MyPageDetailModal import
+import HistoryListItem from '@/components/mypage/history/HistoryListItem.vue';
+import MyPageDetailModal from '@/components/mypage/modal/MyPageDetailModal.vue'; // MyPageDetailModal import
 
 // 더미 플레이 기록 데이터
 const allPlayHistory = ref([

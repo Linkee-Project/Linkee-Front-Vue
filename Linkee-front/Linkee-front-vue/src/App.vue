@@ -2,52 +2,73 @@
 import { useRoute } from "vue-router";
 import UserNavbar from "@/components/layout/user/navbar/UserNavbar.vue";
 import UserSidebar from "@/components/layout/user/sidebar/UserSidebar.vue";
+import BaseToast from "@/components/base/toast/BaseToast.vue";
 
 const route = useRoute();
+
+// Toast ref
+const toastRef = ref(null);
+
+// 어디서든 사용 가능하도록 provide
+provide("toast", {
+  show: (msg) => toastRef.value.showToast(msg)
+});
 </script>
 
 <template>
   <div id="app">
 
-    <!-- hideLayout === true 면 Navbar 숨김 -->
+    <!-- Navbar -->
     <UserNavbar
-        v-if="!route.meta.hideLayout
-             && route.name !== 'Login'
-             && route.name !== 'SignUp'"
+        v-if="!route.path.startsWith('/admin')
+           && !route.meta.hideLayout
+           && route.name !== 'Login'
+           && route.name !== 'SignUp'"
     />
 
-    <div class="main-layout">
+    <div class="main-layout"
+         v-if="!route.meta.hideLayout && !route.path.startsWith('/admin')">
 
-      <div class="router-view-container">
-        <router-view />
+      <div
+          :class="{ 'router-view-container': !route.path.startsWith('/admin') }"
+      >
+        <router-view/>
       </div>
 
-      <!-- hideLayout === true 면 Sidebar 숨김 -->
+
+      <!-- Sidebar -->
       <UserSidebar
-          v-if="!route.meta.hideLayout
+          v-if="!route.path.startsWith('/admin')
+             && !route.meta.hideLayout
              && route.name !== 'Login'
              && route.name !== 'SignUp'
              && route.name !== 'Notice'
              && route.name !== 'NoticeDetail'
-"
+             && !route.meta.hideSidebar"
       />
-
     </div>
 
+    <div v-else class="full-screen-page">
+      <router-view/>
+    </div>
+
+    <!-- 전역 토스트 컴포넌트 위치 -->
+    <BaseToast ref="toastRef" />
   </div>
 </template>
 
 
 <style scoped>
 
-body{
+body {
   margin: 0 !important;
 }
 
 html, body, #app {
   height: 100%;
   margin: 0 !important;
-  padding: 0;}
+  padding: 0;
+}
 
 
 /* 전체 페이지 기본 스타일 */
@@ -74,6 +95,12 @@ html, body, #app {
 .router-view-container {
   flex: 1; /* 메인 콘텐츠가 남은 공간 다 차지함 */
   height: calc(100vh - 90px);
+  overflow: hidden;
+}
+
+.full-screen-page {
+  width: 100%;
+  height: 100vh;
   overflow: hidden;
 }
 </style>

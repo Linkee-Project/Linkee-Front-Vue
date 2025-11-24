@@ -3,7 +3,10 @@ import BaseModal from "@/components/base/modal/BaseModal.vue";
 import SearchForm from "@/components/base/form/SearchForm.vue";
 import UserCard from "@/components/home/UserCard.vue";
 
-import { ref, watch } from "vue";
+import { ref, watch, inject } from "vue";
+
+
+const toast = inject("toast");
 
 /* Props */
 const props = defineProps({
@@ -82,6 +85,8 @@ const createRoom = () => {
     });
 
     emit("update:modelValue", false);
+
+    toast?.show("새 채팅방이 생성되었습니다! 🎉");
   });
 };
 const removeInvite = (userId: number) => {
@@ -182,85 +187,120 @@ const removeInvite = (userId: number) => {
 
 
 <style scoped>
+/* 전체 모달 body */
 .modal-body {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 10px 10px; /* 좌우 동일 여백 */
-  max-height: calc(100vh - 280px);
+  gap: 10px;
+  padding: 18px 16px;
+  max-height: calc(100vh - 260px);
   overflow-y: auto;
 }
 
+/* 라벨 */
 .label {
   font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 4px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #3b4450;
 }
 
-.center-item {
-  width: 100%;
-  justify-content: center;
-}
-
+/* el-input 전체 확장 */
 .wide-input {
   width: 100%;
 }
 
-/* 검색 결과 리스트 */
+/* 🔍 검색 리스트 */
 .search-list {
-  width: 92%;
+  width: 90%;
   min-height: 120px;
-  max-height: 280px;
+  max-height: 260px;
   overflow-y: auto;
-  border: 1px solid #e4eaf1;
-  border-radius: 10px;
-  padding: 10px;
-  background: #fafcff;
-  margin-top: 10px;
+  padding: 12px;
+
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  border-radius: 14px;
+  border: 1px solid rgba(200, 220, 240, 0.4);
+
+  box-shadow:
+      0 4px 10px rgba(0,0,0,0.05),
+      inset 0 0 12px rgba(255,255,255,0.3);
+
+  animation: fadeIn 0.2s ease;
 }
 
-/* 검색 결과 유저 카드 */
+/* 개별 친구 item */
 .user-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  justify-content: space-between;
+  margin-bottom: 10px;
+
+  background: #f8fcff;
+  border-radius: 12px;
+  padding: 10px 12px;
+
+  border: 1px solid #e6eef7;
+  transition: 0.2s;
 }
 
+.user-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(120, 180, 255, 0.15);
+}
+
+/* 초대 버튼 */
 .invite-btn {
-  background: linear-gradient(90deg, #00bcd4, #4dd0e1);
+  background: linear-gradient(135deg, #58d1ff, #45b7e6);
   border: none;
   color: white;
   padding: 6px 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+
+  box-shadow: 0 4px 10px rgba(0, 145, 255, 0.25);
+  transition: 0.2s;
 }
 
-/* 초대한 친구 목록 */
+.invite-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 145, 255, 0.35);
+}
+
+/* 초대한 친구 pill 영역 */
 .invited-list {
-  width: 100%;
-  max-height: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 260px;
   overflow-y: auto;
-  padding-right: 6px;
+  padding: 2px;
 }
 
-/* 초대한 친구 카드 */
+/* 친구 pill */
 .invited-pill {
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  background: #f3faff; /* 조금 더 밝고 자연스러운 톤 */
-  padding: 8px 15px;
+  background: linear-gradient(135deg, #f0f7ff, #eaf3ff);
+  padding: 10px 16px;
   border-radius: 16px;
 
-  width: 90%;
-  margin-bottom: 10px;
+  border: 1px solid #d3e6ff;
+  box-shadow: 0 3px 8px rgba(150, 180, 220, 0.15);
 
-  border: 1px solid #e6f2f7; /* 아주 미세한 테두리 (깔끔) */
+  transition: 0.2s;
 }
 
-/* UserCard 내부 스타일 */
+.invited-pill:hover {
+  transform: translateX(4px);
+}
+
+/* UserCard 크기 줄이기 */
 .invited-pill :deep(.user-card) {
   display: flex;
   align-items: center;
@@ -269,45 +309,60 @@ const removeInvite = (userId: number) => {
   padding: 0;
   margin: 0;
 
-  font-size: 14px; /* 텍스트도 살짝 줄여 컴팩트하게 */
+  font-size: 14px;
 }
 
-/* 삭제 버튼 */
+/* 제거 버튼 */
 .remove-btn {
   border: none;
   background: transparent;
   cursor: pointer;
 
-  font-size: 16px;
-  color: #9aa8b0;
+  font-size: 18px;
+  color: #a8b3bb;
 
-  padding: 4px; /* 너무 커 보이지 않게 축소 */
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .remove-btn:hover {
-  color: #5e6a73;
+  color: #6c7a85;
 }
+
+/* 빈 메시지 */
 .empty {
   text-align: center;
   color: #9aa8b0;
   font-size: 13px;
-  padding: 10px;
+  padding: 10px 0;
 }
 
 /* 하단 버튼 */
 .create-btn {
   width: 100%;
   padding: 12px 0;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   color: white;
   cursor: pointer;
-  background: linear-gradient(90deg, #00bcd4, #4dd0e1);
+
+  background: linear-gradient(135deg, #4ec6ff, #0094f6);
+  box-shadow: 0 6px 16px rgba(0, 150, 255, 0.35);
+
+  transition: 0.25s ease;
 }
 
+.create-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 150, 255, 0.45);
+}
+
+/* 부드러운 등장 애니메이션 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 </style>

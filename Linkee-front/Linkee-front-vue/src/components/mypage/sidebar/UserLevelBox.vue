@@ -14,7 +14,7 @@ const navigateToGrade = () => {
     <h3>나의 등급</h3>
 
     <div class="badge">
-      <img src="@/assets/Yellow Grade.svg" alt="badge" />
+      <img src="../../../assets/Yellow%20Grade.svg" alt="badge" />
     </div>
 
     <div class="progress">
