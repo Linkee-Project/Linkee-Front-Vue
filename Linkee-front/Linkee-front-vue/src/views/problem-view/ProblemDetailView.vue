@@ -862,29 +862,4 @@ const deleteComment = (id) => {
   }
 }
 
-/* 모바일 보다 더작게 (<= 480px)  */
-/*@media (max-width: 480px) {
-  .page-inner {
-    margin: 32px auto 32px;
-    padding: 0 10px;
-  }
-
-  .problem-detail-card {
-    padding: 14px 14px;
-  }
-
-  .detail-title {
-    font-size: 17px;
-  }
-
-  .detail-meta {
-    font-size: 10px;
-  }
-
-  .comment-form {
-    padding: 8px 12px;
-  }
-}*/
-
-
 </style>
