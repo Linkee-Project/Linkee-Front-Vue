@@ -25,9 +25,12 @@ const route = useRoute();
       <!-- hideLayout === true 면 Sidebar 숨김 -->
       <UserSidebar
           v-if="!route.meta.hideLayout
-               && !route.meta.hideSidebar   //문제게시판 사이드바 제거 숨김 필요해서 추가했습니다
-               && route.name !== 'Login'
-               && route.name !== 'SignUp'"
+             && route.name !== 'Login'
+             && route.name !== 'SignUp'
+             && route.name !== 'Notice'
+             && route.name !== 'NoticeDetail'
+             && !route.meta.hideSidebar     //문제게시판 사이드바 제거 숨김 필요해서 추가했습니다
+"
       />
     </div>
 
@@ -59,7 +62,6 @@ html, body, #app {
   flex: 1;
   display: flex;
   flex-direction: row;
-  overflow: hidden;
 
   /* 사이드바를 오른쪽 끝으로 밀어냄 */
   justify-content: flex-start;
@@ -71,5 +73,7 @@ html, body, #app {
 
 .router-view-container {
   flex: 1; /* 메인 콘텐츠가 남은 공간 다 차지함 */
+  height: calc(100vh - 90px);
+  overflow: hidden;
 }
 </style>

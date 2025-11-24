@@ -63,7 +63,7 @@ const onSearchClick = async () => {
 
 <style scoped>
 .search-form { display: flex; justify-content: center; margin: 16px 0; }
-.input-wrapper { display: flex; align-items: center; width: 300px; position: relative; }
+.input-wrapper { display: flex; align-items: center; width: 100%; position: relative; }
 .search-btn { position: absolute; right: 4px; padding: 4px 8px; min-width: 50px; }
 .search-btn:hover { border: #4fc3f7; transform: none }
 </style>
