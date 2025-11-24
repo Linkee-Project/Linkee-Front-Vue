@@ -237,15 +237,16 @@ const pagedRooms = computed(() => {
 }
 
 .free-board-header h5 {
+  font-size: 11px;
   font-weight: 900;
-  margin: 8px 0;
+  margin: 5px 0;
 }
 
 .free-board-header p {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: bold;
   color: white;
-  margin: 8px 0;
+  margin: 5px 0;
 }
 
 .free-board {
@@ -265,7 +266,7 @@ const pagedRooms = computed(() => {
   gap: 24px;
   padding: 24px 32px 20px;
 
-  overflow-y: auto;
+  overflow-y: hidden;
   overflow-x: hidden;
   border-bottom-left-radius: 15px;
   border-bottom-right-radius: 15px;
@@ -275,22 +276,28 @@ const pagedRooms = computed(() => {
 .free-board__rooms {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px 24px;
-  margin-top: 8px;
+  justify-content: center;
+  gap: 10px 10px;
+  margin-top: 5px;
   flex: none;
   overflow: visible;
+
+
 }
 
 /* 방 카드 */
 .room-card-btn {
+  width: 100%;  /* 🔥 grid 칸을 꽉 채우기 */
+  max-width: 200px;
+  min-width: 200px !important;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  width: 70%;
-  padding: 13px;
-  border-radius: 16px;
+  height: 80px;
+  padding: 10px;
+  border-radius: 14px;
   background: linear-gradient(135deg, #f7fbff, #e3f3ff);
-  box-shadow: 0 12px 24px rgba(0, 148, 246, 0.12);
+  box-shadow: 0 10px 20px rgba(0, 148, 246, 0.12);
+  margin: 0 auto; /* 🔥 카드가 칸 내부에서 가운데 위치하도록 */
 }
 
 .room-card__header {
@@ -298,26 +305,25 @@ const pagedRooms = computed(() => {
   justify-content: space-between; /* 좌우 배치 */
   align-items: center;
   width: 100%;
-  font-size: 11px;
-  padding-bottom: 5px;
+  font-size: 8px;
+  padding-bottom: 3px;
   color: #7a8ca3;
 }
 
 .room-card__title {
-  margin-top: 6px;
-  margin-bottom: 12px;
-  font-size: 16px;
+  padding-top: 5px;
+  font-size: 12px;
   font-weight: 600;
   color: #1c3757;
-  padding-bottom: 5px;
+  padding-bottom: 3px;
   text-align: center;
 }
 
 .room-card__footer {
-  font-size: 12px;
+  font-size: 9px;
   color: #7a8ca3;
   text-align: center;
-  padding-bottom: 5px;
+  padding-bottom: 3px;
 }
 
 .free-board__category {
@@ -325,27 +331,33 @@ const pagedRooms = computed(() => {
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 
-  overflow-x: auto;
+  padding-bottom: 2px;
+  margin-bottom: 4px;
+
   white-space: nowrap;
-  padding-bottom: 4px;
 
   scrollbar-width: thin;
 }
 
 /* 카테고리 버튼 크기 줄여서 한 줄 정렬 적합 */
 .free-board__category-btn {
-  min-width: 120px;
-  height: 80px;
-  flex-shrink: 0; /* 🔥 절대 줄어들지 않게 */
+  min-width: 120px;      /* 🔥 버튼 좀 더 슬림 */
+  height: 60px; /* 🔥 높이도 축소 */
+  padding: 6px 10px;
+  font-size: 12px;
+  border-radius: 15px;
+  flex-shrink: 0;
 }
 
 
 /* 검색 영역 - 완전 한 줄 */
 .free-board__search {
+  margin-top: 0;         /* 🔥 카테고리 아래 딱 붙게 */
+
+
   display: flex;
-  flex-direction: row; /* 무조건 한 줄 */
   align-items: center;
   justify-content: space-between;
 
@@ -353,8 +365,8 @@ const pagedRooms = computed(() => {
 
   margin-left: -32px;
   margin-right: -32px;
-  padding: 8px 32px;
-  gap: 12px;
+  padding-left: 32px;
+  padding-right: 32px;
 }
 
 /* 검색 input 크기 줄어들도록 설정 */
