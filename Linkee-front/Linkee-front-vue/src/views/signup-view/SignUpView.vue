@@ -4,8 +4,8 @@
       <h1 class="logo">🔗 Linkee</h1>
       <p class="subtitle">회원가입하고 Linkee 서비스를 시작하세요</p>
 
-      <!-- 일반 회원가입 폼 -->
-      <form @submit.prevent="handleSignup">
+      <!-- 회원가입 폼 -->
+      <form @submit.prevent="validateSignup">
         <input v-model="email" type="email" placeholder="이메일" required />
         <p class="error-message">{{ emailError }}</p>
 
@@ -21,7 +21,7 @@
       <!-- SNS 회원가입 -->
       <div class="social-login">
         <p>또는 SNS로 간편 회원가입</p>
-        <a href="http://localhost:8080/oauth2/authorization/naver" class="naver-btn">
+        <a href="#" class="naver-btn">
           <img src="@/assets/naver_logo.svg" alt="네이버 로고" /> 네이버로 가입하기
         </a>
       </div>
@@ -35,54 +35,33 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref } from "vue"
 
-const email = ref("");
-const nickname = ref("");
-const password = ref("");
-const confirm = ref("");
+const email = ref("")
+const nickname = ref("")
+const password = ref("")
+const confirm = ref("")
 
-const emailError = ref("");
-const message = ref("");
+const emailError = ref("")
+const message = ref("")
 
-const handleSignup = async () => {
-  emailError.value = "";
-  message.value = "";
+// 단순 UI 검증만 수행
+const validateSignup = () => {
+  emailError.value = ""
+  message.value = ""
 
   if (!email.value.includes("@")) {
-    emailError.value = "올바른 이메일 형식이 아닙니다.";
-    return;
+    emailError.value = "올바른 이메일 형식이 아닙니다."
+    return
   }
 
   if (password.value !== confirm.value) {
-    message.value = "비밀번호가 일치하지 않습니다.";
-    return;
+    message.value = "비밀번호가 일치하지 않습니다."
+    return
   }
 
-  try {
-    const res = await fetch("/api/v1/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: email.value,
-        nickname: nickname.value,
-        password: password.value,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      message.value = data.message || "회원가입 실패";
-      return;
-    }
-
-    message.value = "회원가입 성공! 로그인 페이지로 이동하세요.";
-  } catch (err) {
-    console.error(err);
-    message.value = "서버 오류가 발생했습니다.";
-  }
-};
+  message.value = "회원가입 정보가 정상적으로 입력되었습니다. (백엔드 연결 X)"
+}
 </script>
 
 <style scoped>
