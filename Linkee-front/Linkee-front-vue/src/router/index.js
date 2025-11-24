@@ -21,6 +21,10 @@ import BookmarkView from '@/views/mypage-view/BookmarkView.vue';
 import HistoryView from '@/views/mypage-view/HistoryView.vue';
 import GradeView from '@/views/mypage-view/GradeView.vue';
 
+// 관리자 페이지 관련
+import AdminLayout from '@/views/admin-view/AdminLayout.vue';
+import UserManagementView from '@/views/admin-view/UserManagementView.vue';
+
 
 const routes = [
     {
@@ -108,6 +112,24 @@ const routes = [
                 name: 'MyGrade',
                 component: GradeView,
             },
+        ]
+    },
+
+    /* ------------------------------
+       관리자 페이지 라우트
+    ------------------------------ */
+    {
+        path: '/admin',
+        name: 'Admin',
+        component: AdminLayout,
+        redirect: '/admin/users', // Default admin view
+        children: [
+            {
+                path: 'users',
+                name: 'AdminUsers',
+                component: UserManagementView,
+            },
+            // Add other admin child routes here (e.g., products, orders, settings)
         ]
     },
 ];
