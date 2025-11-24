@@ -131,10 +131,6 @@ const props = defineProps({
   .category-grade-level {
     font-size: 12px;
   }
-  .category-grade-description {
-    font-size: 11px;
-    padding: 5px;
-  }
   .category-grade-benefits h4 {
     font-size: 13px;
   }
