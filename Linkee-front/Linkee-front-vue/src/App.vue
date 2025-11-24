@@ -20,6 +20,10 @@ provide("toast", {
 
     <!-- Navbar -->
     <UserNavbar
+        v-if="!route.meta.hideLayout
+             && route.name !== 'Login'
+             && route.name !== 'SignUp'"
+
         v-if="!route.path.startsWith('/admin')
            && !route.meta.hideLayout
            && route.name !== 'Login'
