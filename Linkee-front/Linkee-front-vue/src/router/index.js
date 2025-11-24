@@ -5,6 +5,7 @@ import ChatGameListView from "@/views/chat-view/ChatGameListView.vue";
 import ChatGameRoom from "@/views/chat-view/ChatGameRoom.vue";
 import LoginView from "@/views/login-view/LoginView.vue";
 import SignUpView from "@/views/signup-view/SignUpView.vue";
+import QuizRoomListView from "@/views/quiz-view/QuizRoomListView.vue";
 
 
 const routes = [
@@ -46,6 +47,12 @@ const routes = [
         name: 'SignUp',
         component: SignUpView
     },
+    {
+        path: "/quiz/rooms",
+        name: 'QuizRoomList',
+        component: QuizRoomListView
+    },
+
 ];
 
 

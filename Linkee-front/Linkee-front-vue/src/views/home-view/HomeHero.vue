@@ -30,9 +30,13 @@
         <div class="action-grid">
 
           <!-- 퀴즈방 이동 버튼 -->
-          <a class="gbtn g1"  aria-label="퀴즈방 입장">
+          <router-link
+              to="/quiz/rooms"
+              class="gbtn g1"
+              aria-label="퀴즈방 입장"
+          >
             🧠 퀴즈방 입장
-          </a>
+          </router-link>
 
           <!-- 자율방 이동 버튼 -->
           <router-link
