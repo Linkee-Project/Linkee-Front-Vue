@@ -1,11 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
 import ComponentTest from "@/views/ComponentTest.vue";
 import HomeView from "@/views/home-view/HomeView.vue";
 import ChatGameListView from "@/views/chat-view/ChatGameListView.vue";
 import ChatGameRoom from "@/views/chat-view/ChatGameRoom.vue";
 import LoginView from "@/views/login-view/LoginView.vue";
 import SignUpView from "@/views/signup-view/SignUpView.vue";
+import ProblemListView from '@/views/problem-view/ProblemListView.vue';
+import ProblemDetailView from "@/views/problem-view/ProblemDetailView.vue";
+import ProblemCreateView from "@/views/problem-view/ProblemCreateView.vue";
+import ProblemEditView from "@/views/problem-view/ProblemEditView.vue";
 
 // 공지사항
 import NoticeView from "@/views/notice-view/NoticeView.vue";
@@ -58,6 +61,33 @@ const routes = [
         name: 'SignUp',
         component: SignUpView
     },
+    {
+        path: '/problem',
+        name: 'ProblemList',
+        component: ProblemListView,
+        meta: { hideSidebar: true },    //사이드바 숨김
+    },
+    {
+        path: '/problem/:id',
+        name: 'ProblemDetail',
+        component: ProblemDetailView,
+        meta: { hideSidebar: true },    //사이드바 숨김
+    },
+    {
+        path: '/problem/create',
+        name: 'ProblemCreate',
+        component: ProblemCreateView,
+        meta: { hideSidebar: true },    //사이드바 숨김
+    },
+    {
+        path: '/problem/:id/edit',
+        name: 'ProblemEdit',
+        component: ProblemEditView,
+        meta: { hideSidebar: true },    //사이드바 숨김
+    },
+
+
+
 
     /* ------------------------------
        공지사항 라우트

@@ -77,8 +77,11 @@ const handleProfileAction = (menu) => {
     <!-- 네비게이션 -->
     <nav class="nav-menu">
       <router-link to="/mypage/profile" class="nav-item">👤 마이페이지</router-link>
-      <button class="nav-item">📜 문제 게시판</button>
-      <router-link to="/notice" style="text-decoration:none">
+
+      <!--문제게시판 버튼-->
+      <router-link to = "/problem" class="nav-item" >📜 문제 게시판</router-link>
+      <!-- 공지사항 버튼 -->
+      <router-link to="/notice" style="text-decoration: none">
         <button class="nav-item">📢 공지사항</button>
       </router-link>
     </nav>
