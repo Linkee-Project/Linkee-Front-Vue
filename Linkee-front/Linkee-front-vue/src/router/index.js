@@ -1,39 +1,41 @@
 import { createRouter, createWebHistory } from 'vue-router'
+
 import ComponentTest from "@/views/ComponentTest.vue";
 import HomeView from "@/views/home-view/HomeView.vue";
 import ChatGameListView from "@/views/chat-view/ChatGameListView.vue";
 import ChatGameRoom from "@/views/chat-view/ChatGameRoom.vue";
 import LoginView from "@/views/login-view/LoginView.vue";
 import SignUpView from "@/views/signup-view/SignUpView.vue";
+
+// 공지사항
+import NoticeView from "@/views/notice-view/NoticeView.vue";
+// NoticeDetail은 lazy-loading 사용 (사용할 때만 로드)
+const NoticeDetailView = () => import('@/views/notice-view/NoticeDetailView.vue');
+
+// 마이페이지 관련
 import MyPageView from "@/views/mypage/MyPageView.vue";
-import QuestionView from '../views/mypage/QuestionView.vue'
+import QuestionView from "@/views/mypage/QuestionView.vue";
 import ProfilePage from "@/components/layout/mypage/profile/ProfilePage.vue";
-import InquiryView from '@/views/mypage/InquiryView.vue'
-import BookmarkView from '@/views/mypage/BookmarkView.vue'
-import HistoryView from '@/views/mypage/HistoryView.vue'
-import GradeView from '@/views/mypage/GradeView.vue'
+import InquiryView from '@/views/mypage/InquiryView.vue';
+import BookmarkView from '@/views/mypage/BookmarkView.vue';
+import HistoryView from '@/views/mypage/HistoryView.vue';
+import GradeView from '@/views/mypage/GradeView.vue';
 
 
 const routes = [
-// {} 라우터 설정
-
-    /*{
-        path: '/',
-        redirect: '/login'
-    },*/
     {
         path: '/',
         name: 'Home',
         component: HomeView
     },
     {
-        path: '/component-test',   // 원하는 URL 경로
+        path: '/component-test',
         name: 'ComponentTest',
         component: ComponentTest
     },
     {
         path: '/chat/game/rooms',
-        name : 'ChatGameList',
+        name: 'ChatGameList',
         component: ChatGameListView
     },
     {
@@ -41,7 +43,6 @@ const routes = [
         name: 'ChatGameRoom',
         component: ChatGameRoom,
         meta: { hideLayout: true }
-
     },
     {
         path: "/login",
@@ -53,6 +54,24 @@ const routes = [
         name: 'SignUp',
         component: SignUpView
     },
+
+    /* ------------------------------
+       공지사항 라우트
+    ------------------------------ */
+    {
+        path: '/notice',
+        name: 'Notice',
+        component: NoticeView
+    },
+    {
+        path: '/notice/:id',
+        name: 'NoticeDetail',
+        component: NoticeDetailView // Lazy 로딩
+    },
+
+    /* ------------------------------
+       마이페이지 라우트
+    ------------------------------ */
     {
         path: '/mypage',
         name: 'MyPage',
@@ -70,29 +89,27 @@ const routes = [
                 component: QuestionView,
             },
             {
-                path: 'inquiry', // 경로를 'inquiry'로 설정 (오타 수정됨)
+                path: 'inquiry',
                 name: 'MyInquiry',
-                component: InquiryView, // InquiryView 연결
+                component: InquiryView,
             },
-            // --- '나의 북마크 조회' 실제 경로 추가 ---
             {
-                path: 'bookmark', // 경로를 'bookmark'로 설정
+                path: 'bookmark',
                 name: 'MyBookmark',
-                component: BookmarkView, // BookmarkView 연결
+                component: BookmarkView,
             },
-            // --- 아래는 나중에 구현할 페이지들을 위한 임시 경로 (업데이트) ---
             {
                 path: 'history',
                 name: 'MyHistory',
-                component: HistoryView, // HistoryView 연결
+                component: HistoryView,
             },
             {
-                path: 'grade', // 새로운 나의 등급 페이지 경로
+                path: 'grade',
                 name: 'MyGrade',
-                component: GradeView, // GradeView 연결
+                component: GradeView,
             },
         ]
-    }
+    },
 ];
 
 
