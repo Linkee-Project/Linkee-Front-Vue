@@ -106,7 +106,8 @@ const addNewRoom = (roomData) => {
   rooms.value.push({
     id: rooms.value.length + 1,
     title: roomData.roomName,
-    members: roomData.invited
+    members: [me, ...roomData.invited],
+    messages: []
   });
 };
 
@@ -124,7 +125,44 @@ const handleInvite = ({ roomId, invited }) => {
     }
   });
 
+  if (currentRoom.value?.id === roomId) {
+    currentRoom.value = { ...room };
+  }
+
   console.log("초대 완료:", room);
+};
+//=================================================================================
+// 채팅 모달
+
+import ChattingModal from "@/components/home/modal/ChattingModal.vue";
+
+// 채팅 모달 상태
+const isChatModal = ref(false);
+
+// 현재 선택된 채팅방 정보 (방 입장 또는 친구랑 새 채팅방)
+const currentRoom = ref(null);
+
+// 채팅 메시지 배열
+const roomMessages = ref([]);
+
+// 내 유저 정보 (임시)
+const me = { id: 999, name: "나", profile: profileImg };
+
+const sendMessage = (msg) => {
+  roomMessages.value.push({
+    text: msg,
+    me: true
+  });
+
+  //방의 messages도 업데이트
+  const room = rooms.value.find(r => r.id === currentRoom.value.id);
+  if (room) {
+    if (!room.messages) room.messages = [];
+    room.messages.push({
+      text: msg,
+      me: true
+    });
+  }
 };
 
 //=================================================================================
@@ -152,6 +190,59 @@ const handleAction = (type) => {
     selectedRoom.value = selectedFriend.value; // 클릭한 방 객체
     isInviteModal.value = true;
   }
+
+  //채팅방 입장
+  if (type === "enter") {
+    const room = selectedFriend.value;
+
+    // ⭐ 객체를 새로 만들어야 반응형 전달됨
+    currentRoom.value = { ...room };
+
+    roomMessages.value = room.messages || [];
+
+    isChatModal.value = true;
+  }
+
+  //1:1채팅
+  if (type === "chat") {
+    const friend = selectedFriend.value;
+
+    // 이미 있는 1:1 채팅방 검사
+    const existingRoom = rooms.value.find(room => {
+      if (!room.members) return false;
+
+      // 멤버가 정확히 2명
+      if (room.members.length !== 2) return false;
+
+      // 두 명이 me와 friend인지 확인
+      const ids = room.members.map(m => m.id);
+      return ids.includes(me.id) && ids.includes(friend.id);
+    });
+
+    // 이미 존재하면 → 새 방 만들지 말고 바로 입장
+    if (existingRoom) {
+      currentRoom.value = { ...existingRoom };
+      roomMessages.value = existingRoom.messages || [];
+      isChatModal.value = true;
+      return;
+    }
+
+    // 존재하지 않는다면 새로운 방 생성
+    const newRoom = {
+      id: Date.now(),
+      title: `${me.name} · ${friend.name}`,
+      members: [me, friend],
+      messages: []
+    };
+
+    rooms.value.push(newRoom);
+
+    currentRoom.value = { ...newRoom };
+    roomMessages.value = [];
+
+    isChatModal.value = true;
+  }
+
 };
 const handleReportSubmit = (data) => {
   console.log("신고 접수됨:", data);
@@ -262,5 +353,17 @@ const handleReportSubmit = (data) => {
       :room="selectedRoom"
       @invite="handleInvite"
   />
+
+  <ChattingModal
+      v-model="isChatModal"
+      :room="currentRoom"
+      :roomName="currentRoom?.title"
+      :members="currentRoom?.members"
+      :messages="roomMessages"
+      :friends="friends"
+      @sendMessage="sendMessage"
+      @invite="handleInvite"
+  />
+
 </template>
 

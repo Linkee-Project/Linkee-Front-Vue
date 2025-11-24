@@ -53,7 +53,7 @@ const close = () => {
 .modal-content {
   background: #fff;
   border-radius: 10px;
-  width: 400px;
+  width: 700px; /* 가로 길이 증가 */
   max-width: 90%;
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   display: flex; /* Add flex display */
