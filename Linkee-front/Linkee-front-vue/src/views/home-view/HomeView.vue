@@ -2,10 +2,11 @@
   <div class="home-view">
     <HomeHero />
   </div>
+
 </template>
 
 <script setup>
-import HomeHero from "@/components/layout/user/home/HomeHero.vue";
+import HomeHero from "@/views/home-view/HomeHero.vue";
 </script>
 
 <style scoped>
