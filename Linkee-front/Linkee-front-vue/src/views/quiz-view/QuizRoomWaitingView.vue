@@ -166,16 +166,19 @@ function openInviteModal() { console.log('초대') }
 }
 
 .card-wrapper {
-  width: 220px;
-  height: 280px;
+  width: 300px;
+  aspect-ratio: 300 / 218;       /* SVG 비율 그대로 */
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+
 .slot-card {
   width: 100%;
-  height: 100%;
+  height: auto;
+  display: block;
   object-fit: contain;
   opacity: 0.35;
 }

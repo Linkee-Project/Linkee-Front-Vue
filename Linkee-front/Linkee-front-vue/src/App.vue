@@ -3,6 +3,7 @@ import { useRoute } from "vue-router";
 import UserNavbar from "@/components/layout/user/navbar/UserNavbar.vue";
 import UserSidebar from "@/components/layout/user/sidebar/UserSidebar.vue";
 import BaseToast from "@/components/base/toast/BaseToast.vue";
+import { provide, ref } from "vue";
 
 const route = useRoute();
 
@@ -20,10 +21,6 @@ provide("toast", {
 
     <!-- Navbar -->
     <UserNavbar
-        v-if="!route.meta.hideLayout
-             && route.name !== 'Login'
-             && route.name !== 'SignUp'"
-
         v-if="!route.path.startsWith('/admin')
            && !route.meta.hideLayout
            && route.name !== 'Login'

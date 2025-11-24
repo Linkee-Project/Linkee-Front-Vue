@@ -29,15 +29,7 @@ import GradeView from '@/views/mypage-view/GradeView.vue';
 // 관리자 페이지 관련
 import AdminLayout from '@/views/admin-view/AdminLayout.vue';
 import UserManagementView from '@/views/admin-view/UserManagementView.vue';
-import MyPageView from "@/views/mypage/MyPageView.vue";
-import QuestionView from "@/views/mypage/QuestionView.vue";
-import ProfilePage from "@/components/layout/mypage/profile/ProfilePage.vue";
-import InquiryView from '@/views/mypage/InquiryView.vue';
-import BookmarkView from '@/views/mypage/BookmarkView.vue';
-import HistoryView from '@/views/mypage/HistoryView.vue';
-import GradeView from '@/views/mypage/GradeView.vue';
 import QuizRoomWaitingView from "@/views/quiz-view/QuizRoomWaitingView.vue";
-
 
 const routes = [
 // {} 라우터 설정

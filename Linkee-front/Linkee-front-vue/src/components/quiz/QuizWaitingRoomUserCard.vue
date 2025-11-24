@@ -31,10 +31,11 @@ defineProps({
 <style scoped>
 /* 상위 div 배경 제거 */
 .room-card {
-  width: 220px;
-  height: 280px;
+  width: 100%;
+  height: 100%;
   position: relative;
   background: none !important;
+  overflow: hidden;
 }
 
 /* 카드 SVG가 전체 덮도록 */
