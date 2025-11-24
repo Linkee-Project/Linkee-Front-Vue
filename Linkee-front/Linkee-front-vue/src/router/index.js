@@ -7,6 +7,7 @@ import LoginView from "@/views/login-view/LoginView.vue";
 import SignUpView from "@/views/signup-view/SignUpView.vue";
 import ProblemListView from '@/views/problem-view/ProblemListView.vue';
 import ProblemDetailView from "@/views/problem-view/ProblemDetailView.vue";
+import ProblemCreateView from "@/views/problem-view/ProblemCreateView.vue";
 
 
 const routes = [
@@ -58,6 +59,12 @@ const routes = [
         path: '/problem/detail',       // 임시로 detail로 적용, 이후 :id 로 바꿀 예정.
         name: 'ProblemDetail',
         component: ProblemDetailView,
+        meta: { hideSidebar: true },    //사이드바 숨김
+    },
+    {
+        path: '/problem/create',
+        name: 'ProblemCreate',
+        component: ProblemCreateView,
         meta: { hideSidebar: true },    //사이드바 숨김
     }
 
