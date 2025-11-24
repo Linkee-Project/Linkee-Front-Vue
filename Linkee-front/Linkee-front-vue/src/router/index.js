@@ -5,6 +5,8 @@ import ChatGameListView from "@/views/chat-view/ChatGameListView.vue";
 import ChatGameRoom from "@/views/chat-view/ChatGameRoom.vue";
 import LoginView from "@/views/login-view/LoginView.vue";
 import SignUpView from "@/views/signup-view/SignUpView.vue";
+import NoticeView from "@/views/notice-view/NoticeView.vue";
+import NoticeDetailView from "@/views/notice-view/NoticeDetailView.vue";
 
 
 const routes = [
@@ -46,6 +48,18 @@ const routes = [
         name: 'SignUp',
         component: SignUpView
     },
+    {
+        path: '/notice',
+        name: 'Notice',
+        component: NoticeView
+    },
+    {
+        path: '/notice/:id',
+        name: 'NoticeDetail',
+        //Lazy로딩 방법, 페이지에 실제로 이동할 때만 컴포넌트를 다운
+        component: () => import('@/views/notice-view/NoticeDetailView.vue')
+    }
+
 ];
 
 

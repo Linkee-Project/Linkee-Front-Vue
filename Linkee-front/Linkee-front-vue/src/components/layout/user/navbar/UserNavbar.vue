@@ -37,7 +37,10 @@
       <button class="nav-item">📜 문제 게시판</button>
 
       <!-- 공지사항 버튼 -->
-      <button class="nav-item">📢 공지사항</button>
+      <router-link to="/notice" style="text-decoration: none">
+        <button class="nav-item">📢 공지사항</button>
+      </router-link>
+
 
     </nav>
 
