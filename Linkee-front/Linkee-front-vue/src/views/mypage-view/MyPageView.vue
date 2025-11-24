@@ -1,5 +1,5 @@
 <script setup>
-import LeftSidebar from '@/components/layout/mypage/sidebar/LiftSidebar.vue';
+import LeftSidebar from '@/components/mypage/sidebar/LiftSidebar.vue';
 </script>
 
 <template>

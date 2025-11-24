@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import BookmarkListItem from '@/components/layout/mypage/bookmark/BookmarkListItem.vue';
+import BookmarkListItem from '@/components/mypage/bookmark/BookmarkListItem.vue';
 import PaginationButton from '@/components/base/button/PaginationButton.vue';
 
 // 더미 북마크 데이터 (페이지네이션 확인용)

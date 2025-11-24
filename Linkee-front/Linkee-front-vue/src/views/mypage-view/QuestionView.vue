@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import QuestionListItem from '@/components/layout/mypage/question/QuestionListItem.vue';
+import QuestionListItem from '@/components/mypage/question/QuestionListItem.vue';
 import PaginationButton from '@/components/base/button/PaginationButton.vue';
 
 // 더미 데이터 추가 (페이지네이션 확인용)

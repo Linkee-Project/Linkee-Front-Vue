@@ -13,13 +13,13 @@ import NoticeView from "@/views/notice-view/NoticeView.vue";
 const NoticeDetailView = () => import('@/views/notice-view/NoticeDetailView.vue');
 
 // 마이페이지 관련
-import MyPageView from "@/views/mypage/MyPageView.vue";
-import QuestionView from "@/views/mypage/QuestionView.vue";
-import ProfilePage from "@/components/layout/mypage/profile/ProfilePage.vue";
-import InquiryView from '@/views/mypage/InquiryView.vue';
-import BookmarkView from '@/views/mypage/BookmarkView.vue';
-import HistoryView from '@/views/mypage/HistoryView.vue';
-import GradeView from '@/views/mypage/GradeView.vue';
+import MyPageView from "@/views/mypage-view/MyPageView.vue";
+import QuestionView from "@/views/mypage-view/QuestionView.vue";
+import ProfilePage from "@/components/mypage/profile/ProfilePage.vue";
+import InquiryView from '@/views/mypage-view/InquiryView.vue';
+import BookmarkView from '@/views/mypage-view/BookmarkView.vue';
+import HistoryView from '@/views/mypage-view/HistoryView.vue';
+import GradeView from '@/views/mypage-view/GradeView.vue';
 
 
 const routes = [

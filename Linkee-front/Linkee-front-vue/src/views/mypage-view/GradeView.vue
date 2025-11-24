@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue';
-import GradeListItem from '@/components/layout/mypage/grade/GradeListItem.vue'; // GradeListItem import
+import GradeListItem from '@/components/mypage/grade/GradeListItem.vue'; // GradeListItem import
 
 // 더미 등급 데이터 (실제 백엔드 연동 시 교체)
 const gradeData = ref({

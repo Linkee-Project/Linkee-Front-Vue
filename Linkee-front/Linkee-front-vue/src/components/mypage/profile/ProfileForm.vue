@@ -6,9 +6,9 @@
 
       <!-- 프로필 이미지 영역 -->
       <div class="profile-image-box">
-        <img src="@/assets/profile_img.svg" alt="profile-image-box" class="profile-image" />
+        <img src="../../../assets/profile_img.svg" alt="profile-image-box" class="profile-image" />
         <div class="edit-icon" @click="changeProfile">
-          <img src="@/assets/프로필 수정 로고.svg" alt="edit-icon"/>
+          <img src="../../../assets/프로필%20수정%20로고.svg" alt="edit-icon"/>
         </div>
       </div>
 
