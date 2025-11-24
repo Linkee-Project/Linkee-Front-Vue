@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue';
-import InquiryListItem from '@/components/layout/mypage/inquiry/InquiryListItem.vue';
+import InquiryListItem from '@/components/mypage/inquiry/InquiryListItem.vue';
 import PaginationButton from '@/components/base/button/PaginationButton.vue';
-import MyPageDetailModal from '@/components/layout/mypage/modal/MyPageDetailModal.vue'; // MyPageDetailModal import
+import MyPageDetailModal from '@/components/mypage/modal/MyPageDetailModal.vue'; // MyPageDetailModal import
 
 // 더미 문의 데이터 (페이지네이션 확인용) - 'type' 속성 제거
 const allInquiries = ref([
