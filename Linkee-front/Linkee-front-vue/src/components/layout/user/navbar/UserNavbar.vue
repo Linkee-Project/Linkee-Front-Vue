@@ -1,12 +1,20 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { inject } from "vue";
 import ProfileMenuModal from "@/components/home/modal/ProfileMenuModal.vue"; // ← 추가
-
+import InquiryModal from "@/components/home/modal/InquiryModal.vue";
+import NotificationModal from "@/components/home/modal/NotificationModal.vue";
 const router = useRouter();
 
 /* 프로필 모달 상태 */
 const isProfileModal = ref(false);
+/* 문의 모달 상태 */
+const isInquiryModal = ref(false);
+/* 알림 모달 상태 */
+const isNotificationModal = ref(false);
+/*성공 토스트*/
+const toast = inject("toast");
 
 /* 로그인한 유저 정보 */
 // TODO: 로그인한 유저 가져오기
@@ -55,12 +63,48 @@ const handleProfileAction = (menu) => {
     return;
   }
 
-  // 하단 "문의하기" 버튼 (동일 라우트)
+  // "문의하기"
   if (menu === "inquiry") {
-    router.push("/inquiry");
-    return;
+    isProfileModal.value = false;
+    isInquiryModal.value = true;
   }
 };
+const handleInquirySubmit = (text) => {
+  toast.show("문의가 정상적으로 제출되었습니다! 🙌");
+};
+
+/*알람 박스*/
+/* 알림 테스트 데이터 */
+const notifications = ref([
+  {
+    user: "김 진",
+    message: "님이 친구 요청을 보냈습니다",
+    button: "수락"
+  },
+  {
+    user: "김 쪼푸기감자",
+    message: "님이 CS퀴즈대결방에 초대했습니다",
+    button: "수락"
+  },
+  {
+    user: "김 지니어스",
+    message: "님이 올리신",
+    title: "힌이라?",
+    button: "채택됨"
+  },
+  {
+    user: "김 지니어스",
+    message: "님이 문의하신",
+    title: "다크모드 어떻게 하면요?",
+    button: "답변 보기"
+  },
+  {
+    user: "김 지니어스",
+    message: "님이 올린",
+    title: "힌이라?",
+    button: "게시글 이동"
+  }
+]);
 </script>
 
 <template>
@@ -90,7 +134,7 @@ const handleProfileAction = (menu) => {
     <div class="right-section">
 
       <!-- 알림 -->
-      <button class="icon-btn">
+      <button class="icon-btn" @click="isNotificationModal = true">
         <img src="../../../../assets/bell.svg" class="icon-img" />
       </button>
 
@@ -108,6 +152,20 @@ const handleProfileAction = (menu) => {
       :user="user"
       @select="handleProfileAction"
   />
+
+  <!-- 문의 모달 -->
+  <InquiryModal
+      v-model="isInquiryModal"
+      @submit="handleInquirySubmit"
+  />
+
+<!--알람 모달 -->
+  <NotificationModal
+      v-model="isNotificationModal"
+      :notifications="notifications"
+      @action="(item) => console.log('클릭한 알림:', item)"
+  />
+
 </template>
 
 

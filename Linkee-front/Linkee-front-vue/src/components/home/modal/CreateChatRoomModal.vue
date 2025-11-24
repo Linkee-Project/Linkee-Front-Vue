@@ -3,7 +3,10 @@ import BaseModal from "@/components/base/modal/BaseModal.vue";
 import SearchForm from "@/components/base/form/SearchForm.vue";
 import UserCard from "@/components/home/UserCard.vue";
 
-import { ref, watch } from "vue";
+import { ref, watch, inject } from "vue";
+
+
+const toast = inject("toast");
 
 /* Props */
 const props = defineProps({
@@ -82,6 +85,8 @@ const createRoom = () => {
     });
 
     emit("update:modelValue", false);
+
+    toast?.show("새 채팅방이 생성되었습니다! 🎉");
   });
 };
 const removeInvite = (userId: number) => {
@@ -186,7 +191,7 @@ const removeInvite = (userId: number) => {
 .modal-body {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   padding: 18px 16px;
   max-height: calc(100vh - 260px);
   overflow-y: auto;
@@ -299,7 +304,7 @@ const removeInvite = (userId: number) => {
 .invited-pill :deep(.user-card) {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 
   padding: 0;
   margin: 0;

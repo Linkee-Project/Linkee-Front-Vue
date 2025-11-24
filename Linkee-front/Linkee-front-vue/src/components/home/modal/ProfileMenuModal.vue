@@ -43,9 +43,9 @@ const onSelect = (menu) => {
         <button class="menu-item" @click="onSelect('my-record')">나의 플레이 기록</button>
       </div>
 
-      <div class="footer-divider"></div>
 
       <div class="footer-menu">
+        <div class="footer-divider"></div>
         <button class="footer-item logout" @click="onSelect('logout')">
           <span class="icon brown">🚪</span> 로그 아웃
         </button>
@@ -159,6 +159,7 @@ const onSelect = (menu) => {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  margin-top: calc(100vh - 600px);
 }
 
 .footer-item {

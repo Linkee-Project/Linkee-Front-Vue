@@ -2,8 +2,9 @@
 import BaseModal from "@/components/base/modal/BaseModal.vue";
 import SearchForm from "@/components/base/form/SearchForm.vue";
 import UserCard from "@/components/home/UserCard.vue";
-import { ref, watch } from "vue";
+import { ref, watch, inject } from "vue";
 
+const toast = inject("toast");
 /* props */
 const props = defineProps({
   modelValue: Boolean,
@@ -45,8 +46,22 @@ const searchFriend = (value) => {
 
 /* 초대 추가 */
 const addInvite = (user:any) => {
-  if (!form.value.invited.some((u:any) => u.id === user.id))
-    form.value.invited.push(user);
+  const alreadyInRoom = props.room.users?.some((u: any) => u.id === user.id)
+      || props.room.members?.some(u => u.id === user.id);
+
+  if (alreadyInRoom) {
+    toast?.show(`${user.name}님은 이미 이 방에 있습니다.`);
+    return;
+  }
+
+  const alreadyInvited = form.value.invited.some((u: any) => u.id === user.id);
+  if (alreadyInvited) {
+    toast?.show(`${user.name}님은 이미 초대 목록에 있습니다.`);
+    return;
+  }
+
+  form.value.invited.push(user);
+
 };
 
 /* 초대 제거 */
@@ -62,6 +77,7 @@ const sendInvite = () => {
   });
 
   emit("update:modelValue", false);
+  toast?.show("친구가 채팅방에 초대되었습니다! 🎉");
 };
 </script>
 

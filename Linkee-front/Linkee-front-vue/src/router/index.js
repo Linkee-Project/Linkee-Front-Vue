@@ -159,6 +159,12 @@ const routes = [
                 name: 'AdminUsers',
                 component: UserManagementView,
             },
+            { path: 'notices', component: { template: '<div>관리자 공지</div>' }},
+            { path: 'problems', component: { template: '<div>관리자 문제</div>' }},
+            { path: 'templates', component: { template: '<div>관리자 템플릿</div>' }},
+            { path: 'inquiries', component: { template: '<div>관리자 문의</div>' }},
+            { path: 'reports', component: { template: '<div>관리자 신고</div>' }},
+
             // Add other admin child routes here (e.g., products, orders, settings)
         ]
     },
