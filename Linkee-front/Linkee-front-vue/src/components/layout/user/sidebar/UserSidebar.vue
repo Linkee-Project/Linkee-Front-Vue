@@ -91,13 +91,43 @@ const openRoomModal = (event, room) => {
   isModalOpen.value = true;
 };
 
-
-
 // 모달 닫기
 const closeModal = () => {
   isModalOpen.value = false;
 };
 
+//----------------------------------------------------------------------
+//새 채팅방 만들기
+import CreateChatRoomModal from "@/components/home/modal/CreateChatRoomModal.vue";
+import InviteChatRoomModal from "@/components/home/modal/InviteChatRoomModal.vue";
+//새 채팅방 만들기 상태 on/off
+const isCreateRoomModal = ref(false);
+const addNewRoom = (roomData) => {
+  rooms.value.push({
+    id: rooms.value.length + 1,
+    title: roomData.roomName,
+    members: roomData.invited
+  });
+};
+
+//------------------------------------------------------------------------------
+//친구 초대
+const isInviteModal = ref(false);
+const selectedRoom = ref(null);
+const handleInvite = ({ roomId, invited }) => {
+  const room = rooms.value.find(r => r.id === roomId);
+  if (!room.members) room.members = [];
+
+  invited.forEach(user => {
+    if (!room.members.some(m => m.id === user.id)) {
+      room.members.push(user);
+    }
+  });
+
+  console.log("초대 완료:", room);
+};
+
+//=================================================================================
 // 모달에서 선택한 버튼 실행
 const handleAction = (type) => {
   console.log("선택한 기능:", type, selectedFriend.value.name);
@@ -116,23 +146,17 @@ const handleAction = (type) => {
   if (type === "out") {
     rooms.value = rooms.value.filter(room => room.id !== selectedFriend.value.id);
   }
+
+  //친구 초대
+  if (type === "invite") {
+    selectedRoom.value = selectedFriend.value; // 클릭한 방 객체
+    isInviteModal.value = true;
+  }
 };
 const handleReportSubmit = (data) => {
   console.log("신고 접수됨:", data);
 };
 
-//----------------------------------------------------------------------
-//새 채팅방 만들기
-import CreateChatRoomModal from "@/components/home/modal/CreateChatRoomModal.vue";
-//새 채팅방 만들기 상태 on/off
-const isCreateRoomModal = ref(false);
-const addNewRoom = (roomData) => {
-  rooms.value.push({
-    id: rooms.value.length + 1,
-    title: roomData.roomName,
-    members: roomData.invited
-  });
-};
 </script>
 
 <template>
@@ -236,5 +260,13 @@ const addNewRoom = (roomData) => {
       :friends="friends"
       @create="addNewRoom"
   />
+<!--채팅방 초대 모달-->
+  <InviteChatRoomModal
+      v-model="isInviteModal"
+      :friends="friends"
+      :room="selectedRoom"
+      @invite="handleInvite"
+  />
+
 </template>
 
