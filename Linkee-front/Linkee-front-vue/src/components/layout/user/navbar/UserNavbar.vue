@@ -1,73 +1,112 @@
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import ProfileMenuModal from "@/components/home/modal/ProfileMenuModal.vue"; // ← 추가
+
+const router = useRouter();
+
+/* 프로필 모달 상태 */
+const isProfileModal = ref(false);
+
+/* 로그인한 유저 정보 */
+// TODO: 로그인한 유저 가져오기
+const user = {
+  name: "김명지니어스",
+  profile: "/src/assets/profile_img.svg"
+};
+
+/* 메뉴 선택 시 실행 */
+const handleProfileAction = (menu) => {
+  console.log("선택한 메뉴:", menu);
+
+  if (menu === "logout") {
+    // TODO: 로그아웃 처리
+    console.log("로그아웃");
+    return;
+  }
+
+  // 계정 관리
+  if (menu === "account") {
+    router.push("/mypage/profile");
+    return;
+  }
+
+  // 나의 문제 조회
+  if (menu === "my-problem") {
+    router.push("/mypage/questions");
+    return;
+  }
+
+  // 나의 문의 조회
+  if (menu === "my-question") {
+    router.push("/mypage/inquiry");
+    return;
+  }
+
+  // 나의 북마크 조회
+  if (menu === "my-bookmark") {
+    router.push("/mypage/bookmark");
+    return;
+  }
+
+  // 나의 플레이 기록
+  if (menu === "my-record") {
+    router.push("/mypage/history");
+    return;
+  }
+
+  // 하단 "문의하기" 버튼 (동일 라우트)
+  if (menu === "inquiry") {
+    router.push("/inquiry");
+    return;
+  }
+};
+</script>
+
 <template>
-  <!--
-    <header> : 페이지의 상단 영역(헤더)을 의미하는 시맨틱 태그.
-               여기에는 보통 로고, 내비게이션 메뉴, 사용자 정보 등이 위치함.
-  -->
   <header class="header-container">
-    <!--
-      로고 영역
-      사이트 브랜드 역할. 클릭 시 보통 홈으로 이동함.
-    -->
+
+    <!-- 로고 -->
     <router-link to="/" class="logo-link">
-    <div class="logo-container ">
-      <!-- 로고 이미지 -->
-      <img
-        src="../../../../assets/linkee_character.svg"
-        alt="Linkee Logo"
-        class="logo-img"
-      />
-
-
-      <!-- 텍스트 로고 (사이트 이름) -->
-      <span class="logo-text">Linkee</span>
-
-    </div>
+      <div class="logo-container">
+        <img src="../../../../assets/linkee_character.svg" class="logo-img"/>
+        <span class="logo-text">Linkee</span>
+      </div>
     </router-link>
 
-    <!--
-      가운데 메뉴(nav)
-      <nav> 태그는 페이지 이동 또는 메뉴 구조임을 알려주는 시맨틱 태그.
-    -->
+    <!-- 네비게이션 -->
     <nav class="nav-menu">
-
-      <!--마이페이지 버튼-->
-<!--      <button class="nav-item">👤 마이페이지</button>-->
       <router-link to="/mypage/profile" class="nav-item">👤 마이페이지</router-link>
-
-      <!--문제게시판 버튼-->
       <button class="nav-item">📜 문제 게시판</button>
-
-      <!-- 공지사항 버튼 -->
-      <router-link to="/notice" style="text-decoration: none">
+      <router-link to="/notice" style="text-decoration:none">
         <button class="nav-item">📢 공지사항</button>
       </router-link>
-
-
     </nav>
 
-    <!-- 오른쪽 영역: 알림 + 프로필 -->
+    <!-- 오른쪽 버튼들 -->
     <div class="right-section">
-      <!-- 알림 버튼 -->
+
+      <!-- 알림 -->
       <button class="icon-btn">
-        <img src="../../../../assets/bell.svg" class = "icon-img" />
+        <img src="../../../../assets/bell.svg" class="icon-img" />
       </button>
 
       <!-- 프로필 버튼 -->
-      <button class="profile-btn">
+      <button class="profile-btn" @click="isProfileModal = true">
         <img src="../../../../assets/profile_img.svg" class="profile-img" />
-        <span class="profile-name"> 김명지니어스<!--pinia 사용시 유저 이름 바꿔줌{{ userStore.nickname }}--></span>
+        <span class="profile-name">{{ user.name }}</span>
       </button>
     </div>
-
   </header>
 
+  <!-- 프로필 모달 추가 -->
+  <ProfileMenuModal
+      v-model="isProfileModal"
+      :user="user"
+      @select="handleProfileAction"
+  />
 </template>
 
-<script>
-export default {
-  name: "UserNavbar", // 컴포넌트 이름
-};
-</script>
 
 <style scoped>
 
