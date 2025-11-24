@@ -233,7 +233,6 @@ label {
 
   .edit-icon {
     right: calc(50% - 45px - 5px);
-    bottom: 0px;
   }
   
   .edit-icon img {
@@ -248,12 +247,6 @@ label {
 
   .delete-btn {
     width: 100%;
-  }
-
-  /* BaseButton에 대한 반응형 처리 */
-  .button-area .btn {
-    width: 100%;
-    min-width: unset;
   }
 }
 </style>
