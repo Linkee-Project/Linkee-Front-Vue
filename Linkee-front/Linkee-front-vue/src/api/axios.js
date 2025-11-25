@@ -10,9 +10,20 @@ const api = axios.create({
 // ========== Request: 토큰 자동 포함 ==========
 api.interceptors.request.use(
     (config) => {
+        const authStore = useAuthStore();
+
+        // refresh 요청에는 Authorization 헤더 제거
+        // 기존 accessToken 만료된 상태에서 refresh 요청 시
+        // Authorization 들어가면 Spring Security가 그대로 401로 막음
+        if (config.url.includes("/auth/refresh")) {
+            config.headers.Authorization = null;
+            return config;
+        }
+
+        // 인증 생략 옵션
         if (config.skipAuth) return config;
 
-        const authStore = useAuthStore();
+        // ⬆일반 API일 때만 accessToken 자동 포함
         if (authStore.accessToken && !config.headers.Authorization) {
             config.headers.Authorization = `Bearer ${authStore.accessToken}`;
         }
