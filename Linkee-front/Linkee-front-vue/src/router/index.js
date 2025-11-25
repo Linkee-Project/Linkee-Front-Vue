@@ -42,6 +42,7 @@ import NotificationTemplateView from "@/views/admin-view/NotificationTemplateVie
 import ProblemManagementView from "@/views/admin-view/ProblemManagementView.vue";
 
 import QuizRoomWaitingView from "@/views/quiz-view/QuizRoomWaitingView.vue";
+import QuizInGameView from "@/views/quiz-view/QuizInGameView.vue";
 
 const routes = [
 // {} 라우터 설정
@@ -97,11 +98,19 @@ const routes = [
         component: QuizRoomListView
     },
     {
-        path: "/quiz/rooms/waiting",
+        path: "/quiz/rooms/waiting",    //테스트 완료 후 /quiz/rooms/:quizRoomId 변경 필요
         name: 'QuizRoomWaiting',
         component: QuizRoomWaitingView,
 
     },
+    {
+        path: "/quiz/rooms/quizRoomId",     //테스트 완료 후 /quiz/rooms/:quizRoomId 변경 필요
+        name: 'QuizInGameView',
+        component: QuizInGameView,
+        meta: { hideLayout: true }
+
+    },
+
     /* ------------------------------
        문제게시판 라우트
     ------------------------------ */
