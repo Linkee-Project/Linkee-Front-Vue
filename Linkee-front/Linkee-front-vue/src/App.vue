@@ -3,6 +3,7 @@ import { useRoute } from "vue-router";
 import UserNavbar from "@/components/layout/user/navbar/UserNavbar.vue";
 import UserSidebar from "@/components/layout/user/sidebar/UserSidebar.vue";
 import BaseToast from "@/components/base/toast/BaseToast.vue";
+import {provide, ref} from "vue";
 
 const route = useRoute();
 

@@ -25,8 +25,9 @@ import HistoryView from '@/views/mypage-view/HistoryView.vue';
 import GradeView from '@/views/mypage-view/GradeView.vue';
 
 // 관리자 페이지 관련
-import AdminLayout from '@/views/admin-view/AdminLayout.vue';
 import UserManagementView from '@/views/admin-view/UserManagementView.vue';
+import AdminHomeView from "@/views/admin-view/AdminHomeView.vue";
+import AdminDashBoard from "@/views/admin-view/AdminDashBoard.vue";
 
 
 const routes = [
@@ -149,25 +150,48 @@ const routes = [
        관리자 페이지 라우트
     ------------------------------ */
     {
-        path: '/admin',
-        name: 'Admin',
-        component: AdminLayout,
-        redirect: '/admin/users', // Default admin view
+        path: "/admin",
+        component: AdminHomeView,
         children: [
             {
-                path: 'users',
-                name: 'AdminUsers',
-                component: UserManagementView,
+                path: "",
+                name: "AdminDashboard",
+                component: AdminDashBoard
             },
-            { path: 'notices', component: { template: '<div>관리자 공지</div>' }},
-            { path: 'problems', component: { template: '<div>관리자 문제</div>' }},
-            { path: 'templates', component: { template: '<div>관리자 템플릿</div>' }},
-            { path: 'inquiries', component: { template: '<div>관리자 문의</div>' }},
-            { path: 'reports', component: { template: '<div>관리자 신고</div>' }},
-
-            // Add other admin child routes here (e.g., products, orders, settings)
+            {
+                path: "users",
+                name: "AdminUsers",
+                component: UserManagementView
+            },
+            {
+                path: "notices",
+                name: "AdminNotices",
+                component: { template: "<div>관리자 공지</div>" }
+            },
+            {
+                path: "problems",
+                name: "AdminProblems",
+                component: { template: "<div>관리자 문제</div>" }
+            },
+            {
+                path: "templates",
+                name: "AdminTemplates",
+                component: { template: "<div>관리자 템플릿</div>" }
+            },
+            {
+                path: "inquiries",
+                name: "AdminInquiries",
+                component: { template: "<div>관리자 문의</div>" }
+            },
+            {
+                path: "reports",
+                name: "AdminReports",
+                component: { template: "<div>관리자 신고</div>" }
+            }
         ]
-    },
+    }
+
+
 ];
 
 

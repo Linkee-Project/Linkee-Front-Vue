@@ -233,7 +233,7 @@ const pagedRooms = computed(() => {
   padding: 0 10px;
   border-top-left-radius: 15px;
   border-top-right-radius: 15px;
-  background: #7DBEF2;
+  background: linear-gradient(135deg, #79c0f4, #b4e3ff);
 }
 
 .free-board-header h5 {
