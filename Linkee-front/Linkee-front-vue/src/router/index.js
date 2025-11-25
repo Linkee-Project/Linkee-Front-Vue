@@ -39,6 +39,8 @@ import ReportActionView from "@/views/admin-view/report/ReportActionView.vue";
 import NoticeDetailManagementView from "@/views/admin-view/notice/NoticeDetailManagementView.vue";
 import NoticeCreateView from "@/views/admin-view/notice/NoticeCreateView.vue";
 import NotificationTemplateView from "@/views/admin-view/NotificationTemplateView.vue"
+import ProblemManagementView from "@/views/admin-view/ProblemManagementView.vue";
+
 import QuizRoomWaitingView from "@/views/quiz-view/QuizRoomWaitingView.vue";
 
 const routes = [
@@ -90,16 +92,6 @@ const routes = [
 
     },
     {
-        path: "/login",
-        name: 'Login',
-        component: LoginView
-    },
-    {
-        path: "/signup",
-        name: 'SignUp',
-        component: SignUpView
-    },
-    {
         path: "/quiz/rooms",
         name: 'QuizRoomList',
         component: QuizRoomListView
@@ -110,7 +102,9 @@ const routes = [
         component: QuizRoomWaitingView,
 
     },
-
+    /* ------------------------------
+       문제게시판 라우트
+    ------------------------------ */
     {
         path: '/problem',
         name: 'ProblemList',
@@ -231,7 +225,7 @@ const routes = [
             {
                 path: "problems",
                 name: "AdminProblems",
-                component: { template: "<div>관리자 문제</div>" }
+                component: ProblemManagementView
             },
             {
                 path: "templates",
