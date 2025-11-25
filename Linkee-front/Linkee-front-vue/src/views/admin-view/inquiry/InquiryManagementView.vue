@@ -35,16 +35,16 @@
         </thead>
 
         <tbody>
-        <tr v-for="item in paginatedList" :key="item.id">
-          <td>{{ item.id }}</td>
-          <td>{{ item.title }}</td>
-          <td>{{ item.reg }}</td>
-          <td>{{ item.mod }}</td>
-          <td>{{ item.user }}</td>
-          <td>{{ item.admin }}</td>
-          <td>{{ item.answer }}</td>
+        <tr v-for="item in paginatedList" :key="item.inquiryId">
+          <td>{{ item.inquiryId }}</td>
+          <td>{{ item.inquiryTitle }}</td>
+          <td>{{ formatDate(item.createdAt) }}</td>
+          <td>{{ formatDate(item.updatedAt) }}</td>
+          <td>{{ item.userNickname }}</td>
+          <td>{{ item.adminId ?? '-' }}</td>
+          <td>{{ item.answerStatus }}</td>
           <td class="manage-btn">
-            <button class="btn-small" @click="goAnswer(item.id)">답변</button>
+            <button class="btn-small" @click="goAnswer(item)">답변</button>
           </td>
         </tr>
         </tbody>
@@ -54,7 +54,7 @@
       <PaginationButton
           :currentPage="currentPage"
           :totalPages="totalPages"
-          @update:currentPage="currentPage = $event"
+          @update:currentPage="changePage"
       />
 
       <!-- Toast -->
@@ -64,54 +64,75 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import {ref, computed, onMounted} from "vue";
 import { useRouter } from "vue-router";
 import PaginationButton from "@/components/base/button/PaginationButton.vue";
 import BaseToast from "@/components/base/toast/BaseToast.vue";
+import {fetchInquiryList} from "@/api/inquiryApi.js";
 
 const router = useRouter();
 const toastRef = ref(null);
 
-/* 전체 문의 데이터 */
-const originalList = ref([
-  { id: 1, title: "문의사항 1번임", reg: "2025/11/10", mod: "2025/11/10", user: "유저1번임", admin: "관리자1번임", answer: "Y" },
-  { id: 2, title: "문의사항 2번임", reg: "2025/11/10", mod: "2025/11/10", user: "유저6번임", admin: "관리자1번임", answer: "Y" },
-  { id: 3, title: "문의사항 3번임", reg: "2025/11/10", mod: "2025/11/10", user: "유저2번임", admin: "관리자1번임", answer: "N" },
-  { id: 4, title: "문의사항 4번임", reg: "2025/11/10", mod: "2025/11/10", user: "유저4번임", admin: "관리자1번임", answer: "N" },
-]);
+const inquiryList = ref([]);
+const currentPage = ref(1);
+const totalPages = ref(1);
 
-/* 현재 보여줄 리스트 */
-const filteredList = ref([...originalList.value]);
+const filterStatus = ref(null);
+
+const paginatedList = computed(() => inquiryList.value);
+
+const formatDate = (date) => {
+  return date ? date.replace("T", " ").slice(0, 16) : "-";
+};
+
+const loadList = async () => {
+  try {
+    const res = await fetchInquiryList({
+      page : currentPage.value -1,
+      size : 10,
+      answerStatus : filterStatus.value
+    });
+
+    inquiryList.value = res.content;
+    totalPages.value = res.totalPages;
+  } catch (e) {
+    console.error(e);
+    toastRef.value.showToast("문의 목록 조회 실패 ⚠️");
+  }
+};
+
+onMounted(loadList);
+
+//필터 적용 함수
+const filterAnswer = (status) => {
+  filterStatus.value = status;
+  currentPage.value = 1;
+  loadList();
+};
+
+//필터 초기화
+const resetFilter = () => {
+  filterStatus.value = null;
+  currentPage.value = 1;
+  loadList();
+}
+
+//페이지 변경
+const changePage = (page) => {
+  currentPage.value = page;
+  loadList();
+}
 
 /* 답변 페이지 이동 */
-const goAnswer = (id) => {
-  router.push(`/admin/inquiries/${id}`);
+const goAnswer = (item) => {
+  router.push({
+    name: "AdminInquiryAnswer",
+    params: { id: item.inquiryId }
+  });
 };
 
-/* 상태 필터 */
-const filterAnswer = (flag) => {
-  filteredList.value = originalList.value.filter(item => item.answer === flag);
-  currentPage.value = 1;
-};
 
-/* 필터 초기화 */
-const resetFilter = () => {
-  filteredList.value = [...originalList.value];
-  currentPage.value = 1;
-};
 
-/* 페이지네이션 */
-const currentPage = ref(1);
-const pageSize = 10;
-
-const totalPages = computed(() =>
-    Math.ceil(filteredList.value.length / pageSize)
-);
-
-const paginatedList = computed(() => {
-  const start = (currentPage.value - 1) * pageSize;
-  return filteredList.value.slice(start, start + pageSize);
-});
 </script>
 
 <style scoped>

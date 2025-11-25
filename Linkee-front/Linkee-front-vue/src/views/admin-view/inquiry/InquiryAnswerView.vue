@@ -57,7 +57,8 @@
         </div>
 
         <!-- 답변 입력 -->
-        <div class="form-group">
+        <!-- 답변 입력 -->
+        <div class="form-group" v-if="!inquiry.answer">
           <label>답변 작성</label>
 
           <el-form :model="answerForm" class="answer-form">
@@ -73,7 +74,7 @@
         </div>
 
         <!-- 저장 버튼 -->
-        <button class="btn-save" @click="saveAnswer">
+        <button class="btn-save" v-if="!inquiry.answer" @click="saveAnswer">
           답변 등록
         </button>
 
@@ -88,6 +89,7 @@
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import BaseToast from "@/components/base/toast/BaseToast.vue";
+import { submitInquiryAnswer, fetchInquiryDetail } from "@/api/inquiryApi.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -101,53 +103,57 @@ const inquiry = ref({
   reg: "",
   admin: "",
   content: "",
-  answer: "",     // ★ 추가됨
+  answer: "",
 });
 
-/* 답변 */
+//답변 입력된 것 담는 곳
 const answerForm = ref({
   answer: "",
 });
 
-/* 데이터 로딩 */
-onMounted(() => {
-  const id = route.params.id;
+//페이지 진입시 데이터세팅 (API 호출)
+onMounted(async () => {
+  const inquiryId = route.params.id;
 
-  // 실제 API라면 GET
-  inquiry.value = {
-    id,
-    title: `문의사항 ${id}번 제목`,
-    user: "유저1번",
-    admin: "관리자1번",
-    reg: "2025/11/10",
-    content: `
-이 부분은 문의 내용입니다.
-유저가 작성한 긴 내용이 들어가며
-스크롤이 가능하도록 되어 있습니다.
-    `,
-    answer: "",  // 초기엔 답변 없음
-  };
+  try {
+    const data = await fetchInquiryDetail(inquiryId);
+
+    inquiry.value = {
+      id: data.inquiryId,
+      title: data.inquiryTitle,
+      user: data.userNickname,
+      admin: data.adminId ?? "-",
+      reg: data.createdAt.replace("T", " ").slice(0, 16),
+      content: data.inquiryContent,
+      answer: data.answerContent,
+    };
+  } catch (err) {
+    console.error(err);
+    toastRef.value.showToast("문의 상세 조회 실패 ⚠️");
+    router.push("/admin/inquiries");
+  }
 });
 
-/* 답변 저장 */
-const saveAnswer = () => {
+//답변저장
+const saveAnswer = async () => {
   if (!answerForm.value.answer.trim()) {
     toastRef.value.showToast("답변 내용을 입력해주세요.");
     return;
   }
 
-  // ★ 저장 (실제로는 API POST)
-  inquiry.value.answer = answerForm.value.answer;
+  try {
+    await submitInquiryAnswer(inquiry.value.id, answerForm.value.answer);
 
-  toastRef.value.showToast("답변이 등록되었습니다!");
+    toastRef.value.showToast("답변이 등록되었습니다! 🎉");
 
-  // 등록 후 입력창 초기화
-  answerForm.value.answer = "";
+    // 상세 내용 업데이트
+    inquiry.value.answer = answerForm.value.answer;
+    answerForm.value.answer = "";
 
-  /*// 약간의 지연 후 목록 이동
-  setTimeout(() => {
-    router.push("/admin/inquiries");
-  }, 800);*/
+  } catch (err) {
+    console.error(err);
+    toastRef.value.showToast("답변 등록 실패 ⚠️");
+  }
 };
 
 /* 뒤로가기 */
