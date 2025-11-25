@@ -30,6 +30,9 @@ import AdminHomeView from "@/views/admin-view/AdminHomeView.vue";
 import AdminDashBoard from "@/views/admin-view/AdminDashBoard.vue";
 import AdminLoginView from "@/views/login-view/AdminLoginView.vue";
 import NoticeManagementView from "@/views/admin-view/notice/NoticeManagementView.vue";
+import InquiryManagementView from "@/views/admin-view/inquiry/InquiryManagementView.vue";
+import InquiryAnswerView from "@/views/admin-view/inquiry/InquiryAnswerView.vue";
+import ReportManagementView from "@/views/admin-view/report/ReportManagementView.vue";
 
 
 const routes = [
@@ -182,12 +185,12 @@ const routes = [
             },
             {
                 path: "notices/:id",
-                name: "NoticeDetail",
+                name: "AdminNoticeDetail",
                 component: () => import("@/views/admin-view/notice/NoticeDetailManagementView.vue")
             },
             {
                 path: "notices/create",
-                name: "NoticeCreate",
+                name: "AdminNoticeCreate",
                 component: () => import("@/views/admin-view/notice/NoticeCreateView.vue")
             },
             {
@@ -203,12 +206,17 @@ const routes = [
             {
                 path: "inquiries",
                 name: "AdminInquiries",
-                component: { template: "<div>관리자 문의</div>" }
+                component: InquiryManagementView
+            },
+            {
+                path: "inquiries/:id",
+                name: "AdminInquiryAnswer",
+                component: InquiryAnswerView
             },
             {
                 path: "reports",
                 name: "AdminReports",
-                component: { template: "<div>관리자 신고</div>" }
+                component: ReportManagementView
             }
         ]
     }
