@@ -15,11 +15,11 @@
         <div class="right-btns">
           <el-select v-model="selectedType" placeholder="신고유형" class="select-type" @change="filterReports">
             <el-option label="전체" value=""></el-option>
-            <el-option label="채팅(C)" value="채팅"></el-option>
-            <el-option label="게시글(B)" value="게시글"></el-option>
-            <el-option label="문의(R)" value="문의"></el-option>
-            <el-option label="유저(U)" value="유저"></el-option>
-            <el-option label="게임(G)" value="게임"></el-option>
+            <el-option label="채팅(C)" value="C"></el-option>
+            <el-option label="게시글(B)" value="B"></el-option>
+            <el-option label="문의(R)" value="R"></el-option>
+            <el-option label="유저(U)" value="U"></el-option>
+            <el-option label="게임(G)" value="G"></el-option>
           </el-select>
 
           <button class="btn-sort" @click="filterStatus('Y')">처리완료</button>
@@ -77,58 +77,94 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import PaginationButton from "@/components/base/button/PaginationButton.vue";
 import BaseToast from "@/components/base/toast/BaseToast.vue";
+import { fetchReportList } from "@/api/reportApi.js";
 
 const router = useRouter();
 const toastRef = ref(null);
 
-/* 신고 데이터 */
-const originalList = ref([
-  { id: 1, title: "신고사항 1번임", reg: "2025/11/10", mod: "2025/11/10", user: "유저1번임", admin: "관리자1번임", type: "채팅", status: "Y" },
-  { id: 2, title: "신고사항 2번임", reg: "2025/11/10", mod: "2025/11/10", user: "유저6번임", admin: "관리자1번임", type: "게시글", status: "Y" },
-  { id: 3, title: "신고사항 3번임", reg: "2025/11/10", mod: "2025/11/10", user: "유저2번임", admin: "관리자1번임", type: "유저", status: "N" },
-  { id: 4, title: "신고사항 4번임", reg: "2025/11/10", mod: "2025/11/10", user: "유저4번임", admin: "관리자1번임", type: "게임", status: "N" },
-]);
+const originalList = ref([]);
+const filteredList = ref([]);
 
-const filteredList = ref([...originalList.value]);
-
-/* 상태 필터 */
-const filterStatus = (flag) => {
-  filteredList.value = originalList.value.filter(item => item.status === flag);
-  currentPage.value = 1;
-};
-
-/* 유형 필터 */
+//필터 상태
 const selectedType = ref("");
+const selectedStatus = ref("");
 
-const filterReports = () => {
-  if (!selectedType.value) {
-    filteredList.value = [...originalList.value];
-  } else {
-    filteredList.value = originalList.value.filter(item => item.type === selectedType.value);
-  }
-  currentPage.value = 1;
+//페이지네이션
+const currentPage = ref(1);
+const pageSize = 10;
+
+//유형 한국어로 표시
+const typeLabelMap = {
+  C: "채팅",
+  B: "게시글",
+  R: "문의",
+  U: "유저",
+  G: "게임",
 };
 
-/* 초기화 */
+/* 백엔드 목록 불러오기 */
+const loadReports = async () => {
+  try {
+    const res = await fetchReportList({
+      page: currentPage.value - 1,
+      size: pageSize,
+      type: selectedType.value || null,
+      status: selectedStatus.value || null,
+    });
+
+    // 백엔드 응답 맞춰 가공
+    originalList.value = res.map(item => ({
+      id: item.reportId,
+      title: item.reportTitle,
+      reg: item.createdAt?.replace("T", " ").slice(0, 16),
+      mod: item.updatedAt?.replace("T", " ").slice(0, 16),
+      user: item.reporterNickname ?? item.reporterId,
+      admin: item.adminNickname ?? item.adminId ?? "-",
+      type: typeLabelMap[item.reportType] || item.reportType,
+      status: item.reportStatus
+    }));
+
+    filteredList.value = [...originalList.value];
+  } catch (e) {
+    console.error(e);
+    toastRef.value.showToast("신고 목록 조회 실패 ⚠️");
+  }
+};
+
+onMounted(loadReports);
+
+//상태 필터
+const filterStatus = (flag) => {
+  selectedStatus.value = flag;
+  currentPage.value = 1;
+  loadReports();
+};
+
+//유형 필터
+const filterReports = () => {
+  currentPage.value = 1;
+  loadReports();
+};
+
+//초기화
 const resetFilter = () => {
   selectedType.value = "";
-  filteredList.value = [...originalList.value];
+  selectedStatus.value = "";
   currentPage.value = 1;
+  loadReports();
 };
 
-/* 신고상세 페이지 이동 */
+//신고 상세이동
 const goDetail = (id) => {
   router.push(`/admin/reports/${id}`);
 };
 
-/* 페이지네이션 */
-const currentPage = ref(1);
-const pageSize = 10;
 
+//페이지 계산
 const totalPages = computed(() => Math.ceil(filteredList.value.length / pageSize));
 
 const paginatedList = computed(() => {

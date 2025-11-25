@@ -41,7 +41,7 @@
         </div>
 
         <!-- 신고 내용 -->
-        <div class="form-group">
+        <div v-if="!report.process" class="form-group">
           <label>신고 내용</label>
           <p class="content-box">
             {{ report.content }}
@@ -57,7 +57,7 @@
         </div>
 
         <!-- 처리 내용 입력 -->
-        <div class="form-group">
+        <div v-if="!report.process" class="form-group">
           <label>처리 내용 입력</label>
 
           <el-form :model="processForm" class="answer-form">
@@ -73,7 +73,7 @@
         </div>
 
         <!-- 처리완료 버튼 -->
-        <button class="btn-save" @click="saveProcess">
+        <button v-if="!report.process" class="btn-save" @click="saveProcess">
           처리 완료
         </button>
 
@@ -88,10 +88,21 @@
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import BaseToast from "@/components/base/toast/BaseToast.vue";
+import {fetchReportDetail, submitReportProcess} from "@/api/reportApi.js";
 
 const route = useRoute();
 const router = useRouter();
 const toastRef = ref(null);
+
+//신고유형 매핑
+const typeLabelMap = {
+  C: "채팅",
+  B: "게시글",
+  R: "문의",
+  U: "유저",
+  G: "게임"
+};
+
 
 /* 신고 상세 데이터 */
 const report = ref({
@@ -102,47 +113,67 @@ const report = ref({
   type: "",
   content: "",
   process: "",  // 처리내용
+  status: ""
 });
 
-/* 입력 폼 */
+//입력폼
 const processForm = ref({
   process: "",
 });
 
-/* 데이터 로딩 */
-onMounted(() => {
+//데이터 로드
+onMounted(async () => {
   const id = route.params.id;
 
-  // 실제 API라면 GET
-  report.value = {
-    id,
-    title: `신고사항 ${id}번 제목`,
-    reporter: "유저3번",
-    target: "유저7번",
-    type: "채팅",
-    content: `
-신고 내용이 이곳에 표시됩니다.
-신고자가 작성한 신고 상세 내용이며,
-스크롤이 가능하도록 처리되어 있습니다.
-    `,
-    process: "", // 처음엔 비어있음
-  };
+  try {
+    const data = await fetchReportDetail(id);
+
+    report.value = {
+      id,
+      title: data.reportTitle,
+      reporter: data.reporterId,
+      target: data.reportedId,
+      type: typeLabelMap[data.reportType] ?? data.reportType,
+      content: data.reportContent,
+      process: data.reportAction,
+      status: data.reportStatus
+    };
+
+    // 기존 처리 완료된 경우 -> 입력창 비활성화
+    if (report.value.process) {
+      processForm.value.process = report.value.process;
+    }
+
+  } catch (e) {
+    console.error(e);
+    toastRef.value.showToast("신고 상세 조회 실패 ⚠️");
+    router.push("/admin/reports");
+  }
 });
 
 /* 처리 저장 */
-const saveProcess = () => {
+const saveProcess = async () => {
   if (!processForm.value.process.trim()) {
-    toastRef.value.showToast("처리 내용을 입력해주세요.");
+    toastRef.value.showToast("처리 내용을 입력해주세요. ⚠️");
     return;
   }
 
-  // 실제 API POST 처리
-  report.value.process = processForm.value.process;
+  try {
+    await submitReportProcess(report.value.id, processForm.value.process);
 
-  toastRef.value.showToast("신고가 처리완료되었습니다!");
+    toastRef.value.showToast("신고가 처리되었습니다! 🎉");
 
-  // 입력창 초기화
-  processForm.value.process = "";
+    // 화면 갱신
+    report.value.process = processForm.value.process;
+    report.value.status = "Y"; // 처리완료로 상태 변경
+
+    // 입력창 비활성화 또는 제거 원한다면 여기도 가능
+    // processForm.value.process = "";
+
+  } catch (e) {
+    console.error(e);
+    toastRef.value.showToast("신고 처리 저장 실패 ⚠️");
+  }
 };
 
 /* 뒤로가기 */
