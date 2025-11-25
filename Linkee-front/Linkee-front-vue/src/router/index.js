@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+
 import ComponentTest from "@/views/ComponentTest.vue";
 import HomeView from "@/views/home-view/HomeView.vue";
 import ChatGameListView from "@/views/chat-view/ChatGameListView.vue";
@@ -9,6 +10,7 @@ import ProblemListView from '@/views/problem-view/ProblemListView.vue';
 import ProblemDetailView from "@/views/problem-view/ProblemDetailView.vue";
 import ProblemCreateView from "@/views/problem-view/ProblemCreateView.vue";
 import ProblemEditView from "@/views/problem-view/ProblemEditView.vue";
+import QuizRoomListView from "@/views/quiz-view/QuizRoomListView.vue";
 
 // 공지사항
 import NoticeView from "@/views/notice-view/NoticeView.vue";
@@ -39,8 +41,15 @@ import NoticeCreateView from "@/views/admin-view/notice/NoticeCreateView.vue";
 import NotificationTemplateView from "@/views/admin-view/NotificationTemplateView.vue"
 import ProblemManagementView from "@/views/admin-view/ProblemManagementView.vue";
 
+import QuizRoomWaitingView from "@/views/quiz-view/QuizRoomWaitingView.vue";
 
 const routes = [
+// {} 라우터 설정
+
+    /*{
+        path: '/',
+        redirect: '/login'
+    },*/
     {
         path: "/",
         redirect: '/login'
@@ -80,6 +89,18 @@ const routes = [
         name: 'ChatGameRoom',
         component: ChatGameRoom,
         meta: { hideLayout: true }
+
+    },
+    {
+        path: "/quiz/rooms",
+        name: 'QuizRoomList',
+        component: QuizRoomListView
+    },
+    {
+        path: "/quiz/rooms/waiting",
+        name: 'QuizRoomWaiting',
+        component: QuizRoomWaitingView,
+
     },
     /* ------------------------------
        문제게시판 라우트
