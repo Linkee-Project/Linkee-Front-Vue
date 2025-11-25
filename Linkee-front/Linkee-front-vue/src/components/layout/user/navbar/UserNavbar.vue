@@ -264,12 +264,11 @@ const notifications = ref([
 .icon-btn {
   background: #FFFFFF;
 
-  width: 73px;
-  height: 73px;
+  width: 50px;
+  height: 50px;
 
   border: none;
   border-radius: 50%; /* 완전 동그라미 모양 */
-  padding: 10px;
 
   cursor: pointer;
   transition: 0.2s;
@@ -280,8 +279,9 @@ const notifications = ref([
 }
 
 .icon-img {
-  width: 58px;
-  height: 59px;
+  padding-top: 4px;
+  width: 35px;
+  height: 35px;
 }
 
 /* 프로필 버튼 */

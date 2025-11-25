@@ -34,6 +34,9 @@
 </script>
 
 <style scoped>
+a {
+  text-decoration: none;
+}
 /* 전체 헤더 */
 .header-container {
   width: 100%;
