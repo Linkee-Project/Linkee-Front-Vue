@@ -14,7 +14,7 @@
       <div class="right header-actions">
         <BaseButton color="blue" size="small" @click="showInviteModal = true"
                     style="min-width: 25px; height: 35px; border-radius: 15px">
-          <img src="/src/assets/icon/invite.png" alt="초대 아이콘" style="width: 20px; height: 22px" />
+          <img src="/src/assets/icon/invite.png" alt="초대 아이콘" style="width: 20px; height: 22px; padding-bottom: 4px;" />
         </BaseButton>
 
         <BaseButton color="white" size="small" @click="leaveRoom"
@@ -34,6 +34,7 @@
             v-for="user in displayUsers"
             :key="user.slot"
             class="user-item"
+            style="cursor: pointer"
             @click="!user.isEmpty && openUserModal($event, user)"
         >
           <img
@@ -383,6 +384,12 @@ const handleAction = (type) => {
   vertical-align: middle; /* ⭐ 글자 중앙 정렬 */
   padding-left: 15px;
 }
+/* 인원 아이콘 */
+.icon {
+  width: 21px;
+  height: 21px;
+  opacity: 0.8;
+}
 
 /* (기존 스타일 그대로 유지 - 생략하지 않음) */
 .game-room {
@@ -399,24 +406,70 @@ const handleAction = (type) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 13px 30px;
-  background: rgb(255, 255, 255);
+
+  padding: 15px 36px;
+  height: 50px;
+
+  background: linear-gradient(
+      to bottom,
+      #ffffff 0%,
+      #f8fbff 45%,
+      #edf5ff 100%
+  );
+
+  box-shadow: 0 3px 14px rgba(0, 60, 120, 0.08);
+
+  /* 테두리 대신 부드러운 라인 */
+  border-bottom: 1px solid rgba(200, 220, 255, 0.5);
+
+  border-radius: 0 0 14px 14px;
 }
 
-.room-number, .room-title {
+.left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+
+/* 방 번호 */
+.room-number {
+  font-size: 19px;
+  font-weight: 800;
+  color: #3b5f88;
+}
+
+/* 방 제목 */
+.room-title {
   font-size: 20px;
   font-weight: 900;
-  color: #505050;
+  color: #2b2b2b;
 }
 
-
+/* 인원 수 배지 느낌으로 */
 .user-count {
-  gap: 6px; /* 아이콘과 글자 사이 */
-  padding-left: 5px;
-  font-size: 12px;
-  font-weight: 900;
-  color: #505050;
+  background: #e8f3ff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #3568a3;
+  box-shadow: inset 0 0 4px rgba(0, 80, 180, 0.09);
 }
+
+
+/* 오른쪽 버튼 영역 */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 버튼 안 아이콘 정돈 */
+.header-actions img {
+  margin-top: 1px;
+}
+
 
 .game-layout {
   position: relative;
@@ -428,7 +481,6 @@ const handleAction = (type) => {
 }
 
 .user-list {
-  padding-top: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -470,10 +522,20 @@ const handleAction = (type) => {
 }
 
 .chat-panel {
-
   background: white;
-  border: 4px solid #92ccfd;
+
+  /* ✨ 그라데이션 보더 */
+  border: 3px solid transparent;
   border-radius: 20px;
+  background-clip: padding-box, border-box;
+  background-origin: border-box;
+  background-image:
+      linear-gradient(white, white),
+      linear-gradient(135deg, #aadaff, #70b6ff, #90ccff);
+
+  /* 자연스러운 입체감 */
+  box-shadow: 0 4px 12px rgba(0, 70, 140, 0.12);
+
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -483,7 +545,7 @@ const handleAction = (type) => {
 .chat-panel-logo {
   position: absolute;
   top: -2%;
-  left: 50%;
+  left: 50.3%;
   transform: translateX(-50%);
   width: 56px;
   height: 56px;
@@ -492,7 +554,7 @@ const handleAction = (type) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999;
+  z-index: 10;
 }
 
 .chat-panel-logo img {
@@ -526,7 +588,6 @@ const handleAction = (type) => {
 .chat-area {
   display: flex;
   flex-direction: column;
-  border-right: 2px solid #b2dfff;
   height: 100%;
   overflow: hidden;
 
@@ -567,6 +628,7 @@ const handleAction = (type) => {
 
 .problem-list {
   background: #f7fbff;
+  border: 1px solid #b5e0ff;
   padding: 0;
   display: flex;
   flex-direction: column;

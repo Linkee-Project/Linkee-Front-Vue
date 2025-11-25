@@ -27,8 +27,18 @@ import HistoryView from '@/views/mypage-view/HistoryView.vue';
 import GradeView from '@/views/mypage-view/GradeView.vue';
 
 // 관리자 페이지 관련
-import AdminLayout from '@/views/admin-view/AdminLayout.vue';
 import UserManagementView from '@/views/admin-view/UserManagementView.vue';
+import AdminHomeView from "@/views/admin-view/AdminHomeView.vue";
+import AdminDashBoard from "@/views/admin-view/AdminDashBoard.vue";
+import AdminLoginView from "@/views/login-view/AdminLoginView.vue";
+import NoticeManagementView from "@/views/admin-view/notice/NoticeManagementView.vue";
+import InquiryManagementView from "@/views/admin-view/inquiry/InquiryManagementView.vue";
+import InquiryAnswerView from "@/views/admin-view/inquiry/InquiryAnswerView.vue";
+import ReportManagementView from "@/views/admin-view/report/ReportManagementView.vue";
+import ReportActionView from "@/views/admin-view/report/ReportActionView.vue";
+import NoticeDetailManagementView from "@/views/admin-view/notice/NoticeDetailManagementView.vue";
+import NoticeCreateView from "@/views/admin-view/notice/NoticeCreateView.vue";
+import NotificationTemplateView from "@/views/admin-view/NotificationTemplateView.vue"
 import QuizRoomWaitingView from "@/views/quiz-view/QuizRoomWaitingView.vue";
 
 const routes = [
@@ -39,7 +49,26 @@ const routes = [
         redirect: '/login'
     },*/
     {
-        path: '/',
+        path: "/",
+        redirect: '/login'
+    },
+    {
+        path: "/login",
+        name: 'Login',
+        component: LoginView
+    },
+    {
+        path: "/admin/login",
+        name: 'AdminLogin',
+        component: AdminLoginView
+    },
+    {
+        path: "/signup",
+        name: 'SignUp',
+        component: SignUpView
+    },
+    {
+        path: '/home',
         name: 'Home',
         component: HomeView
     },
@@ -170,25 +199,69 @@ const routes = [
        관리자 페이지 라우트
     ------------------------------ */
     {
-        path: '/admin',
-        name: 'Admin',
-        component: AdminLayout,
-        redirect: '/admin/users', // Default admin view
+        path: "/admin",
+        component: AdminHomeView,
         children: [
             {
-                path: 'users',
-                name: 'AdminUsers',
-                component: UserManagementView,
+                path: "",
+                name: "AdminDashboard",
+                component: AdminDashBoard
             },
-            { path: 'notices', component: { template: '<div>관리자 공지</div>' }},
-            { path: 'problems', component: { template: '<div>관리자 문제</div>' }},
-            { path: 'templates', component: { template: '<div>관리자 템플릿</div>' }},
-            { path: 'inquiries', component: { template: '<div>관리자 문의</div>' }},
-            { path: 'reports', component: { template: '<div>관리자 신고</div>' }},
+            {
+                path: "users",
+                name: "AdminUsers",
+                component: UserManagementView
+            },
 
-            // Add other admin child routes here (e.g., products, orders, settings)
+            {
+                path: "notices",
+                name: "AdminNotices",
+                component: NoticeManagementView
+            },
+            {
+                path: "notices/:id",
+                name: "AdminNoticeDetail",
+                component: NoticeDetailManagementView
+            },
+            {
+                path: "notices/create",
+                name: "AdminNoticeCreate",
+                component: NoticeCreateView
+            },
+            {
+                path: "problems",
+                name: "AdminProblems",
+                component: { template: "<div>관리자 문제</div>" }
+            },
+            {
+                path: "templates",
+                name: "AdminTemplates",
+                component: NotificationTemplateView
+            },
+            {
+                path: "inquiries",
+                name: "AdminInquiries",
+                component: InquiryManagementView
+            },
+            {
+                path: "inquiries/:id",
+                name: "AdminInquiryAnswer",
+                component: InquiryAnswerView
+            },
+            {
+                path: "reports",
+                name: "AdminReports",
+                component: ReportManagementView
+            },
+            {
+                path: "reports/:id",
+                name: "AdminReportAction",
+                component: ReportActionView
+            }
         ]
-    },
+    }
+
+
 ];
 
 
