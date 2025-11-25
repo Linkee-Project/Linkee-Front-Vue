@@ -38,7 +38,7 @@
 
         <tbody>
         <tr v-for="item in paginatedList" :key="item.id">
-          <td>{{ item.id }}</td>
+          <td>{{ item.displayId }}</td>
           <td>{{ item.title }}</td>
           <td>{{ item.admin }}</td>
           <td>{{ item.reg }}</td>
@@ -155,7 +155,14 @@ const totalPages = computed(() =>
     Math.ceil(totalElements.value / pageSize)
 );
 
-const paginatedList = computed(() => filteredList.value);
+//순번은 displayId로 따로 부여
+//item에 index속성 추가
+const paginatedList = computed(() =>
+    filteredList.value.map((item, index) => ({
+      ...item,
+      displayId: (currentPage.value - 1) * pageSize + index + 1 // 화면용 번호(1부터 시작)
+    }))
+);
 
 </script>
 

@@ -35,6 +35,11 @@
           </div>
 
           <div class="form-group small">
+            <label>관리자</label>
+            <p>{{ report.admin }}</p>
+          </div>
+
+          <div class="form-group small">
             <label>신고 유형</label>
             <p>{{ report.type }}</p>
           </div>
@@ -131,8 +136,9 @@ onMounted(async () => {
     report.value = {
       id,
       title: data.reportTitle,
-      reporter: data.reporterId,
-      target: data.reportedId,
+      reporter:  data.reporterNickname ?? `ID: ${data.reporterId}`,
+      target: data.reportedNickname ?? `ID: ${data.reportedId}`,
+      admin: data.adminNickname ?? (data.adminId ? `ID: ${data.adminId}` : "-"),
       type: typeLabelMap[data.reportType] ?? data.reportType,
       content: data.reportContent,
       process: data.reportAction,

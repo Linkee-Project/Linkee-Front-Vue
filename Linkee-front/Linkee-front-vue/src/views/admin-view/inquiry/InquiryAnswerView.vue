@@ -122,7 +122,7 @@ onMounted(async () => {
       id: data.inquiryId,
       title: data.inquiryTitle,
       user: data.userNickname,
-      admin: data.adminId ?? "-",
+      admin: data.adminNickname ?? "-",
       reg: data.createdAt.replace("T", " ").slice(0, 16),
       content: data.inquiryContent,
       answer: data.answerContent,

@@ -36,12 +36,12 @@
 
         <tbody>
         <tr v-for="item in paginatedList" :key="item.inquiryId">
-          <td>{{ item.inquiryId }}</td>
+          <td>{{ item.displayId }}</td>
           <td>{{ item.inquiryTitle }}</td>
           <td>{{ formatDate(item.createdAt) }}</td>
           <td>{{ formatDate(item.updatedAt) }}</td>
           <td>{{ item.userNickname }}</td>
-          <td>{{ item.adminId ?? '-' }}</td>
+          <td>{{ item.adminNickname ?? '-' }}</td>
           <td>{{ item.answerStatus }}</td>
           <td class="manage-btn">
             <button class="btn-small" @click="goAnswer(item)">답변</button>
@@ -79,7 +79,12 @@ const totalPages = ref(1);
 
 const filterStatus = ref(null);
 
-const paginatedList = computed(() => inquiryList.value);
+const paginatedList = computed(() =>
+    inquiryList.value.map((item, index) => ({
+      ...item,
+      displayId: (currentPage.value - 1) * 10 + index + 1
+    }))
+);
 
 const formatDate = (date) => {
   return date ? date.replace("T", " ").slice(0, 16) : "-";

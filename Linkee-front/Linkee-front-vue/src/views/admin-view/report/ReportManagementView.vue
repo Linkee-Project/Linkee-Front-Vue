@@ -47,7 +47,7 @@
 
         <tbody>
         <tr v-for="item in paginatedList" :key="item.id">
-          <td>{{ item.id }}</td>
+          <td>{{ item.displayId }}</td>
           <td>{{ item.title }}</td>
           <td>{{ item.reg }}</td>
           <td>{{ item.mod }}</td>
@@ -169,7 +169,11 @@ const totalPages = computed(() => Math.ceil(filteredList.value.length / pageSize
 
 const paginatedList = computed(() => {
   const start = (currentPage.value - 1) * pageSize;
-  return filteredList.value.slice(start, start + pageSize);
+
+  return filteredList.value.slice(start, start + pageSize).map((item, index) => ({
+    ...item,
+    displayId: start + index+1    // 1부터 시작 + 페이지 계산
+  }));
 });
 </script>
 
