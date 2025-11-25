@@ -3,7 +3,7 @@
     <div class="page-inner">
       <!-- 제목 -->
       <header class="problem-header">
-        <button class="back-btn">
+        <button class="back-btn" @click="goBack">
           <img class="back-icon" :src="problemBackIcon" alt="뒤로 가기" />
         </button>
         <h1 class="page-title">문제게시판</h1>
@@ -11,16 +11,23 @@
 
       <!-- 카테고리 탭 -->
       <nav class="category-tabs">
-        <button class="tab is-active">전체</button>
-        <button class="tab">네트워크</button>
-        <button class="tab">데이터베이스</button>
-        <button class="tab">자료구조</button>
-        <button class="tab">운영체제</button>
+        <button
+            v-for="cat in categories"
+            :key="cat"
+            class="tab"
+            :class="{ 'is-active': selectedCategory === cat }"
+            @click="changeCategory(cat)"
+        >
+          {{ cat }}
+        </button>
       </nav>
 
       <!-- 검색 -->
       <div class="search-row">
-        <SearchForm />
+        <SearchForm
+            v-model="searchKeyword"
+            @search="onSearch"
+        />
       </div>
 
       <!-- 등록 버튼 -->
@@ -44,12 +51,25 @@
           </tr>
           </thead>
           <tbody>
-          <tr>
-            <td>8</td>
-            <td>네트워크</td>
-            <td>TCP 3-way handshake 흐름을 묻는 문제</td>
-            <td>김명지니어스</td>
-            <td>2025-11-17</td>
+          <!-- 데이터 있을 때 -->
+          <tr
+              v-for="problem in paginatedProblems"
+              :key="problem.id"
+              class="problem-row"
+              @click="goDetail(problem.id)"
+          >
+            <td>{{ problem.id }}</td>
+            <td>{{ problem.category }}</td>
+            <td>{{ problem.title }}</td>
+            <td>{{ problem.writer }}</td>
+            <td>{{ formatDate(problem.createdAt) }}</td>
+          </tr>
+
+          <!-- 데이터 없을 때 -->
+          <tr v-if="paginatedProblems.length === 0">
+            <td colspan="5" style="text-align: center; padding: 20px;">
+              등록된 문제가 없습니다.
+            </td>
           </tr>
           </tbody>
         </table>
@@ -66,10 +86,10 @@
   </div>
 </template>
 
-
 <script setup>
-import { ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
+
 import SearchForm from '@/components/base/form/SearchForm.vue'
 import BaseButton from '@/components/base/button/BaseButton.vue'
 import PaginationButton from '@/components/base/button/PaginationButton.vue'
@@ -78,9 +98,98 @@ import PaginationButton from '@/components/base/button/PaginationButton.vue'
 import problemBackIcon from '@/assets/problem_back_icon.svg'
 import problemCreateIcon from '@/assets/problem_create_icon.svg'
 
-// pagination
+// 카테고리
+const categories = ['전체', '네트워크', '데이터베이스', '자료구조', '운영체제']
+const selectedCategory = ref('전체')
+
+// 검색 키워드
+const searchKeyword = ref('')
+
+// 페이지 상태
 const page = ref(1)
-const totalPages = ref(5)
+const size = ref(10)
+
+
+const allProblems = ref([
+  {
+    id: 11,
+    category: '네트워크',
+    title: 'TCP 3-way handshake 흐름을 설명하시오.',
+    writer: '김명지니어스',
+    createdAt: '2025-11-20'
+  },
+  {
+    id: 10,
+    category: '운영체제',
+    title: '운영체제 마스터 풀어보시오',
+    writer: '우하하',
+    createdAt: '2025-11-20'
+  },
+  {
+    id: 9,
+    category: '데이터베이스',
+    title: '정규화가 필요한 이유와 장단점은?',
+    writer: 'DB마스터',
+    createdAt: '2025-11-19'
+  },
+  {
+    id: 8,
+    category: '자료구조',
+    title: '스택과 큐의 차이점을 설명하시오.',
+    writer: 'CS러버',
+    createdAt: '2025-11-18'
+  },
+  {
+    id: 7,
+    category: '운영체제',
+    title: '프로세스와 스레드의 차이는?',
+    writer: 'OS전문가',
+    createdAt: '2025-11-17'
+  },
+  {
+    id: 6,
+    category: '네트워크',
+    title: 'OSI 7계층 각각의 역할은?',
+    writer: '김명지니어스',
+    createdAt: '2025-11-16'
+  },
+  {
+    id: 5,
+    category: '데이터베이스',
+    title: '트랜잭션의 ACID 특성을 설명하시오.',
+    writer: 'DB러버',
+    createdAt: '2025-11-15'
+  },
+  {
+    id: 4,
+    category: '자료구조',
+    title: '해시 테이블의 충돌 해결 방법에는 무엇이 있는가?',
+    writer: '자료구조고수',
+    createdAt: '2025-11-14'
+  },
+  {
+    id: 3,
+    category: '운영체제',
+    title: 'Deadlock의 발생 조건을 설명하시오.',
+    writer: 'OS마스터',
+    createdAt: '2025-11-13'
+  },
+  {
+    id: 2,
+    category: '네트워크',
+    title: 'HTTP와 HTTPS 차이점은?',
+    writer: '웹개발자',
+    createdAt: '2025-11-12'
+  },
+  {
+    id: 1,
+    category: '자료구조',
+    title: '시간 복잡도 Big-O 표기법을 설명하시오.',
+    writer: 'CS학생',
+    createdAt: '2025-11-11'
+  },
+
+])
 
 const router = useRouter()
 
@@ -88,6 +197,74 @@ const goCreate = () => {
   router.push({ name: 'ProblemCreate' })
 }
 
+const goDetail = (id) => {
+  router.push({
+    name: 'ProblemDetail',
+    params: { id },
+  })
+}
+
+const goBack = () => {
+  router.back()
+}
+
+// 날짜 포맷 (yyyy-MM-dd 형태 유지)
+const formatDate = (dateStr) => {
+  if (!dateStr) return ''
+  return dateStr.slice(0, 10)
+}
+
+// 카테고리 + 검색으로 필터링
+const filteredProblems = computed(() => {
+  const kw = searchKeyword.value.trim().toLowerCase()
+
+  return allProblems.value.filter((p) => {
+    // 카테고리 필터
+    const matchCategory =
+        selectedCategory.value === '전체' ||
+        p.category === selectedCategory.value
+
+    // 검색 필터 (제목 + 작성자)
+    const matchKeyword =
+        kw === '' ||
+        p.title.toLowerCase().includes(kw) ||
+        p.writer.toLowerCase().includes(kw)
+
+    return matchCategory && matchKeyword
+  })
+})
+
+
+const totalPages = computed(() => {
+  return Math.max(1, Math.ceil(filteredProblems.value.length / size.value))
+})
+
+
+const paginatedProblems = computed(() => {
+  const start = (page.value - 1) * size.value
+  const end = start + size.value
+  return filteredProblems.value.slice(start, end)
+})
+
+
+const changeCategory = (cat) => {
+  if (selectedCategory.value === cat) return
+  selectedCategory.value = cat
+  page.value = 1
+}
+
+// 검색 이벤트 처리
+const onSearch = (keyword) => {
+  searchKeyword.value = keyword?.trim?.() ?? ''
+  page.value = 1
+}
+
+// 필터 결과가 줄어서 현재 page가 범위를 넘어가면 보정
+watch(filteredProblems, () => {
+  if (page.value > totalPages.value) {
+    page.value = 1
+  }
+})
 </script>
 
 <style scoped>
@@ -97,7 +274,6 @@ const goCreate = () => {
   overflow: auto;
 }
 
-/* 가운데 정렬 */
 .page-inner {
   max-width: 1113px;
   margin: 80px auto 80px;
@@ -131,12 +307,9 @@ const goCreate = () => {
 .back-icon {
   width: 40px;
   height: 40px;
-
   position: relative;
   top: 2px;
 }
-
-
 
 /* 카테고리 탭 */
 .category-tabs {
@@ -163,7 +336,6 @@ const goCreate = () => {
   max-width: 360px;
   margin-bottom: 24px;
 }
-/* searchForm 설정 problem 에서는 다르게 적용하기 위해 추가 (왼쪽 정렬 필요) */
 .search-row :deep(.search-form) {
   justify-content: flex-start;
   margin-left: 0;
@@ -171,7 +343,7 @@ const goCreate = () => {
   margin-top: 0;
 }
 
-/* 등록 버튼 안의 아이콘 */
+
 .creat-btn-icon {
   width: 16px;
   height: 16px;
@@ -179,7 +351,7 @@ const goCreate = () => {
   display: inline-block;
 }
 
-/* 등록 버튼 오른쪽 정렬 */
+
 .action-row {
   display: flex;
   justify-content: flex-end;
@@ -212,6 +384,13 @@ const goCreate = () => {
   background: #f9fafb;
   font-weight: 600;
 }
+.problem-row {
+  cursor: pointer;
+}
+
+.problem-row:hover {
+  background: #f9fafb;
+}
 
 /* 페이징 */
 .pagination-row {
@@ -225,6 +404,7 @@ const goCreate = () => {
   color: #fff;
   border-color: transparent;
 }
+
 /* ------------------- 반응형 영역 ------------------- */
 
 /* 태블릿 이하 (<= 1024px) */
@@ -256,7 +436,6 @@ const goCreate = () => {
     padding: 0 12px;
   }
 
-
   .problem-header {
     gap: 8px;
     margin-bottom: 16px;
@@ -266,7 +445,6 @@ const goCreate = () => {
     font-size: 20px;
   }
 
-  /* 카테고리 탭: 글자 조금 줄이고 줄 바꿈 허용 */
   .category-tabs {
     flex-wrap: wrap;
     gap: 16px;
@@ -277,7 +455,6 @@ const goCreate = () => {
     font-size: 14px;
   }
 
-  /* 검색창 폭 100% 사용 */
   .search-row {
     max-width: 100%;
     margin-bottom: 16px;
@@ -291,18 +468,15 @@ const goCreate = () => {
     width: 100%;
   }
 
-  /* 등록 버튼 여백 줄이기 */
   .action-row {
     margin-bottom: 16px;
   }
 
-  /* 카드 안 패딩 줄이기 */
   .problem-list-card {
     padding: 12px 12px;
     border-radius: 12px;
   }
 
-  /* 테이블 폰트 더 줄이기 */
   .problem-table th,
   .problem-table td {
     padding: 8px 4px;
@@ -314,4 +488,3 @@ const goCreate = () => {
   }
 }
 </style>
-
