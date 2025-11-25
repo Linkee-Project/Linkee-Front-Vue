@@ -12,21 +12,19 @@
 import AdminNavbar from "@/components/layout/admin/navbar/AdminNavbar.vue";
 </script>
 
-
-
 <style scoped>
 .admin-layout {
   width: 100%;
-  height: 100vh;              /* 뷰포트 전체 높이 */
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(to bottom, #e8f6ff, #cfe9ff);
-  overflow: hidden;           /* 전체 페이지 스크롤 제거 */
+  background: linear-gradient(to bottom, #D4EBF5, #acd2ff);
+  overflow: hidden;
 }
 
 .content-area {
-  flex: 1;                    /* 헤더 제외 나머지 공간 모두 차지 */
-  overflow-y: auto;           /* 여기만 스크롤 */
+  flex: 1;
+  overflow-y: auto;
   padding: 40px;
   box-sizing: border-box;
 }
