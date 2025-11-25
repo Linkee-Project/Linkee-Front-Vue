@@ -17,8 +17,6 @@ export async function fetchNoticeList({page = 0, size = 10} = {}) {
     //{params} QueryString으로 자동변환
     const res = await api.get('/board/notices', {
         params,
-        //TODO: 관리자 로그인 완성되면 삭제
-        skipAuth: true,
     });
 
     //pageResponse반환
@@ -30,10 +28,16 @@ export async function fetchNoticeList({page = 0, size = 10} = {}) {
 //공지 상세 조회
 export async function fetchNoticeDetail(noticeId) {
     // GET /api/v1/board/notices/{noticeId}
-    const res = await api.get(`/board/notices/${noticeId}`, {
-        //TODO: 관리자 로그인 완성되면 삭제
-        skipAuth : true,
-    });
+    const res = await api.get(`/board/notices/${noticeId}`, {});
 
     return res.data; //NoticeDetailResponseDto 반환
+}
+
+//공지사항 수정
+export async function updateNotice(noticeId, payload) {
+    const res = await api.put(`/admin/board/notices/${noticeId}/edit`,
+        payload,
+    );
+
+    return res.data;
 }

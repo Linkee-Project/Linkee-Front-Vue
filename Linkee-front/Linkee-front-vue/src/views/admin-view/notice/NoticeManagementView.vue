@@ -47,7 +47,6 @@
           <td>{{ item.active }}</td>
           <td class="manage-btn">
             <button class="btn-small" @click="goDetail(item.id)">✏️</button>
-            <button class="btn-small" @click="deleteNotice(item.id)">❌</button>
           </td>
         </tr>
         </tbody>
@@ -148,10 +147,6 @@ const resetFilter = () => {
 //상세 이동 및 삭제
 const goDetail = (id) => {
   router.push(`/admin/notices/${id}`);
-};
-
-const deleteNotice = (id) => {
-  toastRef.value.showToast("삭제 API는 아직 미구현입니다.");
 };
 
 //페이지네이션
