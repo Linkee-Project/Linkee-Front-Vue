@@ -9,6 +9,7 @@ import ProblemListView from '@/views/problem-view/ProblemListView.vue';
 import ProblemDetailView from "@/views/problem-view/ProblemDetailView.vue";
 import ProblemCreateView from "@/views/problem-view/ProblemCreateView.vue";
 import ProblemEditView from "@/views/problem-view/ProblemEditView.vue";
+import QuizRoomListView from "@/views/quiz-view/QuizRoomListView.vue";
 
 // 공지사항
 import NoticeView from "@/views/notice-view/NoticeView.vue";
@@ -37,6 +38,10 @@ import ReportActionView from "@/views/admin-view/report/ReportActionView.vue";
 import NoticeDetailManagementView from "@/views/admin-view/notice/NoticeDetailManagementView.vue";
 import NoticeCreateView from "@/views/admin-view/notice/NoticeCreateView.vue";
 import NotificationTemplateView from "@/views/admin-view/NotificationTemplateView.vue"
+import ProblemManagementView from "@/views/admin-view/ProblemManagementView.vue";
+
+import QuizRoomWaitingView from "@/views/quiz-view/QuizRoomWaitingView.vue";
+import {useAuthStore} from "@/stores/authStore.js";
 
 const routes = [
     {
@@ -78,7 +83,22 @@ const routes = [
         name: 'ChatGameRoom',
         component: ChatGameRoom,
         meta: { hideLayout: true }
+
     },
+    {
+        path: "/quiz/rooms",
+        name: 'QuizRoomList',
+        component: QuizRoomListView
+    },
+    {
+        path: "/quiz/rooms/waiting",
+        name: 'QuizRoomWaiting',
+        component: QuizRoomWaitingView,
+
+    },
+    /* ------------------------------
+       문제게시판 라우트
+    ------------------------------ */
     {
         path: '/problem',
         name: 'ProblemList',
@@ -199,7 +219,7 @@ const routes = [
             {
                 path: "problems",
                 name: "AdminProblems",
-                component: { template: "<div>관리자 문제</div>" }
+                component: ProblemManagementView
             },
             {
                 path: "templates",
@@ -239,14 +259,37 @@ const router = createRouter({
 });
 
 
-// router.beforeEach((to, from, next) => {
-//     const token = localStorage.getItem("token");
-//
-//     if (to.meta.requiresAuth && !token) {
-//         return next("/login");        // 로그인 안 됨 → 로그인 페이지로
-//     }
-//
-//     next();
-// });
+router.beforeEach((to, from) => {
+    const authStore = useAuthStore();
+
+    // 🔹 새로고침 대비 → localStorage 값 복원
+    if (!authStore.accessToken || !authStore.user) {
+        authStore.loadFromStorage();
+    }
+
+    const isLoggedIn = authStore.isLoggedIn;
+    const isAdmin = authStore.isAdmin;
+
+    // 🔹 로그인 페이지 / 회원가입 페이지만 비로그인 허용
+    if (to.path === "/login" || to.path === "/signup" || to.path === "/admin/login") {
+        return true;
+    }
+
+    // 1) 로그인 안 되어 있으면 → 로그인 페이지 강제 이동
+    if (!isLoggedIn) {
+        return {
+            name: "Login",
+            query: { redirect: to.fullPath }
+        };
+    }
+
+    // 2) /admin/** 접근 → 관리자만 허용
+    if (to.path.startsWith("/admin") && !isAdmin) {
+        return { name: "Home" };
+    }
+
+    // 통과
+    return true;
+});
 
 export default router;

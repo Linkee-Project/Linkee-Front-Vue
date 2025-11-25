@@ -141,7 +141,7 @@ const rooms = ref([]);
 // 게임방 불러오기 함수
 const loadGameRooms = async () => {
   try {
-    const result = await fetchGameRooms({ page: 1, size: 50 });
+    const result = await fetchGameRooms({ page: 0, size: 50 });
     const content = result.content || [];
 
     rooms.value = content.map(room => ({
