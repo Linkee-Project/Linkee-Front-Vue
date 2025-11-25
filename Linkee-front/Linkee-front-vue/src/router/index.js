@@ -29,6 +29,7 @@ import UserManagementView from '@/views/admin-view/UserManagementView.vue';
 import AdminHomeView from "@/views/admin-view/AdminHomeView.vue";
 import AdminDashBoard from "@/views/admin-view/AdminDashBoard.vue";
 import AdminLoginView from "@/views/login-view/AdminLoginView.vue";
+import NoticeManagementView from "@/views/admin-view/notice/NoticeManagementView.vue";
 
 
 const routes = [
@@ -173,10 +174,21 @@ const routes = [
                 name: "AdminUsers",
                 component: UserManagementView
             },
+
             {
                 path: "notices",
                 name: "AdminNotices",
-                component: { template: "<div>관리자 공지</div>" }
+                component: NoticeManagementView
+            },
+            {
+                path: "notices/:id",
+                name: "NoticeDetail",
+                component: () => import("@/views/admin-view/notice/NoticeDetailManagementView.vue")
+            },
+            {
+                path: "notices/create",
+                name: "NoticeCreate",
+                component: () => import("@/views/admin-view/notice/NoticeCreateView.vue")
             },
             {
                 path: "problems",
