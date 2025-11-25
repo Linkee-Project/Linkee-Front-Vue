@@ -36,7 +36,7 @@ import ReportManagementView from "@/views/admin-view/report/ReportManagementView
 import ReportActionView from "@/views/admin-view/report/ReportActionView.vue";
 import NoticeDetailManagementView from "@/views/admin-view/notice/NoticeDetailManagementView.vue";
 import NoticeCreateView from "@/views/admin-view/notice/NoticeCreateView.vue";
-
+import NotificationTemplateView from "@/views/admin-view/NotificationTemplateView.vue"
 
 const routes = [
     {
@@ -204,7 +204,7 @@ const routes = [
             {
                 path: "templates",
                 name: "AdminTemplates",
-                component: { template: "<div>관리자 템플릿</div>" }
+                component: NotificationTemplateView
             },
             {
                 path: "inquiries",
