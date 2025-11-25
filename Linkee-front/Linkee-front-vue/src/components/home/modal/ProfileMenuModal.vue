@@ -1,6 +1,6 @@
 <script setup>
 import { defineProps, defineEmits } from "vue";
-
+import router from "@/router/index.js";
 const props = defineProps({
   modelValue: Boolean,
   user: {
@@ -17,9 +17,13 @@ const emit = defineEmits(["update:modelValue", "select"]);
 const close = () => emit("update:modelValue", false);
 
 const onSelect = (menu) => {
+  if (menu === 'logout') {
+    router.push('/login');
+  }
   emit("select", menu);
   close();
 };
+
 </script>
 
 <template>

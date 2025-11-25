@@ -33,7 +33,26 @@ import AdminLoginView from "@/views/login-view/AdminLoginView.vue";
 
 const routes = [
     {
-        path: '/',
+        path: "/",
+        redirect: '/login'
+    },
+    {
+        path: "/login",
+        name: 'Login',
+        component: LoginView
+    },
+    {
+        path: "/admin/login",
+        name: 'AdminLogin',
+        component: AdminLoginView
+    },
+    {
+        path: "/signup",
+        name: 'SignUp',
+        component: SignUpView
+    },
+    {
+        path: '/home',
         name: 'Home',
         component: HomeView
     },
@@ -52,21 +71,6 @@ const routes = [
         name: 'ChatGameRoom',
         component: ChatGameRoom,
         meta: { hideLayout: true }
-    },
-    {
-        path: "/login",
-        name: 'Login',
-        component: LoginView
-    },
-    {
-        path: "/admin/login",
-        name: 'AdminLogin',
-        component: AdminLoginView
-    },
-    {
-        path: "/signup",
-        name: 'SignUp',
-        component: SignUpView
     },
     {
         path: '/problem',
