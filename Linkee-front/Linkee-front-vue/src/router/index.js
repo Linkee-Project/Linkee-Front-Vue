@@ -33,6 +33,9 @@ import NoticeManagementView from "@/views/admin-view/notice/NoticeManagementView
 import InquiryManagementView from "@/views/admin-view/inquiry/InquiryManagementView.vue";
 import InquiryAnswerView from "@/views/admin-view/inquiry/InquiryAnswerView.vue";
 import ReportManagementView from "@/views/admin-view/report/ReportManagementView.vue";
+import ReportActionView from "@/views/admin-view/report/ReportActionView.vue";
+import NoticeDetailManagementView from "@/views/admin-view/notice/NoticeDetailManagementView.vue";
+import NoticeCreateView from "@/views/admin-view/notice/NoticeCreateView.vue";
 
 
 const routes = [
@@ -186,12 +189,12 @@ const routes = [
             {
                 path: "notices/:id",
                 name: "AdminNoticeDetail",
-                component: () => import("@/views/admin-view/notice/NoticeDetailManagementView.vue")
+                component: NoticeDetailManagementView
             },
             {
                 path: "notices/create",
                 name: "AdminNoticeCreate",
-                component: () => import("@/views/admin-view/notice/NoticeCreateView.vue")
+                component: NoticeCreateView
             },
             {
                 path: "problems",
@@ -217,6 +220,11 @@ const routes = [
                 path: "reports",
                 name: "AdminReports",
                 component: ReportManagementView
+            },
+            {
+                path: "reports/:id",
+                name: "AdminReportAction",
+                component: ReportActionView
             }
         ]
     }
