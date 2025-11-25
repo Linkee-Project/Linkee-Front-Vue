@@ -109,13 +109,14 @@
 </template>
 
 <script setup>
-import {ref, computed, reactive} from "vue";
+import {ref, computed, reactive, onMounted} from "vue";
 import BaseButton from "@/components/base/button/BaseButton.vue";
 import SearchForm from "@/components/base/form/SearchForm.vue";
 import PaginationButton from "@/components/base/button/PaginationButton.vue";
 import BaseModal from "@/components/base/modal/BaseModal.vue";
 import BaseInput from "@/components/base/input/BaseInput.vue";
 import {useRouter} from "vue-router";
+import { fetchGameRooms } from "@/api/chatRoomApi";
 
 const router = useRouter();
 const keyword = ref("");
@@ -134,17 +135,36 @@ const categories = ref([
 
 const selectedCategory = ref(null);
 
-const rooms = ref([
-  {id: 32, title: "너 자신을 알라딘", memberCount: 4, maxMemberCount: 5, categoryId: 1, categoryName: "카테고리"},
-  ...Array.from({length: 20}).map((_, idx) => ({
-    id: idx + 1,
-    title: "방제목",
-    memberCount: 3,
-    maxMemberCount: 5,
-    categoryId: (idx % 5) + 1,
-    categoryName: "카테고리",
-  })),
-]);
+
+// ============ 게임방 불러오기 ===========
+const rooms = ref([]);
+// 게임방 불러오기 함수
+const loadGameRooms = async () => {
+  try {
+    const result = await fetchGameRooms({ page: 1, size: 50 });
+    const content = result.content || [];
+
+    rooms.value = content.map(room => ({
+      id: room.chatRoomId,
+      title: room.chatRoomName,
+      memberCount: room.joinedCount,
+      maxMemberCount: room.roomCapacity,
+      categoryId: null,
+      categoryName: "자율방",
+      isPrivate: room.isPrivate,
+      ownerId: room.ownerId,
+    }));
+  } catch (err) {
+    console.error("게임방 조회 실패:", err);
+    alert("게임방을 불러오지 못했습니다.");
+  }
+};
+
+// 컴포넌트 로드시 실행
+onMounted(() => {
+  loadGameRooms();
+});
+// ///
 
 const newRoom = reactive({title: "", password: "", categoryId: null});
 

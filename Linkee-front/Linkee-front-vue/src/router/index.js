@@ -238,4 +238,15 @@ const router = createRouter({
     routes
 });
 
+
+// router.beforeEach((to, from, next) => {
+//     const token = localStorage.getItem("token");
+//
+//     if (to.meta.requiresAuth && !token) {
+//         return next("/login");        // 로그인 안 됨 → 로그인 페이지로
+//     }
+//
+//     next();
+// });
+
 export default router;

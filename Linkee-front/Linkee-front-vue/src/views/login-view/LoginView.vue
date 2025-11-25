@@ -4,7 +4,8 @@
       <h1 class="logo">🔗 Linkee</h1>
       <p class="subtitle">계정으로 로그인하거나 네이버 계정을 이용해 로그인하세요</p>
 
-      <form @submit.prevent>
+      <!-- 로그인 폼 -->
+      <form @submit.prevent="handleLogin">
         <input v-model="email" type="email" placeholder="이메일" />
         <input v-model="password" type="password" placeholder="비밀번호" />
 
@@ -13,6 +14,8 @@
         </button>
       </form>
 
+      <p class="message">{{ message }}</p>
+
       <div class="divider">또는</div>
 
       <!-- 네이버 로그인 -->
@@ -20,8 +23,6 @@
         <img src="https://static.nid.naver.com/oauth/small_g_in.PNG" alt="네이버 로고" />
         네이버로 로그인
       </button>
-
-      <p class="message"></p>
 
       <p class="signup-link">
         아직 계정이 없나요?
@@ -32,10 +33,36 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/authStore";
 
-const email = ref('');
-const password = ref('');
+const email = ref("");
+const password = ref("");
+const message = ref("");
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+// 🔥 로그인 실행
+const handleLogin = async () => {
+  if (!email.value || !password.value) {
+    message.value = "이메일과 비밀번호를 입력해주세요.";
+    return;
+  }
+
+  const res = await authStore.login({
+    userEmail: email.value,
+    password: password.value,
+  });
+
+  if (res.success) {
+    message.value = "로그인 성공!";
+    router.push("/home"); // 로그인 후 이동할 페이지
+  } else {
+    message.value = res.message;
+  }
+};
 </script>
 
 <style scoped>
@@ -55,7 +82,7 @@ body {
   align-items: center;
 }
 
-/* ✨ 움직이는 빛 배경 */
+/* 움직이는 빛 */
 body::before {
   content: "";
   position: absolute;
@@ -72,7 +99,7 @@ body::before {
   100% { transform: translate(-10%, -10%); }
 }
 
-/* 💎 로그인 카드 */
+/* 로그인 카드 */
 .login-card {
   position: relative;
   background: rgba(255, 255, 255, 0.9);
@@ -91,7 +118,7 @@ body::before {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* 🔗 로고 */
+/* 로고 */
 .logo {
   font-size: 2.4rem;
   color: #0094f6;
@@ -125,7 +152,7 @@ input:focus {
   box-shadow: 0 0 8px rgba(0, 148, 246, 0.3);
 }
 
-/* 로그인 버튼 */
+/* 버튼 */
 .btn-primary {
   width: 100%;
   padding: 0.9rem;
@@ -170,7 +197,7 @@ input:focus {
 .divider::before { left: 0; }
 .divider::after { right: 0; }
 
-/* 네이버 로그인 버튼 */
+/* 네이버 로그인 */
 .btn-naver {
   display: flex;
   align-items: center;
@@ -197,13 +224,14 @@ input:focus {
   margin-right: 8px;
 }
 
-/* 메시지 placeholder */
+/* 메시지 */
 .message {
   margin-top: 1rem;
   height: 1.2rem;
+  color: red;
 }
 
-/* 회원가입 링크 */
+/* 회원가입 */
 .signup-link {
   margin-top: 2rem;
   font-size: 0.9rem;
