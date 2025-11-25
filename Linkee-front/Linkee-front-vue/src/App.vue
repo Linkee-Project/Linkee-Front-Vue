@@ -28,7 +28,12 @@ provide("toast", {
     />
 
     <div class="main-layout"
-         v-if="!route.meta.hideLayout && !route.path.startsWith('/admin')">
+         v-if="!route.meta.hideLayout && !(
+            route.path.startsWith('/admin') ||
+            route.path.startsWith('/login') ||
+            route.path.startsWith('/signup'))"
+
+    >
 
       <div
           :class="{ 'router-view-container': !route.path.startsWith('/admin') }"
