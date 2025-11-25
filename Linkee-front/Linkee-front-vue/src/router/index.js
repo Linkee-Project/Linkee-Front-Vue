@@ -28,6 +28,7 @@ import GradeView from '@/views/mypage-view/GradeView.vue';
 import UserManagementView from '@/views/admin-view/UserManagementView.vue';
 import AdminHomeView from "@/views/admin-view/AdminHomeView.vue";
 import AdminDashBoard from "@/views/admin-view/AdminDashBoard.vue";
+import AdminLoginView from "@/views/login-view/AdminLoginView.vue";
 
 
 const routes = [
@@ -56,6 +57,11 @@ const routes = [
         path: "/login",
         name: 'Login',
         component: LoginView
+    },
+    {
+        path: "/admin/login",
+        name: 'AdminLogin',
+        component: AdminLoginView
     },
     {
         path: "/signup",
