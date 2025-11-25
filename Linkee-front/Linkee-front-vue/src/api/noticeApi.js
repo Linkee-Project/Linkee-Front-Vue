@@ -15,10 +15,25 @@ export async function fetchNoticeList({page = 0, size = 10} = {}) {
 
     //axios Get 요청
     //{params} QueryString으로 자동변환
-    const res = await api.get('/board/notices', { params, skipAuth: true, });
+    const res = await api.get('/board/notices', {
+        params,
+        //TODO: 관리자 로그인 완성되면 삭제
+        skipAuth: true,
+    });
 
     //pageResponse반환
     /*
     * {data, totalElements, ...}*/
     return res.data;
+}
+
+//공지 상세 조회
+export async function fetchNoticeDetail(noticeId) {
+    // GET /api/v1/board/notices/{noticeId}
+    const res = await api.get(`/board/notices/${noticeId}`, {
+        //TODO: 관리자 로그인 완성되면 삭제
+        skipAuth : true,
+    });
+
+    return res.data; //NoticeDetailResponseDto 반환
 }

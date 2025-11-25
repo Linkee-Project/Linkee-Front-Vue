@@ -83,6 +83,7 @@
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import BaseToast from "@/components/base/toast/BaseToast.vue";
+import { fetchNoticeDetail } from "@/api/noticeApi";
 
 const route = useRoute();
 const router = useRouter();
@@ -102,26 +103,30 @@ const notice = ref({
   content: "",
 });
 
+//공지사항 상세조회 API호출
+const loadDetail = async () => {
+  try {
+    const id = route.params.id;
+
+    const res = await fetchNoticeDetail(id);
+
+    notice.value = {
+      id,
+      title: res.noticeTitle,
+      content: res.noticeContent,
+      views: res.noticeViews,
+      reg: res.createdAt,
+      admin: res.adminName,
+      mod: res.updatedAt ?? "-",
+    };
+  }catch (e) {
+    console.error(e);
+    toastRef.value.showToast("공지 상세 조회 실패");
+  }
+}
+
 onMounted(() => {
-  const id = route.params.id;
-
-  notice.value = {
-    id,
-    title: `공지사항 ${id}번 상세 제목`,
-    admin: "관리자1번",
-    reg: "2025/11/10",
-    mod: "2025/11/10",
-    views: 24,
-    content: `
-공지사항 상세 내용입니다.
-여기에 긴 내용이 들어가고 스크롤이 생깁니다.
-더 길어지면 자동으로 스크롤 되는지 확인하세요.
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-Praesent commodo ligula nec nunc ullamcorper, vitae sollicitudin urna luctus.
-Mauris ut nulla id augue semper finibus.
-    `,
-  };
+  loadDetail();
 });
 
 const goBack = () => {
