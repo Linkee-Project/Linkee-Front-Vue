@@ -111,7 +111,7 @@ const notifications = ref([
   <header class="header-container">
 
     <!-- 로고 -->
-    <router-link to="/" class="logo-link">
+    <router-link to="/home" class="logo-link">
       <div class="logo-container">
         <img src="../../../../assets/linkee_character.svg" class="logo-img"/>
         <span class="logo-text">Linkee</span>

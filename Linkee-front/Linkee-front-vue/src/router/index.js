@@ -29,6 +29,14 @@ import UserManagementView from '@/views/admin-view/UserManagementView.vue';
 import AdminHomeView from "@/views/admin-view/AdminHomeView.vue";
 import AdminDashBoard from "@/views/admin-view/AdminDashBoard.vue";
 import AdminLoginView from "@/views/login-view/AdminLoginView.vue";
+import NoticeManagementView from "@/views/admin-view/notice/NoticeManagementView.vue";
+import InquiryManagementView from "@/views/admin-view/inquiry/InquiryManagementView.vue";
+import InquiryAnswerView from "@/views/admin-view/inquiry/InquiryAnswerView.vue";
+import ReportManagementView from "@/views/admin-view/report/ReportManagementView.vue";
+import ReportActionView from "@/views/admin-view/report/ReportActionView.vue";
+import NoticeDetailManagementView from "@/views/admin-view/notice/NoticeDetailManagementView.vue";
+import NoticeCreateView from "@/views/admin-view/notice/NoticeCreateView.vue";
+import NotificationTemplateView from "@/views/admin-view/NotificationTemplateView.vue"
 import ProblemManagementView from "@/views/admin-view/ProblemManagementView.vue";
 
 
@@ -177,10 +185,21 @@ const routes = [
                 name: "AdminUsers",
                 component: UserManagementView
             },
+
             {
                 path: "notices",
                 name: "AdminNotices",
-                component: { template: "<div>관리자 공지</div>" }
+                component: NoticeManagementView
+            },
+            {
+                path: "notices/:id",
+                name: "AdminNoticeDetail",
+                component: NoticeDetailManagementView
+            },
+            {
+                path: "notices/create",
+                name: "AdminNoticeCreate",
+                component: NoticeCreateView
             },
             {
                 path: "problems",
@@ -190,17 +209,27 @@ const routes = [
             {
                 path: "templates",
                 name: "AdminTemplates",
-                component: { template: "<div>관리자 템플릿</div>" }
+                component: NotificationTemplateView
             },
             {
                 path: "inquiries",
                 name: "AdminInquiries",
-                component: { template: "<div>관리자 문의</div>" }
+                component: InquiryManagementView
+            },
+            {
+                path: "inquiries/:id",
+                name: "AdminInquiryAnswer",
+                component: InquiryAnswerView
             },
             {
                 path: "reports",
                 name: "AdminReports",
-                component: { template: "<div>관리자 신고</div>" }
+                component: ReportManagementView
+            },
+            {
+                path: "reports/:id",
+                name: "AdminReportAction",
+                component: ReportActionView
             }
         ]
     }
@@ -213,5 +242,16 @@ const router = createRouter({
     history: createWebHistory(),
     routes
 });
+
+
+// router.beforeEach((to, from, next) => {
+//     const token = localStorage.getItem("token");
+//
+//     if (to.meta.requiresAuth && !token) {
+//         return next("/login");        // 로그인 안 됨 → 로그인 페이지로
+//     }
+//
+//     next();
+// });
 
 export default router;

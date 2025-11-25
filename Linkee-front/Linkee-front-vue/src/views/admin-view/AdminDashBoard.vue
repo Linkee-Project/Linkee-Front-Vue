@@ -30,7 +30,7 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 
 const goUserMain = () => {
-  router.push("/"); // ← 원하면 다른 경로로 변경
+  router.push("/home"); // ← 원하면 다른 경로로 변경
 };
 </script>
 
