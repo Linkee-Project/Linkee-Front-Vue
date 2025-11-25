@@ -29,6 +29,7 @@ import UserManagementView from '@/views/admin-view/UserManagementView.vue';
 import AdminHomeView from "@/views/admin-view/AdminHomeView.vue";
 import AdminDashBoard from "@/views/admin-view/AdminDashBoard.vue";
 import AdminLoginView from "@/views/login-view/AdminLoginView.vue";
+import ProblemManagementView from "@/views/admin-view/ProblemManagementView.vue";
 
 
 const routes = [
@@ -72,6 +73,9 @@ const routes = [
         component: ChatGameRoom,
         meta: { hideLayout: true }
     },
+    /* ------------------------------
+       문제게시판 라우트
+    ------------------------------ */
     {
         path: '/problem',
         name: 'ProblemList',
@@ -181,7 +185,7 @@ const routes = [
             {
                 path: "problems",
                 name: "AdminProblems",
-                component: { template: "<div>관리자 문제</div>" }
+                component: ProblemManagementView
             },
             {
                 path: "templates",
