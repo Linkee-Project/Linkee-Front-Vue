@@ -50,6 +50,17 @@
             <label>조회수</label>
             <p>{{ notice.views }}</p>
           </div>
+
+          <div class="form-group small">
+            <label>활성 여부</label>
+
+            <select v-if="editMode" v-model="notice.active" class="input-box">
+              <option value="Y">활성</option>
+              <option value="N">비활성</option>
+            </select>
+
+            <p v-else>{{ notice.active === 'Y' ? "활성" : "비활성" }}</p>
+          </div>
         </div>
 
         <!-- 내용 -->
@@ -83,6 +94,7 @@
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import BaseToast from "@/components/base/toast/BaseToast.vue";
+import {fetchNoticeDetail, updateNotice} from "@/api/noticeApi";
 
 const route = useRoute();
 const router = useRouter();
@@ -100,38 +112,71 @@ const notice = ref({
   mod: "",
   views: 0,
   content: "",
+  active: "Y",
 });
 
+//공지사항 상세조회 API호출
+const loadDetail = async () => {
+  try {
+    const id = route.params.id;
+
+    const res = await fetchNoticeDetail(id);
+
+    notice.value = {
+      id,
+      title: res.noticeTitle,
+      content: res.noticeContent,
+      views: res.noticeViews,
+      reg: res.createdAt,
+      admin: res.adminName,
+      mod: res.updatedAt ?? "-",
+      active: res.isActive,
+    };
+  }catch (e) {
+    console.error(e);
+    toastRef.value.showToast("공지 상세 조회 실패");
+  }
+}
+
 onMounted(() => {
-  const id = route.params.id;
-
-  notice.value = {
-    id,
-    title: `공지사항 ${id}번 상세 제목`,
-    admin: "관리자1번",
-    reg: "2025/11/10",
-    mod: "2025/11/10",
-    views: 24,
-    content: `
-공지사항 상세 내용입니다.
-여기에 긴 내용이 들어가고 스크롤이 생깁니다.
-더 길어지면 자동으로 스크롤 되는지 확인하세요.
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-Praesent commodo ligula nec nunc ullamcorper, vitae sollicitudin urna luctus.
-Mauris ut nulla id augue semper finibus.
-    `,
-  };
+  loadDetail();
 });
 
 const goBack = () => {
   router.push("/admin/notices");
 };
 
-const saveEdit = () => {
-  editMode.value = false;
-  toastRef.value.showToast("공지사항이 수정되었습니다!");
-};
+/* 수정 */
+const saveEdit = async () => {
+  try{
+    //백엔드로 보낼 데이터
+    const payload = {
+      noticeTitle: notice.value.title,
+      noticeContent: notice.value.content,
+      isActive: notice.value.active,
+    };
+
+    //백엔드로 수정 요청
+    /*
+    * updateNotice() 실행
+      axios로 PUT/PATCH 요청 전송
+      서버가 DB 업데이트
+      서버가 성공/실패 응답 보냄
+      응답이 올 때까지 기다림(await)
+      끝나면 다음 줄로 넘어감
+    * */
+    await updateNotice(notice.value.id, payload);
+
+    toastRef.value.showToast("공지사항 수정 완료!🎉");
+
+    editMode.value = false;
+
+    await loadDetail();
+  }catch (e) {
+    console.error(e);
+    toastRef.value.showToast("수정 실패 ⚠️");
+  }
+}
 </script>
 
 <style scoped>
