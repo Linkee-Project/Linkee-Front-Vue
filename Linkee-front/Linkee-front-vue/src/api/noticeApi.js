@@ -41,3 +41,12 @@ export async function updateNotice(noticeId, payload) {
 
     return res.data;
 }
+
+//공지 수정
+export async function createNotice(payload) {
+    const res = await api.post(
+        "/admin/board/notices/new",
+        payload
+    );
+    return res.data;
+}
