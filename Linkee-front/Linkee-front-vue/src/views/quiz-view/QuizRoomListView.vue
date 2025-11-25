@@ -108,15 +108,18 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { fetchQuizRooms, quickStart } from '@/api/quizRoomApi'
+
 import BaseButton from '@/components/base/button/BaseButton.vue'
 import PaginationButton from '@/components/base/button/PaginationButton.vue'
 import BaseModal from '@/components/base/modal/BaseModal.vue'
 import BaseInput from '@/components/base/input/BaseInput.vue'
-import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
+/* ========== 모달 상태 ========== */
 const isModalOpen = ref(false)
 const newRoom = ref({
   title: '',
@@ -124,20 +127,33 @@ const newRoom = ref({
   categoryId: null
 })
 
+/* ========== 검색 / 페이지 / 카테고리 ========== */
 const keyword = ref('')
 const page = ref(1)
 const pageSize = 12
-
-const categories = ref([
-  { id: 1, name: '전체' },
-  { id: 2, name: '자료구조' },
-  { id: 3, name: '네트워크' },
-  { id: 4, name: 'DB' },
-  { id: 5, name: '운영체제' }
-])
+//카테고리 연동 필요 
+const categories = ref([])
 
 const selectedCategory = ref(null)
-/* 모달 열기 */
+
+/* ========== 방 목록 (백엔드 연동) ========== */
+const rooms = ref([])
+
+/** 퀴즈방 목록 조회 */
+const loadRooms = async () => {
+  try {
+    const pageData = await fetchQuizRooms({ page: 1, size: 50 })
+    rooms.value = pageData?.content ?? []
+  } catch (e) {
+    console.error('퀴즈방 목록 조회 실패', e)
+  }
+}
+
+onMounted(() => {
+  loadRooms()
+})
+
+/* ========== 모달 열기 / 방 생성 ========= */
 const openCreateModal = () => {
   newRoom.value.title = ''
   newRoom.value.password = ''
@@ -145,7 +161,6 @@ const openCreateModal = () => {
   isModalOpen.value = true
 }
 
-/* 방 생성 */
 const createRoom = () => {
   if (!newRoom.value.title.trim()) {
     alert('방 제목을 입력해주세요')
@@ -157,33 +172,14 @@ const createRoom = () => {
   }
 
   console.log('생성된 방:', newRoom.value) // 추후 백엔드 연동 예정
-
   isModalOpen.value = false
 }
 
-
-const rooms = ref([
-  {
-    id: 32,
-    title: '나를 죽이지 못하는 고통은 나를 더 강하게 한다',
-    memberCount: 4,
-    maxMemberCount: 5,
-    categoryId: 1,
-    categoryName: 'DB'
-  },
-  ...Array.from({ length: 18 }).map((_, i) => ({
-    id: i + 1,
-    title: '방제목',
-    memberCount: 3,
-    maxMemberCount: 5,
-    categoryId: (i % 5) + 1,
-    categoryName: '카테고리'
-  }))
-])
-
+/* ========== 필터 + 프론트 페이징 ========== */
 const filteredRooms = computed(() => {
   const normalize = str => str.replace(/\s+/g, '').toLowerCase()
   const kw = normalize(keyword.value)
+
   return rooms.value.filter(r => {
     const matchKeyword = !kw || normalize(r.title).includes(kw)
     const matchCategory =
@@ -206,6 +202,7 @@ const handleSearch = () => {
   page.value = 1
 }
 
+/* ========== 방 클릭 시 대기방 이동 ========== */
 const handleRoomClick = room => {
   router.push({
     path: '/quiz/rooms/waiting',
@@ -215,7 +212,24 @@ const handleRoomClick = room => {
     }
   })
 }
+
+/* ========== 빠른 시작 ========== */
+const handleQuickStart = async () => {
+  try {
+    const room = await quickStart()
+    router.push({
+      path: '/quiz/rooms/waiting',
+      query: {
+        roomId: room.id,
+        title: room.title
+      }
+    })
+  } catch (e) {
+    alert('참여 가능한 방이 없습니다.')
+  }
+}
 </script>
+
 
 <style scoped>
 .quiz-room {
