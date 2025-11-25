@@ -1,23 +1,48 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import { fetchNoticeDetail } from "@/api/noticeApi";
 
 const route = useRoute();
 const router = useRouter();
 
-//전달받은 공지 아이디
 const noticeId = Number(route.params.id);
-//전달받은 query
-const notice = {
-  id: noticeId,
-  title: route.query.title || "제목 없음",
-  writer: route.query.writer || "관리자",
-  date: route.query.date || "-",
-  viewCount: route.query.viewCount || 0,
-  content:
-      `안녕하세요, Linkee 운영팀입니다.
-       해당 공지의 내용은 서버에서 받아오도록 변경될 예정입니다.`.trim()
+
+// API로 받아온 공지 상세 데이터
+const notice = ref({
+  title: "",
+  writer: "",
+  date: "",
+  viewCount: 0,
+  content: ""
+});
+
+// 날짜 포맷
+const formatDate = (date) => {
+  return date ? date.replace("T", " ").slice(0, 10) : "-";
 };
+
+// 상세 데이터 로드
+const loadNoticeDetail = async () => {
+  try {
+    const data = await fetchNoticeDetail(noticeId);
+
+    notice.value = {
+      title: data.noticeTitle,
+      writer: data.adminName ?? "관리자",
+      date: formatDate(data.createdAt),
+      viewCount: data.noticeViews,
+      content: data.noticeContent
+    };
+
+  } catch (e) {
+    console.error(e);
+    alert("공지 상세 조회 실패");
+    router.push("/notice");
+  }
+};
+
+onMounted(loadNoticeDetail);
 </script>
 
 <template>
@@ -54,6 +79,7 @@ const notice = {
     </div>
   </div>
 </template>
+
 
 <style scoped>
 /*전체 레이아웃*/
