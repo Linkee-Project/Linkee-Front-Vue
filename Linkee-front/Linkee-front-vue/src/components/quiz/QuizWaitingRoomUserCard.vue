@@ -1,14 +1,21 @@
 <template>
-  <div class="room-card">
+  <!-- 🔥 카드 전체 클릭 + 이벤트 전달 -->
+  <div class="room-card" @click="emitClickUser($event)">
+
     <!-- 카드 배경 -->
     <img src="@/assets/대기실 카드.svg" class="card-bg" />
 
-    <!-- 상태 태그 (방장 / 대기 / 준비) -->
-    <div :class="['status-tag', user.isLeader ? 'leader' : 'normal']">
-      {{ user.isLeader ? '방장' : (user.status === 'READY' ? '준비' : '대기') }}
+    <!-- 상태 태그 -->
+    <div
+        :class="[
+        'status-tag',
+        user.isLeader ? 'leader' : user.status === 'READY' ? 'ready' : 'normal'
+      ]"
+    >
+      {{ user.isLeader ? '방장' : user.status === 'READY' ? '준비' : '대기' }}
     </div>
 
-    <!-- 캐릭터 -->
+    <!-- 캐릭터 (이미 카드 클릭에 포함됨) -->
     <img src="@/assets/대기실 캐릭터.svg" class="character-img" />
 
     <!-- 닉네임 / 등급 -->
@@ -16,29 +23,39 @@
       <p class="nickname">{{ user.nickname }}</p>
       <p class="grade">{{ user.grade }}</p>
     </div>
+
   </div>
 </template>
 
 <script setup>
-defineProps({
+/* 사용자 정보 */
+const props = defineProps({
   user: {
     type: Object,
     required: true
   }
 })
+
+/* 이벤트 정의 */
+const emit = defineEmits(['click-user'])
+
+/* 🔥 클릭 시 event + user 전달 */
+function emitClickUser(event) {
+  emit('click-user', event, props.user)
+}
 </script>
 
 <style scoped>
-/* 상위 div 배경 제거 */
 .room-card {
   width: 100%;
   height: 100%;
   position: relative;
-  background: none !important;
+  background: none;
   overflow: hidden;
+  cursor: pointer; /* 클릭 가능 표시 */
 }
 
-/* 카드 SVG가 전체 덮도록 */
+/* 카드 배경 */
 .card-bg {
   position: absolute;
   top: 0;
@@ -48,7 +65,7 @@ defineProps({
   z-index: 1;
 }
 
-/* 캐릭터 위치 ( SVG의 흰 영역 기준 중앙) */
+/* 캐릭터 */
 .character-img {
   position: absolute;
   top: 70px;
@@ -57,12 +74,17 @@ defineProps({
   width: 120px;
   height: 120px;
   z-index: 2;
+  transition: transform 0.15s ease;
+}
+
+.character-img:hover {
+  transform: translateX(-50%) scale(1.05);
 }
 
 /* 상태 태그 */
 .status-tag {
   position: absolute;
-  top: 80px;
+  top: 60px;
   left: 15px;
   font-size: 13px;
   font-weight: 600;
@@ -81,11 +103,16 @@ defineProps({
   color: white;
 }
 
-/* 닉네임/등급 (SVG 하단 회색 영역 기준) */
+.status-tag.ready {
+  background: #FF977A;
+  color: white;
+}
+
+/* 닉네임 / 등급 */
 .info-area {
   position: absolute;
-  bottom: 60px;
-  right: 60px;
+  bottom: 50px;
+  right: 90px;
   width: 100%;
   text-align: center;
   z-index: 2;
@@ -98,6 +125,7 @@ defineProps({
 
 .grade {
   font-size: 12px;
+  font-weight: 600;
   color: #666;
 }
 </style>

@@ -113,7 +113,9 @@ import BaseButton from '@/components/base/button/BaseButton.vue'
 import PaginationButton from '@/components/base/button/PaginationButton.vue'
 import BaseModal from '@/components/base/modal/BaseModal.vue'
 import BaseInput from '@/components/base/input/BaseInput.vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 
 const isModalOpen = ref(false)
 const newRoom = ref({
@@ -163,7 +165,7 @@ const createRoom = () => {
 const rooms = ref([
   {
     id: 32,
-    title: '나를 죽이지 못하는 디비 쿼리는 나를 더 강하게 한다',
+    title: '나를 죽이지 못하는 고통은 나를 더 강하게 한다',
     memberCount: 4,
     maxMemberCount: 5,
     categoryId: 1,
@@ -205,7 +207,13 @@ const handleSearch = () => {
 }
 
 const handleRoomClick = room => {
-  console.log('방 클릭:', room)
+  router.push({
+    path: '/quiz/rooms/waiting',
+    query: {
+      roomId: room.id,
+      title: room.title
+    }
+  })
 }
 </script>
 
