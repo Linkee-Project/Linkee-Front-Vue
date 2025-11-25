@@ -111,6 +111,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchQuizRooms, quickStart } from '@/api/quizRoomApi'
+import api from '@/api/axios'
 
 import BaseButton from '@/components/base/button/BaseButton.vue'
 import PaginationButton from '@/components/base/button/PaginationButton.vue'
@@ -131,8 +132,26 @@ const newRoom = ref({
 const keyword = ref('')
 const page = ref(1)
 const pageSize = 12
-//카테고리 연동 필요 
-const categories = ref([])
+
+//카테고리
+const categories = ref([{ id: null, name: '전체' }])
+
+const loadCategories = async () => {
+  try {
+    const res = await api.get('/question/categories')
+    const list = res.data // List<CategoryResponseDto>
+
+    categories.value = [
+      { id: null, name: '전체' },
+      ...list.map(category => ({
+        id: category.categoryId,
+        name: category.categoryName,
+      })),
+    ]
+  } catch (e) {
+    console.error('카테고리 조회 실패', e)
+  }
+}
 
 const selectedCategory = ref(null)
 
@@ -140,17 +159,35 @@ const selectedCategory = ref(null)
 const rooms = ref([])
 
 /** 퀴즈방 목록 조회 */
-const loadRooms = async () => {
+const loadQuizRooms = async () => {
   try {
-    const pageData = await fetchQuizRooms({ page: 1, size: 50 })
-    rooms.value = pageData?.content ?? []
-  } catch (e) {
-    console.error('퀴즈방 목록 조회 실패', e)
+
+    const result = await fetchQuizRooms({
+      page: page.value,
+      size: pageSize
+    })
+
+    const content = result.content || [];
+
+    rooms.value = content.map(room => ({
+      id: room.quizRoomId,
+      title: room.roomTitle,
+      memberCount: room.joinedCount,
+      maxMemberCount: room.roomCapacity,
+      categoryId: room.categoryId,
+      categoryName: room.categoryName,
+      isPrivate: room.isPrivate
+    }));
+
+  } catch (err) {
+    console.error("퀴즈방 조회 실패:", err);
+    alert("퀴즈방을 불러오지 못했습니다.");
   }
-}
+};
 
 onMounted(() => {
-  loadRooms()
+  loadQuizRooms()
+  loadCategories()
 })
 
 /* ========== 모달 열기 / 방 생성 ========= */
