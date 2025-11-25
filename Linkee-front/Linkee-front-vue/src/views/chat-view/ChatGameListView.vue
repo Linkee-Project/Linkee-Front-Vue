@@ -1,3 +1,128 @@
+<script setup>
+import {ref, computed, reactive, onMounted, watch} from "vue";
+import BaseButton from "@/components/base/button/BaseButton.vue";
+import SearchForm from "@/components/base/form/SearchForm.vue";
+import PaginationButton from "@/components/base/button/PaginationButton.vue";
+import BaseModal from "@/components/base/modal/BaseModal.vue";
+import BaseInput from "@/components/base/input/BaseInput.vue";
+import {useRouter} from "vue-router";
+import { fetchGameRooms } from "@/api/chatRoomApi";
+
+const router = useRouter();
+
+const keyword = ref("");
+const page = ref(1);           // 프론트 페이지는 1부터 시작
+const pageSize = 12;           // 한 페이지 12개
+const totalPages = ref(1);     // 서버에서 받은 totalPages 저장
+const isModalOpen = ref(false);
+
+const categories = ref([
+  {id: null, name: "ALL"},
+  {id: 1, name: "카테고리1"},
+  {id: 2, name: "카테고리2"},
+  {id: 3, name: "카테고리3"},
+  {id: 4, name: "카테고리4"},
+  {id: 5, name: "카테고리5"},
+]);
+
+const selectedCategory = ref(null);
+
+// ==========================
+// 게임방 불러오기 (서버 페이징)
+// ==========================
+const rooms = ref([]);
+
+const loadGameRooms = async () => {
+  try {
+    const result = await fetchGameRooms({
+      page: page.value - 1,   // 백엔드는 0부터 시작
+      size: pageSize
+    });
+
+    const content = result.content || [];
+    totalPages.value = result.totalPages || 1;
+
+    rooms.value = content.map(room => ({
+      id: room.chatRoomId,
+      title: room.chatRoomName,
+      memberCount: room.joinedCount,
+      maxMemberCount: room.roomCapacity,
+      categoryId: null,
+      categoryName: "자율방",
+      isPrivate: room.isPrivate,
+      ownerId: room.ownerId
+    }));
+
+  } catch (err) {
+    console.error("게임방 조회 실패:", err);
+    alert("게임방을 불러오지 못했습니다.");
+  }
+};
+
+// 컴포넌트 로드시 실행
+onMounted(loadGameRooms);
+
+// 🔥 페이지 값 변경될 때 자동 서버 재요청
+watch(page, () => {
+  loadGameRooms();
+});
+
+// ==========================
+// 방 만들기 모달
+// ==========================
+const newRoom = reactive({title: "", password: "", categoryId: null});
+
+const selectCategory = (id) => {
+  selectedCategory.value = id;
+  page.value = 1;
+};
+
+const openCreateModal = () => {
+  newRoom.title = "";
+  newRoom.password = "";
+  newRoom.categoryId = null;
+  isModalOpen.value = true;
+};
+
+const createRoom = () => {
+  alert("방 만들기 기능은 서버 연동 필요!");
+};
+
+// ==========================
+// 방 클릭
+// ==========================
+const handleRoomClick = (room) => {
+  router.push({
+    name: "ChatGameRoom",
+    params: { roomId: room.id },
+    query: { title: room.title }
+  });
+};
+
+// ==========================
+// 검색 및 카테고리 필터링 (프론트)
+// ==========================
+const handleSearch = (value) => {
+  keyword.value = value;
+  page.value = 1;
+};
+
+const filteredRooms = computed(() => {
+  const normalize = str => str.replace(/\s+/g, "").toLowerCase();
+  const kw = normalize(keyword.value);
+
+  return rooms.value.filter(room => {
+    const title = normalize(room.title);
+    const matchKeyword = !kw || title.includes(kw);
+    const matchCategory = !selectedCategory.value || room.categoryId === selectedCategory.value;
+    return matchKeyword && matchCategory;
+  });
+});
+
+// 서버 페이징이므로 여기서는 rooms 그대로 반환
+const pagedRooms = computed(() => filteredRooms.value);
+</script>
+
 <template>
   <div class="free-board">
     <!-- 헤더 -->
@@ -6,7 +131,6 @@
       <p>자유로운 주제로 같이 토론해 보아요</p>
     </div>
 
-    <!-- 본문 -->
     <div class="free-board-body">
       <!-- 카테고리 -->
       <section class="free-board__category">
@@ -22,7 +146,7 @@
         </BaseButton>
       </section>
 
-      <!-- 검색 + 방 만들기 -->
+      <!-- 검색 -->
       <section class="free-board__search">
         <SearchForm v-model="keyword" @search="handleSearch"/>
         <BaseButton
@@ -42,9 +166,8 @@
             :key="room.id"
             color="white"
             size="medium"
-            class="room-card-btn"
-            :disabled="room.disabled"
             @click="handleRoomClick(room)"
+            class="room-card-btn"
         >
           <div class="room-card__header">
             <span class="room-card__badge">{{ room.id }}</span>
@@ -61,7 +184,7 @@
         </div>
       </section>
 
-      <!-- 페이지네이션 -->
+      <!-- 🔥 서버 기반 페이지네이션 -->
       <section class="free-board__pagination">
         <PaginationButton
             v-model:currentPage="page"
@@ -83,7 +206,6 @@
         <BaseInput v-model="newRoom.password" type="password" placeholder="비밀번호"/>
       </label>
 
-      <!-- 카테고리 카드 선택 -->
       <label>
         카테고리
         <template class="modal-category-cards">
@@ -108,144 +230,6 @@
   </BaseModal>
 </template>
 
-<script setup>
-import {ref, computed, reactive, onMounted} from "vue";
-import BaseButton from "@/components/base/button/BaseButton.vue";
-import SearchForm from "@/components/base/form/SearchForm.vue";
-import PaginationButton from "@/components/base/button/PaginationButton.vue";
-import BaseModal from "@/components/base/modal/BaseModal.vue";
-import BaseInput from "@/components/base/input/BaseInput.vue";
-import {useRouter} from "vue-router";
-import { fetchGameRooms } from "@/api/chatRoomApi";
-
-const router = useRouter();
-const keyword = ref("");
-const page = ref(1);
-const pageSize = 12;
-const isModalOpen = ref(false);
-
-const categories = ref([
-  {id: null, name: "ALL"},
-  {id: 1, name: "카테고리1"},
-  {id: 2, name: "카테고리2"},
-  {id: 3, name: "카테고리3"},
-  {id: 4, name: "카테고리4"},
-  {id: 5, name: "카테고리5"},
-]);
-
-const selectedCategory = ref(null);
-
-
-// ============ 게임방 불러오기 ===========
-const rooms = ref([]);
-// 게임방 불러오기 함수
-const loadGameRooms = async () => {
-  try {
-    const result = await fetchGameRooms({ page: 0, size: 50 });
-    const content = result.content || [];
-
-    rooms.value = content.map(room => ({
-      id: room.chatRoomId,
-      title: room.chatRoomName,
-      memberCount: room.joinedCount,
-      maxMemberCount: room.roomCapacity,
-      categoryId: null,
-      categoryName: "자율방",
-      isPrivate: room.isPrivate,
-      ownerId: room.ownerId,
-    }));
-  } catch (err) {
-    console.error("게임방 조회 실패:", err);
-    alert("게임방을 불러오지 못했습니다.");
-  }
-};
-
-// 컴포넌트 로드시 실행
-onMounted(() => {
-  loadGameRooms();
-});
-// ///
-
-const newRoom = reactive({title: "", password: "", categoryId: null});
-
-// --- 클릭 이벤트 핸들러 ---
-const selectCategory = (id) => {
-  selectedCategory.value = id;
-  page.value = 1;
-};
-
-const openCreateModal = () => {
-  newRoom.title = "";
-  newRoom.password = "";
-  newRoom.categoryId = null;
-  isModalOpen.value = true;
-};
-
-const createRoom = () => {
-  if (!newRoom.title.trim()) {
-    alert("방 제목을 입력해주세요");
-    return;
-  }
-  if (newRoom.categoryId === null) {
-    alert("카테고리를 선택해주세요");
-    return;
-  }
-
-  const category = categories.value.find(c => c.id === newRoom.categoryId) || {name: "ALL"};
-  const id = rooms.value.length ? Math.max(...rooms.value.map(r => r.id)) + 1 : 1;
-
-  rooms.value.unshift({
-    id,
-    title: newRoom.title,
-    memberCount: 1,
-    maxMemberCount: 5,
-    categoryId: newRoom.categoryId,
-    categoryName: category.name,
-    password: newRoom.password || null,
-  });
-
-  newRoom.title = "";
-  newRoom.password = "";
-  newRoom.categoryId = null;
-  isModalOpen.value = false;
-  page.value = 1;
-};
-
-
-const handleRoomClick = (room) => {
-  console.log("방 클릭", room);
-  router.push({
-    name: "ChatGameRoom",
-    params: { roomId: room.id },
-    query: { title: room.title }
-  });
-};
-
-const handleSearch = (value) => {
-  keyword.value = value;
-  page.value = 1;
-};
-
-// --- 필터 + 페이지네이션 ---
-const filteredRooms = computed(() => {
-  const normalize = str => str.replace(/\s+/g, "").toLowerCase();
-  const kw = normalize(keyword.value);
-  return rooms.value.filter(room => {
-    const title = normalize(room.title);
-    const matchKeyword = !kw || title.includes(kw);
-    const matchCategory = !selectedCategory.value || room.categoryId === selectedCategory.value;
-    return matchKeyword && matchCategory;
-  });
-});
-
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredRooms.value.length / pageSize)));
-
-const pagedRooms = computed(() => {
-  if (page.value > totalPages.value) page.value = totalPages.value;
-  const start = (page.value - 1) * pageSize;
-  return filteredRooms.value.slice(start, start + pageSize);
-});
-</script>
 
 <style scoped>
 /* 전체 페이지 (레이아웃 안에서 공간 채움) */
