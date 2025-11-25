@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+
 import ComponentTest from "@/views/ComponentTest.vue";
 import HomeView from "@/views/home-view/HomeView.vue";
 import ChatGameListView from "@/views/chat-view/ChatGameListView.vue";
@@ -9,6 +10,7 @@ import ProblemListView from '@/views/problem-view/ProblemListView.vue';
 import ProblemDetailView from "@/views/problem-view/ProblemDetailView.vue";
 import ProblemCreateView from "@/views/problem-view/ProblemCreateView.vue";
 import ProblemEditView from "@/views/problem-view/ProblemEditView.vue";
+import QuizRoomListView from "@/views/quiz-view/QuizRoomListView.vue";
 
 // 공지사항
 import NoticeView from "@/views/notice-view/NoticeView.vue";
@@ -37,8 +39,15 @@ import ReportActionView from "@/views/admin-view/report/ReportActionView.vue";
 import NoticeDetailManagementView from "@/views/admin-view/notice/NoticeDetailManagementView.vue";
 import NoticeCreateView from "@/views/admin-view/notice/NoticeCreateView.vue";
 import NotificationTemplateView from "@/views/admin-view/NotificationTemplateView.vue"
+import QuizRoomWaitingView from "@/views/quiz-view/QuizRoomWaitingView.vue";
 
 const routes = [
+// {} 라우터 설정
+
+    /*{
+        path: '/',
+        redirect: '/login'
+    },*/
     {
         path: "/",
         redirect: '/login'
@@ -78,7 +87,30 @@ const routes = [
         name: 'ChatGameRoom',
         component: ChatGameRoom,
         meta: { hideLayout: true }
+
     },
+    {
+        path: "/login",
+        name: 'Login',
+        component: LoginView
+    },
+    {
+        path: "/signup",
+        name: 'SignUp',
+        component: SignUpView
+    },
+    {
+        path: "/quiz/rooms",
+        name: 'QuizRoomList',
+        component: QuizRoomListView
+    },
+    {
+        path: "/quiz/rooms/waiting",
+        name: 'QuizRoomWaiting',
+        component: QuizRoomWaitingView,
+
+    },
+
     {
         path: '/problem',
         name: 'ProblemList',
