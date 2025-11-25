@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
 import ComponentTest from "@/views/ComponentTest.vue";
 import HomeView from "@/views/home-view/HomeView.vue";
 import ChatGameListView from "@/views/chat-view/ChatGameListView.vue";
@@ -43,14 +42,9 @@ import ProblemManagementView from "@/views/admin-view/ProblemManagementView.vue"
 
 import QuizRoomWaitingView from "@/views/quiz-view/QuizRoomWaitingView.vue";
 import QuizInGameView from "@/views/quiz-view/QuizInGameView.vue";
+import {useAuthStore} from "@/stores/authStore.js";
 
 const routes = [
-// {} 라우터 설정
-
-    /*{
-        path: '/',
-        redirect: '/login'
-    },*/
     {
         path: "/",
         redirect: '/login'
@@ -274,14 +268,37 @@ const router = createRouter({
 });
 
 
-// router.beforeEach((to, from, next) => {
-//     const token = localStorage.getItem("token");
-//
-//     if (to.meta.requiresAuth && !token) {
-//         return next("/login");        // 로그인 안 됨 → 로그인 페이지로
-//     }
-//
-//     next();
-// });
+router.beforeEach((to, from) => {
+    const authStore = useAuthStore();
+
+    // 🔹 새로고침 대비 → localStorage 값 복원
+    if (!authStore.accessToken || !authStore.user) {
+        authStore.loadFromStorage();
+    }
+
+    const isLoggedIn = authStore.isLoggedIn;
+    const isAdmin = authStore.isAdmin;
+
+    // 🔹 로그인 페이지 / 회원가입 페이지만 비로그인 허용
+    if (to.path === "/login" || to.path === "/signup" || to.path === "/admin/login") {
+        return true;
+    }
+
+    // 1) 로그인 안 되어 있으면 → 로그인 페이지 강제 이동
+    if (!isLoggedIn) {
+        return {
+            name: "Login",
+            query: { redirect: to.fullPath }
+        };
+    }
+
+    // 2) /admin/** 접근 → 관리자만 허용
+    if (to.path.startsWith("/admin") && !isAdmin) {
+        return { name: "Home" };
+    }
+
+    // 통과
+    return true;
+});
 
 export default router;

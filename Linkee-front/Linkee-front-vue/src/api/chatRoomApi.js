@@ -1,88 +1,42 @@
-import api from "./axios";
+import api from "@/api/axios.js";
 
-/**
- * 전체 게임방 목록 조회
- * GET /api/v1/chat/rooms/game
- */
-export async function fetchGameRooms({ page = 1, size = 20 } = {}) {
+/** 게임방 목록 */
+export async function fetchGameRooms({ page = 0, size = 20 } = {}) {
     const res = await api.get("/chat/rooms/game", {
-        params: { page, size },
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`, // 또는 Pinia store
-        },
+        params: { page, size }
     });
 
-    return res.data; // PageResponse<GameRoomListResponseDto>
+    console.log(res.data)
+    return res.data;  // <- 서버가 보내는 PageResponse 그대로 반환
 }
 
-/**
- * 특정 게임방 정보 조회? (원하면 추가)
- * GET /api/v1/chat/rooms/{roomId}
- * 백엔드에 존재하면 구현, 없으면 생략
- */
+/** 게임방 상세 */
 export async function fetchGameRoomDetail(roomId) {
-    const res = await api.get(`/chat/rooms/${roomId}`, {
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-    });
+    const res = await api.get(`/chat/rooms/${roomId}`);
     return res.data.data;
 }
 
-/**
- * 게임방 생성
- * POST /api/v1/chat/rooms
- */
+/** 게임방 생성 */
 export async function createGameRoom(payload) {
-    const res = await api.post("/chat/rooms", payload, {
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-    });
-
-    return res.data; // 성공하면 ApiResponse or DTO
+    const res = await api.post("/chat/rooms", payload);
+    return res.data;
 }
 
-/**
- * 방 입장 (비밀번호 있을 경우 roomCode 포함)
- * POST /api/v1/chat/rooms/{roomId}/join
- */
+/** 입장 */
 export async function joinGameRoom(roomId, roomCode = null) {
-    const body = roomCode !== null ? { roomCode } : {};
-
-    const res = await api.post(`/chat/rooms/${roomId}/join`, body, {
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-    });
-
-    return res.data; // ChatRoomJoinResponseDto
+    const body = roomCode ? { roomCode } : {};
+    const res = await api.post(`/chat/rooms/${roomId}/join`, body);
+    return res.data;
 }
 
-/**
- * 해당 방의 현재 참여자 목록 조회
- * GET /api/v1/chat/rooms/{roomId}/members
- */
+/** 멤버 목록 */
 export async function fetchRoomMembers(roomId) {
-    const res = await api.get(`/chat/rooms/${roomId}/members`, {
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-    });
-
-    return res.data; // List<ChatMemberDto>
+    const res = await api.get(`/chat/rooms/${roomId}/members`);
+    return res.data;
 }
 
-/**
- * 특정 방의 메시지 목록 조회
- * GET /api/v1/chat/rooms/{roomId}/messages
- */
+/** 메시지 */
 export async function fetchRoomMessages(roomId) {
-    const res = await api.get(`/chat/rooms/${roomId}/messages`, {
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-    });
-
-    return res.data; // Mongo message list
+    const res = await api.get(`/chat/rooms/${roomId}/messages`);
+    return res.data;
 }
