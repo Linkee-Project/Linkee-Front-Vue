@@ -9,6 +9,7 @@ import ProblemListView from '@/views/problem-view/ProblemListView.vue';
 import ProblemDetailView from "@/views/problem-view/ProblemDetailView.vue";
 import ProblemCreateView from "@/views/problem-view/ProblemCreateView.vue";
 import ProblemEditView from "@/views/problem-view/ProblemEditView.vue";
+import QuizRoomListView from "@/views/quiz-view/QuizRoomListView.vue";
 
 // 공지사항
 import NoticeView from "@/views/notice-view/NoticeView.vue";
@@ -37,6 +38,9 @@ import ReportActionView from "@/views/admin-view/report/ReportActionView.vue";
 import NoticeDetailManagementView from "@/views/admin-view/notice/NoticeDetailManagementView.vue";
 import NoticeCreateView from "@/views/admin-view/notice/NoticeCreateView.vue";
 import NotificationTemplateView from "@/views/admin-view/NotificationTemplateView.vue"
+import ProblemManagementView from "@/views/admin-view/ProblemManagementView.vue";
+
+import QuizRoomWaitingView from "@/views/quiz-view/QuizRoomWaitingView.vue";
 import {useAuthStore} from "@/stores/authStore.js";
 
 const routes = [
@@ -79,7 +83,22 @@ const routes = [
         name: 'ChatGameRoom',
         component: ChatGameRoom,
         meta: { hideLayout: true }
+
     },
+    {
+        path: "/quiz/rooms",
+        name: 'QuizRoomList',
+        component: QuizRoomListView
+    },
+    {
+        path: "/quiz/rooms/waiting",
+        name: 'QuizRoomWaiting',
+        component: QuizRoomWaitingView,
+
+    },
+    /* ------------------------------
+       문제게시판 라우트
+    ------------------------------ */
     {
         path: '/problem',
         name: 'ProblemList',
@@ -200,7 +219,7 @@ const routes = [
             {
                 path: "problems",
                 name: "AdminProblems",
-                component: { template: "<div>관리자 문제</div>" }
+                component: ProblemManagementView
             },
             {
                 path: "templates",
