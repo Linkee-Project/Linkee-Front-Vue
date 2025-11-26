@@ -50,12 +50,12 @@
             :key="idx"
             class="option-row"
         >
-          <span class="option-label">{{ idx + 1 }}번</span>
+          <span class="option-label">{{ opt.index }}번</span>
           <input
-              v-model="inner.options[idx]"
+              v-model="opt.text"
               type="text"
               class="text-input"
-              :placeholder="`${idx + 1}번 보기를 입력하세요.`"
+              :placeholder="`${opt.index}번 보기를 입력하세요.`"
           />
         </div>
       </div>
@@ -130,9 +130,17 @@ const inner = ref(clone(props.modelValue))
 watch(
     () => props.modelValue,
     (val) => {
-      inner.value = clone(val)
+      // options가 문자열 배열일 경우 객체 배열로 변환
+      if (Array.isArray(val.options) && val.options.every(opt => typeof opt === 'string')) {
+        inner.value = {
+          ...clone(val),
+          options: val.options.map((text, index) => ({ index: index + 1, text: text }))
+        };
+      } else {
+        inner.value = clone(val)
+      }
     },
-    { deep: true }
+    { deep: true, immediate: true } // immediate: true를 추가하여 컴포넌트 마운트 시 초기값 동기화
 )
 
 // 폼 → 부모 동기화

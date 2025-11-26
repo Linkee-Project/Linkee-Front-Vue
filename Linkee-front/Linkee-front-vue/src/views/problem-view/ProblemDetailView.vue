@@ -1,7 +1,7 @@
 <template>
   <div class="problem-page">
     <div class="page-inner">
-      <!-- 제목  -->
+       <!-- 제목  -->
       <header class="problem-header">
         <button class="back-btn" @click="goList">
           <img class="back-icon" :src="problemBackIcon" alt="뒤로 가기" />
@@ -9,16 +9,22 @@
         <h1 class="page-title">문제게시판</h1>
       </header>
 
+      <!-- 로딩 중일 때 -->
+      <div v-if="detailLoading" class="loading-card">
+        문제 정보를 불러오는 중입니다...
+      </div>
+
       <!-- 문제 상세 -->
-      <section class="problem-detail-card">
+      <section v-else-if="problemDetail" class="problem-detail-card">
         <header class="detail-header">
           <div>
-            <span class="problem-tag">{{ problem.category }}</span>
-            <h2 class="detail-title">{{ problem.title }}</h2>
+            <!-- TODO: 백엔드 응답에 맞게 키 이름 확인 필요 -->
+            <span class="problem-tag">{{ problemDetail.categoryName }}</span>
+            <h2 class="detail-title">{{ problemDetail.questionTitle }}</h2>
             <div class="detail-meta">
-              <span>작성자 : {{ problem.writer }}</span>
-              <span>등록일 : {{ problem.createdAt }}</span>
-              <span>조회수 : {{ problem.views }}</span>
+              <span>작성자 : {{ problemDetail.userNickname }}</span>
+              <span>등록일 : {{ formatDate(problemDetail.createdAt) }}</span>
+              <span>조회수 : {{ problemDetail.viewCount }}</span>
             </div>
           </div>
 
@@ -29,7 +35,7 @@
             <button
                 v-if="!isOwner"
                 class="bookmark-btn"
-                :class="{ active: problem.bookmarked }"
+                :class="{ active: problemDetail.bookmarked }"
                 @click="toggleBookmark"
             >
               <img class="bookmark-icon" :src="problemBookMarkIcon" alt="북마크" />
@@ -52,22 +58,30 @@
         <!-- 문제 내용 -->
         <section class="detail-section">
           <h3 class="section-title">문제</h3>
+          <!-- TODO: 백엔드 응답에 맞게 키 이름 확인 필요 (ex: problemDetail.content) -->
           <p class="section-content">
-            {{ problem.content }}
+            {{ problemDetail.content }}
           </p>
         </section>
 
         <!-- 보기 -->
-        <section class="detail-section" v-if="problem.options.length">
+        <!-- TODO: 백엔드 응답에 맞게 키 이름 확인 필요 (ex: problemDetail.options) -->
+        <section class="detail-section" v-if="problemDetail.options && problemDetail.options.length">
           <h3 class="section-title">보기</h3>
           <div class="option-box">
-            <div v-for="(opt, idx) in problem.options" :key="idx" class="option-row">
-              <span class="option-step">{{ idx + 1 }}번</span>
-              <span>{{ opt }}</span>
+            <div v-for="(opt, idx) in problemDetail.options" :key="opt.optionId" class="option-row">
+              <span class="option-step">{{ opt.optionIndex }}번</span>
+              <span>{{ opt.optionText }}</span>
             </div>
           </div>
 
-          <div class="answer-text">정답 : {{ problem.answer }}번</div>
+          <!-- 정답 표시: options 배열에서 isCorrected가 'Y'인 항목을 찾아 표시 -->
+          <div class="answer-text">
+            정답 :
+            <template v-for="(opt, idx) in problemDetail.options">
+                <span v-if="opt.isCorrected === 'Y'">{{ opt.optionIndex }}번 {{ opt.optionText }}</span>
+            </template>
+          </div>
         </section>
 
         <div class="detail-action-row">
@@ -77,113 +91,15 @@
         </div>
       </section>
 
+      <!-- 데이터가 없을 때 -->
+      <div v-else class="loading-card">
+        요청한 문제 정보를 찾을 수 없습니다.
+      </div>
+
+
       <!-- ===================== 댓글 ===================== -->
-      <section class="comment-section">
-        <h2 class="comment-title">댓글</h2>
-
-        <!-- 상단 댓글 입력 -->
-        <div class="comment-form">
-          <!-- 아바타 + 닉네임 묶음 -->
-          <div class="comment-user-block">
-            <div class="avatar">
-              <img :src="profileImg" alt="프로필" class="avatar-img" />
-            </div>
-            <div class="comment-user-name">
-              {{ currentUserName }}
-            </div>
-          </div>
-
-          <!-- 인풋 영역 -->
-          <input v-model="newComment" type="text" placeholder="댓글을 입력하세요" @keyup.enter="addComment"/>
-          <BaseButton color="blue" size="small" class="comment-submit" @click="addComment">등록</BaseButton>
-        </div>
-
-
-        <!-- 댓글 + 대댓글 목록 -->
-        <div class="comment-list">
-          <!-- 댓글 + 그에 대한 대댓글들 -->
-          <div v-for="comment in topLevelComments" :key="comment.id" class="comment-thread">
-            <!-- 부모 댓글 -->
-            <div class="comment-item">
-              <div class="avatar small">
-                <img :src="profileImg" alt="프로필" class="avatar-img" />
-              </div>
-
-              <div class="comment-body">
-                <div class="comment-header">
-                  <span class="name">{{ comment.author }}</span>
-                  <span class="date">{{ comment.date }} {{ comment.time }}</span>
-                </div>
-
-                <!-- 수정 모드 -->
-                <div v-if="editingId === comment.id">
-                  <input v-model="editText" type="text" class="edit-input"/>
-                  <div class="edit-actions">
-                    <BaseButton color="blue" size="small" @click="saveEdit(comment.id)">수정</BaseButton>
-                    <BaseButton color="gray" size="small" @click="cancelEdit">취소</BaseButton>
-                  </div>
-                </div>
-
-                <!-- 일반 -->
-                <div v-else class="comment-content">
-                  {{ comment.content }}
-                </div>
-
-                <!-- 액션 영역 -->
-                <div class="comment-actions">
-                  <span @click="openReply(comment.id)">답글</span>
-                  <span v-if="comment.mine" @click="startEdit(comment)">수정</span>
-                  <span v-if="comment.mine" class="delete" @click="deleteComment(comment.id)">삭제</span>
-                </div>
-
-
-                <!-- 대댓글 입력창  -->
-                <div v-if="replyTargetId === comment.id" class="reply-form">
-                  <div class="avatar small">
-                    <img :src="profileImg" alt="프로필" class="avatar-img" />
-                  </div>
-                  <input v-model="replyText" type="text" placeholder="답글을 입력하세요" @keyup.enter="submitReply(comment.id)"/>
-                  <BaseButton color="blue" size="small" class="comment-submit" @click="submitReply(comment.id)">등록</BaseButton>
-                </div>
-              </div>
-            </div>
-
-            <!-- 대댓글 리스트 -->
-            <div v-for="reply in repliesFor(comment.id)" :key="reply.id" class="comment-item reply">
-              <div class="avatar small">
-                <img :src="profileImg" alt="프로필" class="avatar-img" />
-              </div>
-
-              <div class="comment-body">
-                <div class="comment-header">
-                  <span class="name">{{ reply.author }}</span>
-                  <span class="date">{{ reply.date }} {{ reply.time }}</span>
-                </div>
-
-                <!-- 대댓글 수정 -->
-                <div v-if="editingId === reply.id">
-                  <input v-model="editText" type="text" class="edit-input"/>
-                  <div class="edit-actions">
-                    <BaseButton color="blue" size="small" @click="saveEdit(reply.id)">수정</BaseButton>
-                    <BaseButton color="gray" size="small" @click="cancelEdit">취소</BaseButton>
-                  </div>
-                </div>
-
-                <!-- 대댓글 일반  -->
-                <div v-else class="comment-content">
-                  {{ reply.content }}
-                </div>
-
-                <div v-if="reply.mine" class="comment-actions">
-                  <span @click="startEdit(reply)">수정</span>
-                  <span class="delete" @click="deleteComment(reply.id)">삭제</span>
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <CommentList v-if="problemDetail" :question-id="problemDetail.questionId" />
+      <!-- ================================================= -->
       <!-- ================================================= -->
     </div>
   </div>
@@ -191,9 +107,13 @@
 
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useProblemStore } from '@/stores/problemStore'
+import { useAuthStore } from '@/stores/authStore' // authStore 추가
 import BaseButton from '@/components/base/button/BaseButton.vue'
+import CommentList from '@/components/problem/CommentList.vue'; // CommentList 컴포넌트 추가
 
 //icon
 import problemBackIcon from '@/assets/problem_back_icon.svg'
@@ -203,174 +123,82 @@ import profileImg from '@/assets/profile_img.svg'
 
 const router = useRouter()
 const route = useRoute()
+const problemStore = useProblemStore()
+const authStore = useAuthStore() // authStore 인스턴스 생성
 
-// 로그인 된 유저 ID (더미 데이터)
-const currentUserId = ref('USER-123')
+// Store에서 상태 가져오기
+const { problemDetail, detailLoading } = storeToRefs(problemStore)
+const { user: currentUser, isLoggedIn } = storeToRefs(authStore) // authStore에서 사용자 정보 가져오기
 
-// TODO: 실제 API 연동 시 교체
-
-const problem = ref({
-  id: Number(route.params.id),
-  category: '네트워크',
-  title: 'TCP 3-way handshake 흐름을 묻는 문제',
-  writer: '김명지니어스',
-  createdAt: '2025-11-17',
-  views: 15,
-  writerId: 'USER-123',
-  bookmarked: false,
-  content:
-      'TCP 3-way handshake의 각 단계(SYN, SYN+ACK, ACK)를 순서대로 설명하세요.',
-  options: [
-    '클라이언트가 ACK를 먼저 보낸다.',
-    '클라이언트 SYN → 서버 SYN+ACK → 클라이언트 ACK.',
-    '서버가 두 번 SYN을 보낸다.',
-    '자동으로 연결된다.'
-  ],
-  answer: 2
-})
-
-// 작성자 본인인지 여부
+// 🚨 중요: 백엔드 응답에 'writerId'가 있는지, authStore의 user 객체에 'userId'가 있는지 확인 필요
 const isOwner = computed(
-    () => problem.value.writerId === currentUserId.value
+  () => isLoggedIn.value && problemDetail.value?.userId === currentUser.value?.userId
 )
 
-const currentUserName = ref('김이긴')
+// 댓글 작성자 이름으로 현재 로그인된 사용자 닉네임 사용
+const currentUserName = computed(() => currentUser.value?.nickname || '방문자')
 
-const comments = ref([
-  {
-    id: 1,
-    parentId: null,
-    author: 'dzma',
-    content: '좋은 문제네요.',
-    date: '2025-11-17',
-    time: '13:21',
-    mine: false
-  },
-  {
-    id: 2,
-    parentId: 1,
-    author: '김이긴',
-    content: '저도 좋은 문제라고 생각합니다.',
-    date: '2025-11-18',
-    time: '13:21',
-    mine: true
+
+// 🚨 권한 확인 디버깅용
+watchEffect(() => {
+  if (problemDetail.value && currentUser.value) {
+    console.log('--- 권한 확인 디버깅 ---');
+    console.log('문제 작성자 ID (userId):', problemDetail.value.userId, `(타입: ${typeof problemDetail.value.userId})`);
+    console.log('로그인 사용자 ID (userId):', currentUser.value.userId, `(타입: ${typeof currentUser.value.userId})`);
+    console.log('isOwner 계산 결과:', isOwner.value);
+    console.log('--------------------------');
   }
-])
+});
 
-// 상단 새 댓글 입력
-const newComment = ref('')
 
-// 대댓글 입력용
-const replyTargetId = ref(null)   // 어느 댓글에 대댓글을 다는지
-const replyText = ref('')
+// 라이프사이클 훅: 컴포넌트가 마운트될 때 데이터 로드
+onMounted(() => {
+  const questionId = route.params.id;
+  if (questionId) {
+    problemStore.fetchProblemDetail(questionId);
+  }
+})
 
-const editingId = ref(null)      // 지금 수정 중인 댓글 id
-const editText = ref('')         // 수정 입력값
-
+// 날짜 포맷 함수
+const formatDate = (dateStr) => {
+  if (!dateStr) return ''
+  return dateStr.slice(0, 10)
+}
 
 // 수정 이동
 const goEdit = () => {
-  router.push({ name: 'ProblemEdit', params: { id: problem.value.id } })
+  router.push({ name: 'ProblemEdit', params: { id: problemDetail.value.questionId } })
 }
 // 삭제 처리
-const handleDelete = () => {
-  if (!confirm('정말 삭제하시겠습니까?')) return
+const handleDelete = async () => {
+  if (!confirm('정말 삭제하시겠습니까?')) return;
 
-  console.log('삭제 요청:', problem.value.id)
+  if (!problemDetail.value?.questionId) {
+    alert('삭제할 문제 정보가 없습니다.');
+    return;
+  }
 
-  router.push({ name: 'ProblemList' })
+  const result = await problemStore.deleteQuestionAction(problemDetail.value.questionId);
+
+  if (result.success) {
+    alert('문제가 성공적으로 삭제되었습니다.');
+    router.push({ name: 'ProblemList' }); // 성공 시 목록으로 이동
+  } else {
+    alert(`문제 삭제에 실패했습니다: ${result.message}`);
+  }
 }
 
-// 상단 "목록으로" 이동
+// 목록으로 이동
 const goList = () => {
   router.push({ name: 'ProblemList' })
 }
 
 // 북마크 토글
 const toggleBookmark = () => {
-  problem.value.bookmarked = !problem.value.bookmarked
-}
-
-// 최상위 댓글만 필터링
-const topLevelComments = computed(() =>
-    comments.value.filter(c => c.parentId === null)
-)
-
-// 특정 댓글의 대댓글 목록
-const repliesFor = (parentId) =>
-    comments.value.filter(c => c.parentId === parentId)
-
-// 새 댓글 등록 할 때 userNickname, 시간 더미데이터 (상단 입력창)
-const addComment = () => {
-  if (!newComment.value.trim()) return
-
-  comments.value.push({
-    id: Date.now(),
-    parentId: null,
-    author: '우하하',
-    content: newComment.value.trim(),
-    date: '2025-11-18',
-    time: '13:21',
-    mine: true
-  })
-  newComment.value = ''
-}
-
-// 답글(대댓글) 입력창 열기
-const openReply = (commentId) => {
-  // 같은 댓글을 다시 누르면 토글로 닫기
-  if (replyTargetId.value === commentId) {
-    replyTargetId.value = null
-    replyText.value = ''
-  } else {
-    replyTargetId.value = commentId
-    replyText.value = ''
+  // TODO: 북마크 API 연동
+  if (problemDetail.value) {
+    problemDetail.value.bookmarked = !problemDetail.value.bookmarked;
   }
-}
-
-// 대댓글 등록
-const submitReply = (parentId) => {
-  if (!replyText.value.trim()) return
-
-  comments.value.push({
-    id: Date.now(),
-    parentId,
-    author: '김명지니어스',
-    content: replyText.value.trim(),
-    date: '2025-11-18',
-    time: '13:21',
-    mine: true
-  })
-
-  replyTargetId.value = null
-  replyText.value = ''
-}
-
-// 댓글/대댓글 수정 시작
-const startEdit = (comment) => {
-  editingId.value = comment.id
-  editText.value = comment.content
-}
-
-// 수정 저장
-const saveEdit = (id) => {
-  const target = comments.value.find(c => c.id === id)
-  if (target) target.content = editText.value.trim() || target.content
-  editingId.value = null
-  editText.value = ''
-}
-
-// 수정 취소
-const cancelEdit = () => {
-  editingId.value = null
-  editText.value = ''
-}
-
-// 삭제 (부모 댓글 삭제 시 그 댓글의 대댓글도 같이 삭제)
-const deleteComment = (id) => {
-  comments.value = comments.value.filter(
-      c => c.id !== id && c.parentId !== id
-  )
 }
 </script>
 
@@ -381,6 +209,15 @@ const deleteComment = (id) => {
 .problem-page {
   height: 100%;
   overflow: auto;
+}
+
+/* 로딩 카드 */
+.loading-card {
+  text-align: center;
+  padding: 40px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
 }
 
 /* 가운데 정렬 */
