@@ -7,15 +7,24 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue", "submit"]);
 const close = () => emit("update:modelValue", false);
+//내용 및 제목
+const inquiryTitle = ref("");
 const inquiryText = ref("");
 
 const submitInquiry = () => {
-  if (!inquiryText.value.trim()) return;
+  if (!inquiryTitle.value.trim() || !inquiryText.value.trim()) return;
 
-  emit ("submit", inquiryText.value);
+  emit("submit", {
+    inquiryTitle: inquiryTitle.value,
+    inquiryContent: inquiryText.value
+  });
+
+  // 초기화
+  inquiryTitle.value = "";
   inquiryText.value = "";
+
   close();
-}
+};
 </script>
 
 <template>
@@ -23,17 +32,26 @@ const submitInquiry = () => {
     <div class="side-modal">
 
       <h2 class="title">링키에게 문의하기</h2>
-      <div class="subtitle">문의 내용을 알려주세요. (필수)</div>
 
+      <div class="subtitle">문의 제목 (필수)</div>
+      <input
+          class="input-title"
+          v-model="inquiryTitle"
+          placeholder="문의 제목을 입력해주세요"
+      />
+
+      <div class="subtitle">문의 내용 (필수)</div>
       <textarea
-        class="textarea"
-        v-model="inquiryText"
-        placeholder="문의 내용을 입력해주세요"></textarea>
+          class="textarea"
+          v-model="inquiryText"
+          placeholder="문의 내용을 입력해주세요"
+      ></textarea>
 
       <button class="submit-btn" @click="submitInquiry">제출하기</button>
     </div>
   </div>
 </template>
+
 
 <style scoped>
 .overlay {
@@ -84,6 +102,22 @@ const submitInquiry = () => {
   font-size: 14px;
   margin-bottom: 10px;
   color: #444;
+}
+
+.input-title {
+  width: 90%;
+  padding: 10px;
+  font-size: 14px;
+  margin-bottom: 12px;
+  border: 1px solid #d7dceb;
+  border-radius: 10px;
+  background: #f8faff;
+}
+
+.input-title:focus {
+  border-color: #8ab6ff;
+  background: #f0f6ff;
+  outline: none;
 }
 
 .textarea {

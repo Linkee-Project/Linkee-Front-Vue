@@ -9,8 +9,8 @@ const props = defineProps({
   user: {
     type: Object,
     default: () => ({
-      name: "김명지니어스",
-      profile: "/src/assets/profile_img.svg"
+      userNickname: "Guest",
+      userProfile: '/src/assets/profile_img.svg'
     })
   }
 });
@@ -35,9 +35,9 @@ const onSelect = async (menu) => {
     <div class="side-modal">
 
       <div class="profile-header">
-        <img :src="props.user.profile" class="avatar" />
+        <img :src="props.user.userProfile || '/src/assets/profile_img.svg'" class="avatar" />
         <div class="info">
-          <div class="name">{{ props.user.name }}</div>
+          <div class="name">{{ props.user.userNickname || "로그인 유저" }}</div>
         </div>
       </div>
 

@@ -23,5 +23,11 @@ export default defineConfig({
         * Vue SPA(index.html)로 보내서 라우터가 처리하게 하자ㅃ
         * -> /oauth/callback 라우트로 이동*/
         historyApiFallback: true
-    }
+    },
+    // Vite + ESModule 환경에서는 CDN 을 직접 html에 넣어서 쓰면 충돌 일어남
+    // global / require / crypto 오류 발생
+    // CDN 삭제 후 global 추가
+    define: {
+        global: "window",
+    },
 })

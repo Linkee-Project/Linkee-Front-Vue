@@ -9,7 +9,7 @@
       <router-link to="/admin/problems" class="nav-item">문제게시판</router-link>
 
       <!-- 가운데 로고 -->
-      <router-link to="/admin" class="logo-link mid-logo">
+      <router-link to="/admin/home" class="logo-link mid-logo">
         <div class="logo-container">
           <img
               src="../../../../assets/linkee_character.svg"

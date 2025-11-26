@@ -2,7 +2,8 @@
 import {computed, ref} from "vue";
 import { useRouter } from "vue-router";
 import { inject } from "vue";
-import { useAuthStore } from "@/stores/authStore"; // 👈 추가
+import { useAuthStore } from "@/stores/authStore";
+import { createInquiry } from "@/api/inquiryApi.js";
 import ProfileMenuModal from "@/components/home/modal/ProfileMenuModal.vue";
 import InquiryModal from "@/components/home/modal/InquiryModal.vue";
 import NotificationModal from "@/components/home/modal/NotificationModal.vue";
@@ -41,9 +42,21 @@ const handleProfileAction = async (menu) => {
   }
 };
 
-const handleInquirySubmit = (text) => {
-  toast.show("문의가 정상적으로 제출되었습니다! 🙌");
+const handleInquirySubmit = async ({ inquiryTitle, inquiryContent }) => {
+  try {
+    await createInquiry({
+      inquiryTitle,
+      inquiryContent
+    });
+
+    toast.show("문의가 정상적으로 제출되었습니다! 🙌");
+
+  } catch (error) {
+    console.error(error);
+    toast.show("문의 제출 중 오류가 발생했습니다 😢");
+  }
 };
+
 
 /* 알림 리스트 */
 const notifications = ref([

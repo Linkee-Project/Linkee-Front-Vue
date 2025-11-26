@@ -85,7 +85,7 @@ api.interceptors.response.use(
             await authStore.refreshTokens();
             isRefreshing = false;
 
-            // ★ 재발급한 토큰 넣고 요청 재시도
+            // 재발급한 토큰 넣고 요청 재시도
             originalRequest.headers.Authorization = `Bearer ${authStore.accessToken}`;
             return api(originalRequest);
 

@@ -102,7 +102,7 @@ export const useAuthStore = defineStore('auth', () => {
         loading.value = true;
 
         try {
-            const res = await loginApi(userEmail, password);  // <-- 수정 포인트
+            const res = await loginApi(userEmail, password);
             const { success, data, message } = res.data;
 
             if (!success) {
