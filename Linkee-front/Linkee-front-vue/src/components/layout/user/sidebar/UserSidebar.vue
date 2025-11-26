@@ -2,13 +2,15 @@
 //버튼 컴포넌트 가져오기
 import BlueButton from "@/components/base/button/BaseButton.vue";
 import "./UserSidebar.css";
+import api from "@/api/axios";
 import profileImg from "@/assets/profile_img.svg";
 import onlineIcon from "@/assets/online.svg";
 import offlineIcon from "@/assets/offline.svg";
 import ChoiceModal from "/src/components/common/modal/ChoiceModal.vue";
 import ReportModal from "@/components/home/modal/ReportModal.vue";
-import { ref } from "vue";
-
+import { ref, onMounted, computed } from "vue";
+import { useAuthStore } from "@/stores/authStore.js";
+import { fetchMyRelations } from "@/api/relationApi.js";
 
 //채팅방 여러개 만들기
 const rooms = ref([
@@ -18,39 +20,48 @@ const rooms = ref([
   { id: 4, title: "코딩 천재들, 알고리즘 스터디" }
 ]);
 
-//친구 여러개 만들기
-// ✔ 친구 4명 데이터
-const friends = ref([
-  {
-    id: 1,
-    name: "김폭주기관차",
-    status: "접속중",
-    online: true,
-    avatar: profileImg
-  },
-  {
-    id: 2,
-    name: "김 이길까 말까",
-    status: "20분전 마지막 접속",
-    online: false,
-    avatar: profileImg
-  },
-  {
-    id: 3,
-    name: "코딩하는 햄찌",
-    status: "5시간 전 마지막 접속",
-    online: false,
-    avatar: profileImg
-  },
-  {
-    id: 4,
-    name: "주말만 기다리는 중",
-    status: "접속중",
-    online: true,
-    avatar: profileImg
-  }
-]);
+//회원 정보
+const authStore = useAuthStore();
+//친구
+const friends = ref([]);
 
+const loadFriends = async () => {
+  try {
+    const myId = authStore.user.userId;
+
+    let rows;
+
+    // 일반 로그인 → /my
+    if (!authStore.user.social) {
+      const res = await fetchMyRelations();
+      rows = res.data.content;
+
+      // 소셜 로그인 → by-id
+    } else {
+      const res = await api.get(`/api/v1/users/relations/by-id?userId=${myId}`);
+      rows = res.data.content;
+    }
+
+    friends.value = rows.map(r => {
+      const isMeRequester = r.requesterId === myId;
+      return {
+        id: isMeRequester ? r.receiverId : r.requesterId,
+        name: isMeRequester ? r.receiverNickname : r.requesterNickname,
+        online: true,
+        status: "접속중",
+        avatar: profileImg
+      };
+    });
+  } catch (err) {
+    console.error("친구 목록 조회 실패:", err);
+  }
+};
+const totalCount = computed(() => friends.value.length);
+const onlineCount = computed(() => friends.value.length);
+
+onMounted(() => {
+  loadFriends();
+});
 
 // 모달 관련 상태
 const isModalOpen = ref(false);
@@ -258,7 +269,7 @@ const handleReportSubmit = (data) => {
       <div class="section-block">
         <div class="section-header">
           <span class="title">👥 친구 목록</span>
-          <span class="count">접속 중: 1 / 2</span>
+          <span class="count">접속 중: {{ onlineCount }} / {{ totalCount }}</span>
         </div>
 
         <!-- 🔥 CSS와 동일하게 scroll-area 사용 -->
