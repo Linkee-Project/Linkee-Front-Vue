@@ -44,6 +44,8 @@ import QuizRoomWaitingView from "@/views/quiz-view/QuizRoomWaitingView.vue";
 import {useAuthStore} from "@/stores/authStore.js";
 
 const routes = [
+
+    /*로그인, 회원가입*/
     {
         path: "/",
         redirect: '/login'
@@ -63,6 +65,12 @@ const routes = [
         name: 'SignUp',
         component: SignUpView
     },
+    {
+        path: "/oauth/callback",
+        name: "OauthCallback",
+        component: () => import("@/views/login-view/OauthCallback.vue")
+    },
+    /*--------------------------------------*/
     {
         path: '/home',
         name: 'Home',
@@ -262,6 +270,11 @@ const router = createRouter({
 router.beforeEach((to, from) => {
     const authStore = useAuthStore();
 
+    //네이버 로그인
+    if (to.path.startsWith("/oauth/callback")) {
+        return true;
+    }
+
     // 🔹 새로고침 대비 → localStorage 값 복원
     if (!authStore.accessToken || !authStore.user) {
         authStore.loadFromStorage();
@@ -271,7 +284,7 @@ router.beforeEach((to, from) => {
     const isAdmin = authStore.isAdmin;
 
     // 🔹 로그인 페이지 / 회원가입 페이지만 비로그인 허용
-    if (to.path === "/login" || to.path === "/signup" || to.path === "/admin/login") {
+    if (to.path === "/login" || to.path === "/signup" || to.path === "/admin/login" || to.path === "/oauth/callback") {
         return true;
     }
 
