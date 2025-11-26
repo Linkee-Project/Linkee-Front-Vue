@@ -7,14 +7,15 @@
         <span class="room-number">{{ roomId }}번방 :</span>
         <span class="room-title">{{ roomTitle }}</span>
         <img src="/src/assets/icon/people.png" alt="인원 아이콘" class="icon"/>
-        <span class="user-count">{{ users.length }} / {{ maxUsers }}</span>
+        <span class="user-count">{{ members.length }} / {{ maxUsers }}</span>
       </div>
 
       <!-- 초대 / 나가기 -->
       <div class="right header-actions">
         <BaseButton color="blue" size="small" @click="showInviteModal = true"
                     style="min-width: 25px; height: 35px; border-radius: 15px">
-          <img src="/src/assets/icon/invite.png" alt="초대 아이콘" style="width: 20px; height: 22px; padding-bottom: 4px;" />
+          <img src="/src/assets/icon/invite.png" alt="초대 아이콘"
+               style="width: 20px; height: 22px; padding-bottom: 4px;" />
         </BaseButton>
 
         <BaseButton color="white" size="small" @click="leaveRoom"
@@ -31,18 +32,18 @@
       <!-- 왼쪽 유저 리스트 -->
       <aside class="user-list">
         <div
-            v-for="user in displayUsers"
-            :key="user.slot"
+            v-for="m in displayUsers"
+            :key="m.slot"
             class="user-item"
             style="cursor: pointer"
-            @click="!user.isEmpty && openUserModal($event, user)"
+            @click="!m.isEmpty && openUserModal($event, m)"
         >
           <img
-              :src="user.avatar"
+              :src="m.avatar"
               class="user-avatar"
-              :style="user.isEmpty ? 'filter: grayscale(100%) brightness(70%); opacity: 0.5;' : ''"
+              :style="m.isEmpty ? 'filter: grayscale(100%) brightness(70%); opacity: 0.5;' : ''"
           />
-          <p class="user-name" :class="{ empty: user.isEmpty }">{{ user.name }}</p>
+          <p class="user-name" :class="{ empty: m.isEmpty }">{{ m.name }}</p>
         </div>
       </aside>
 
@@ -76,8 +77,11 @@
 
             <!-- 입력창 -->
             <div class="chat-input">
-              <BaseInput v-model="message" placeholder="메시지를 입력하세요"
-                         @keydown.enter="sendMessage"/>
+              <BaseInput
+                  v-model="inputMessage"
+                  placeholder="메시지를 입력하세요"
+                  @keydown.enter="sendMessage"
+              />
               <BaseButton color="white" size="small" @click="sendMessage">입력</BaseButton>
             </div>
 
@@ -112,7 +116,6 @@
               <div v-for="p in problems" :key="p.id" class="problem-card">
                 <div class="problem-title">{{ p.id }}. {{ p.title }}</div>
                 <div class="problem-desc">{{ p.desc }}</div>
-
                 <div class="problem-user">출제자: {{ p.user }}</div>
 
                 <div v-if="p.revealed" class="problem-answer">
@@ -135,7 +138,7 @@
           </div>
         </BaseModal>
 
-        <!-- 🔥 작은 친구 모달 -->
+        <!-- 유저 옵션 작은 모달 -->
         <ChoiceModal
             :type="modalType"
             :data="selectedFriend"
@@ -146,14 +149,12 @@
             @action="handleAction"
         />
 
-        <!-- 🔥 신고 모달 -->
         <ReportModal
             v-model="isReportModal"
             :target="reportTarget"
             @submit="handleReportSubmit"
         />
 
-        <!-- 🔥 1:1 채팅 모달 -->
         <ChattingModal
             v-model="isChatModal"
             :room="currentRoom"
@@ -167,154 +168,155 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useRoute } from "vue-router";
+/* ---------------------------------------------------
+   IMPORTS
+--------------------------------------------------- */
+import { ref, computed, onMounted, onBeforeUnmount } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
+
+
+/* UI 컴포넌트 */
 import BaseInput from "@/components/base/input/BaseInput.vue";
 import BaseButton from "@/components/base/button/BaseButton.vue";
 import BaseModal from "@/components/base/modal/BaseModal.vue";
-
 import ChoiceModal from "@/components/common/modal/ChoiceModal.vue";
 import ReportModal from "@/components/home/modal/ReportModal.vue";
 import ChattingModal from "@/components/home/modal/ChattingModal.vue";
+import {useChatGameStore} from "@/stores/chatgameStore.js";
+import {useAuthStore} from "@/stores/authStore.js";
 
 const route = useRoute();
+const router = useRouter();
+
+/* ---------------------------------------------------
+   STORE 연결
+--------------------------------------------------- */
+const chat = useChatGameStore();
+const auth = useAuthStore();
 
 const roomId = route.params.roomId;
 const roomTitle = route.query.title;
 
-/* ==============================
-   유저 목록
-============================== */
+chat.init(auth.accessToken, roomId);
 
-const avatarImg = "/src/assets/퀴즈방 캐릭터.svg";
+/* ---------------------------------------------------
+   STATE (UI)
+--------------------------------------------------- */
 const maxUsers = 5;
 
-const users = ref([
-  { id: 1, name: "김진", avatar: avatarImg },
-  { id: 2, name: "김이김", avatar: avatarImg },
-  { id: 3, name: "김비김", avatar: avatarImg }
-]);
+const inputMessage = ref("");
 
-const displayUsers = computed(() => {
-  const arr = users.value.map((u, i) => ({ ...u, slot: i, isEmpty: false }));
-  while (arr.length < maxUsers)
-    arr.push({ slot: arr.length, isEmpty: true, avatar: avatarImg });
-  return arr;
-});
-
-/* ==============================
-   채팅
-============================== */
-
-const messages = ref([
-  { id: 1, user: "SYSTEM", text: "입장하셨습니다." },
-  { id: 2, user: "김진", text: "어서오세요" }
-]);
-
-const message = ref("");
-
-const sendMessage = () => {
-  if (!message.value.trim()) return;
-
-  messages.value.push({
-    id: Date.now(),
-    user: "나",
-    text: message.value
-  });
-
-  message.value = "";
-};
-
-/* ==============================
-   문제 출제
-============================== */
-
-const problems = ref([
-  { id: 1, title: "Stack이란?", desc: "LIFO 구조", answer: "LIFO", user: "김진", revealed: false },
-  { id: 2, title: "싱글톤이란?", desc: "하나의 인스턴스", answer: "유일 객체", user: "김비김", revealed: false }
-]);
-
+/* 문제 모달 */
 const showProblemModal = ref(false);
+const newProblem = ref({ title: "", answer: "" });
 
-const newProblem = ref({ title: "", desc: "", answer: "" });
-
-const addProblem = () => {
-  if (!newProblem.value.title.trim()) return;
-
-  const newId = problems.value.length + 1;
-
-  problems.value.push({
-    id: newId,
-    title: newProblem.value.title,
-    desc: newProblem.value.desc,
-    answer: newProblem.value.answer,
-    user: "나",
-    revealed: false
-  });
-
-  messages.value.push({
-    id: Date.now(),
-    user: "SYSTEM",
-    text: `${newId}번 문제가 출제되었습니다.`
-  });
-
-  newProblem.value = { title: "", desc: "", answer: "" };
-  showProblemModal.value = false;
-};
-
-const revealAnswer = () => {
-  const last = problems.value[problems.value.length - 1];
-  if (!last) return;
-
-  last.revealed = true;
-
-  messages.value.push({
-    id: Date.now(),
-    user: "SYSTEM",
-    text: `${last.id}번 문제의 정답이 공개되었습니다.`
-  });
-};
-
-/* ==============================
-   친구 초대
-============================== */
-
+/* 친구 초대 */
 const showInviteModal = ref(false);
-
 const friends = ref([
   { id: 101, name: "김비김비김" },
   { id: 102, name: "김명지니" },
   { id: 103, name: "진진돌이" }
 ]);
 
-const invite = (friend) => {
-  alert(friend.name + " 님을 초대했습니다.");
-  showInviteModal.value = false;
-};
-
-/* ==============================
-   방 나가기
-============================== */
-
-const leaveRoom = () => window.location.href = "/chat/game/rooms";
-
-/* ==============================
-   🔥 작은 유저 모달 (ChoiceModal)
-============================== */
-
+/* 유저 모달 */
 const isModalOpen = ref(false);
 const modalX = ref(0);
 const modalY = ref(0);
 const selectedFriend = ref(null);
 const modalType = ref("friend");
 
+/* 신고, 1:1채팅 */
+const isReportModal = ref(false);
+const reportTarget = ref(null);
+
+const isChatModal = ref(false);
+const currentRoom = ref(null);
+const roomMessages = ref([]);
+
+const me = { id: 999, name: "나" };
+
+/* ---------------------------------------------------
+   COMPUTED (store 데이터 불러오기)
+--------------------------------------------------- */
+const messages = computed(() => chat.messages);
+const problems = computed(() => chat.problems);
+const members = computed(() => chat.members);
+
+const displayUsers = computed(() => {
+  const arr = members.value.map((m, i) => ({
+    ...m,
+    name: m.userNickname,
+    avatar: "/src/assets/퀴즈방 캐릭터.svg",
+    slot: i,
+    isEmpty: false
+  }));
+
+  while (arr.length < maxUsers) {
+    arr.push({
+      slot: arr.length,
+      name: "",
+      avatar: "/src/assets/퀴즈방 캐릭터.svg",
+      isEmpty: true
+    });
+  }
+
+  return arr;
+});
+
+/* ---------------------------------------------------
+   LIFECYCLE
+--------------------------------------------------- */
+onMounted(() => {
+  chat.connectSocket();
+  chat.loadMessages();
+  chat.loadMembers();
+});
+
+onBeforeUnmount(() => {
+  chat.leaveRoom();
+});
+
+/* ---------------------------------------------------
+   ACTIONS
+--------------------------------------------------- */
+const sendMessage = () => {
+  if (!inputMessage.value.trim()) return;
+  chat.sendMessage(inputMessage.value);
+  inputMessage.value = "";
+};
+
+const addProblem = () => {
+  if (!newProblem.value.title.trim() || !newProblem.value.answer.trim()) return;
+
+  chat.submitProblem(newProblem.value.title, newProblem.value.answer);
+
+  newProblem.value = { title: "", answer: "" };
+  showProblemModal.value = false;
+};
+
+const revealAnswer = () => {
+  chat.revealAnswer();
+};
+
+const invite = (friend) => {
+  alert(`${friend.name} 님을 초대했습니다.`);
+  showInviteModal.value = false;
+};
+
+const leaveRoom = () => {
+  chat.leaveRoom();
+  router.replace("/chat/game/rooms");
+};
+
+/* ---------------------------------------------------
+   유저 옵션 모달
+--------------------------------------------------- */
 const openUserModal = (event, user) => {
   selectedFriend.value = user;
   modalType.value = "friend";
 
   const rect = event.currentTarget.getBoundingClientRect();
-
   modalX.value = rect.right + 10;
   modalY.value = rect.top + rect.height / 2 - 70;
 
@@ -323,52 +325,27 @@ const openUserModal = (event, user) => {
 
 const closeModal = () => (isModalOpen.value = false);
 
-/* ==============================
-   🔥 신고 모달
-============================== */
-
-const isReportModal = ref(false);
-const reportTarget = ref(null);
-
 const handleReportSubmit = (data) => {
-  console.log("신고 접수됨:", data);
+  console.log("신고 접수:", data);
 };
-
-/* ==============================
-   🔥 1:1 채팅 모달
-============================== */
-
-const isChatModal = ref(false);
-const currentRoom = ref(null);
-const roomMessages = ref([]);
-
-const me = { id: 999, name: "나" };
-
-/* ==============================
-   🔥 ChoiceModal → 기능 실행
-============================== */
 
 const handleAction = (type) => {
   isModalOpen.value = false;
 
-  // 신고하기
   if (type === "report") {
     reportTarget.value = selectedFriend.value;
     isReportModal.value = true;
     return;
   }
 
-  // 1:1 채팅하기
   if (type === "chat") {
     const friend = selectedFriend.value;
-
     currentRoom.value = {
       id: Date.now(),
       title: `${friend.name}님과 대화`,
       members: [me, friend],
       messages: []
     };
-
     roomMessages.value = [];
     isChatModal.value = true;
   }
