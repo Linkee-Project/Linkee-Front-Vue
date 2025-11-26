@@ -51,22 +51,28 @@
           </tr>
           </thead>
           <tbody>
+          <!-- 로딩 중 -->
+          <tr v-if="loading">
+            <td colspan="5" style="text-align: center; padding: 20px;">
+              데이터를 불러오는 중입니다...
+            </td>
+          </tr>
           <!-- 데이터 있을 때 -->
           <tr
-              v-for="problem in paginatedProblems"
-              :key="problem.id"
+              v-else-if="problems.length > 0"
+              v-for="problem in problems"
+              :key="problem.questionId"
               class="problem-row"
-              @click="goDetail(problem.id)"
+              @click="goDetail(problem.questionId)"
           >
-            <td>{{ problem.id }}</td>
-            <td>{{ problem.category }}</td>
-            <td>{{ problem.title }}</td>
-            <td>{{ problem.writer }}</td>
+            <td>{{ problem.questionId }}</td>
+            <td>{{ problem.categoryName }}</td>
+            <td>{{ problem.questionTitle }}</td>
+            <td>{{ problem.userNickname }}</td>
             <td>{{ formatDate(problem.createdAt) }}</td>
           </tr>
-
           <!-- 데이터 없을 때 -->
-          <tr v-if="paginatedProblems.length === 0">
+          <tr v-else>
             <td colspan="5" style="text-align: center; padding: 20px;">
               등록된 문제가 없습니다.
             </td>
@@ -87,8 +93,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useProblemStore } from '@/stores/problemStore'
 
 import SearchForm from '@/components/base/form/SearchForm.vue'
 import BaseButton from '@/components/base/button/BaseButton.vue'
@@ -98,100 +106,57 @@ import PaginationButton from '@/components/base/button/PaginationButton.vue'
 import problemBackIcon from '@/assets/problem_back_icon.svg'
 import problemCreateIcon from '@/assets/problem_create_icon.svg'
 
-// 카테고리
+// Store 사용
+const problemStore = useProblemStore()
+const { problems, loading, totalPages } = storeToRefs(problemStore)
+
+// 로컬 상태
 const categories = ['전체', '네트워크', '데이터베이스', '자료구조', '운영체제']
 const selectedCategory = ref('전체')
-
-// 검색 키워드
 const searchKeyword = ref('')
-
-// 페이지 상태
-const page = ref(1)
-const size = ref(10)
-
-
-const allProblems = ref([
-  {
-    id: 11,
-    category: '네트워크',
-    title: 'TCP 3-way handshake 흐름을 설명하시오.',
-    writer: '김명지니어스',
-    createdAt: '2025-11-20'
-  },
-  {
-    id: 10,
-    category: '운영체제',
-    title: '운영체제 마스터 풀어보시오',
-    writer: '우하하',
-    createdAt: '2025-11-20'
-  },
-  {
-    id: 9,
-    category: '데이터베이스',
-    title: '정규화가 필요한 이유와 장단점은?',
-    writer: 'DB마스터',
-    createdAt: '2025-11-19'
-  },
-  {
-    id: 8,
-    category: '자료구조',
-    title: '스택과 큐의 차이점을 설명하시오.',
-    writer: 'CS러버',
-    createdAt: '2025-11-18'
-  },
-  {
-    id: 7,
-    category: '운영체제',
-    title: '프로세스와 스레드의 차이는?',
-    writer: 'OS전문가',
-    createdAt: '2025-11-17'
-  },
-  {
-    id: 6,
-    category: '네트워크',
-    title: 'OSI 7계층 각각의 역할은?',
-    writer: '김명지니어스',
-    createdAt: '2025-11-16'
-  },
-  {
-    id: 5,
-    category: '데이터베이스',
-    title: '트랜잭션의 ACID 특성을 설명하시오.',
-    writer: 'DB러버',
-    createdAt: '2025-11-15'
-  },
-  {
-    id: 4,
-    category: '자료구조',
-    title: '해시 테이블의 충돌 해결 방법에는 무엇이 있는가?',
-    writer: '자료구조고수',
-    createdAt: '2025-11-14'
-  },
-  {
-    id: 3,
-    category: '운영체제',
-    title: 'Deadlock의 발생 조건을 설명하시오.',
-    writer: 'OS마스터',
-    createdAt: '2025-11-13'
-  },
-  {
-    id: 2,
-    category: '네트워크',
-    title: 'HTTP와 HTTPS 차이점은?',
-    writer: '웹개발자',
-    createdAt: '2025-11-12'
-  },
-  {
-    id: 1,
-    category: '자료구조',
-    title: '시간 복잡도 Big-O 표기법을 설명하시오.',
-    writer: 'CS학생',
-    createdAt: '2025-11-11'
-  },
-
-])
+const page = ref(1) // 현재 페이지 (1-based)
+const size = ref(10) // 페이지 크기
 
 const router = useRouter()
+
+// 🚨 중요: 임시 카테고리 매핑 객체 - 백엔드의 실제 ID에 맞춰 수정 필요!
+const categoryMap = {
+  '전체': undefined, // '전체'는 categoryId를 보내지 않음
+  '운영체제': 1,
+  '네트워크': 2,
+  '자료구조': 3,
+  '데이터베이스': 4
+  // TODO: 실제 백엔드의 카테고리 ID에 맞춰 이 매핑을 정확히 수정해주세요!
+};
+
+// 데이터 로드 함수
+const loadProblems = () => {
+  let currentCategoryId = categoryMap[selectedCategory.value];
+
+  // '전체' 카테고리이거나 매핑된 ID가 없으면 categoryId를 보내지 않습니다.
+  if (selectedCategory.value === '전체' || currentCategoryId === undefined) {
+    currentCategoryId = undefined; // categoryId를 보내지 않도록 설정
+  }
+
+  // store의 fetchProblems는 0-based index를 사용하므로 page-1 전달
+  problemStore.fetchProblems(
+      page.value - 1,
+      size.value,
+      currentCategoryId, // 변환된 categoryId 전달
+      searchKeyword.value // 검색 키워드 전달
+  );
+};
+
+// 라이프사이클 훅: 컴포넌트가 마운트될 때 데이터 로드
+onMounted(() => {
+  loadProblems()
+})
+
+// 페이지 번호가 변경되면 데이터 다시 로드
+watch(page, () => {
+  loadProblems()
+})
+
 
 const goCreate = () => {
   router.push({ name: 'ProblemCreate' })
@@ -214,57 +179,19 @@ const formatDate = (dateStr) => {
   return dateStr.slice(0, 10)
 }
 
-// 카테고리 + 검색으로 필터링
-const filteredProblems = computed(() => {
-  const kw = searchKeyword.value.trim().toLowerCase()
-
-  return allProblems.value.filter((p) => {
-    // 카테고리 필터
-    const matchCategory =
-        selectedCategory.value === '전체' ||
-        p.category === selectedCategory.value
-
-    // 검색 필터 (제목 + 작성자)
-    const matchKeyword =
-        kw === '' ||
-        p.title.toLowerCase().includes(kw) ||
-        p.writer.toLowerCase().includes(kw)
-
-    return matchCategory && matchKeyword
-  })
-})
-
-
-const totalPages = computed(() => {
-  return Math.max(1, Math.ceil(filteredProblems.value.length / size.value))
-})
-
-
-const paginatedProblems = computed(() => {
-  const start = (page.value - 1) * size.value
-  const end = start + size.value
-  return filteredProblems.value.slice(start, end)
-})
-
-
 const changeCategory = (cat) => {
   if (selectedCategory.value === cat) return
   selectedCategory.value = cat
-  page.value = 1
+  page.value = 1 // 카테고리 변경 시 페이지 초기화
+  loadProblems(); // 카테고리 변경 시 데이터 다시 로드
 }
 
 // 검색 이벤트 처리
 const onSearch = (keyword) => {
   searchKeyword.value = keyword?.trim?.() ?? ''
-  page.value = 1
+  page.value = 1 // 검색 시 페이지 초기화
+  loadProblems(); // 검색 시 데이터 다시 로드
 }
-
-// 필터 결과가 줄어서 현재 page가 범위를 넘어가면 보정
-watch(filteredProblems, () => {
-  if (page.value > totalPages.value) {
-    page.value = 1
-  }
-})
 </script>
 
 <style scoped>

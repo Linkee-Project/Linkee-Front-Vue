@@ -8,7 +8,7 @@
       <form @submit.prevent="validateSignup">
 
         <div class="email-row">
-          <input v-model="email" type="email" placeholder="이메일" required />
+          <input v-model="email" type="email" placeholder="이메일" required/>
 
           <button type="button" class="verify-btn" @click="sendVerifyEmail">
             {{ sent ? "재전송" : "인증번호 전송" }}
@@ -20,7 +20,7 @@
         <!-- 인증번호 입력창 (전송된 이후에만 표시) -->
         <div v-if="sent" class="verify-section">
           <div class="verify-row">
-            <input v-model="verifyCode" type="text" placeholder="인증번호 입력" />
+            <input v-model="verifyCode" type="text" placeholder="인증번호 입력"/>
 
             <!-- 인증번호 확인 버튼 -->
             <button type="button" class="verify-check-btn" @click="checkVerifyCode">
@@ -36,9 +36,9 @@
           <p class="verify-info">이메일로 전송된 인증번호를 입력하세요.</p>
         </div>
 
-        <input v-model="nickname" type="text" placeholder="닉네임" required />
-        <input v-model="password" type="password" placeholder="비밀번호" required />
-        <input v-model="confirm" type="password" placeholder="비밀번호 확인" required />
+        <input v-model="nickname" type="text" placeholder="닉네임" required/>
+        <input v-model="password" type="password" placeholder="비밀번호" required/>
+        <input v-model="confirm" type="password" placeholder="비밀번호 확인" required/>
 
         <button type="submit" class="btn-primary glow">회원가입</button>
       </form>
@@ -48,8 +48,11 @@
       <!-- SNS 회원가입 -->
       <div class="social-login">
         <p>또는 SNS로 간편 회원가입</p>
-        <a href="#" class="naver-btn">
-          <img src="@/assets/naver_logo.svg" alt="네이버 로고" /> 네이버로 가입하기
+        <a
+            href="http://localhost:8080/oauth2/authorization/naver"
+            class="naver-btn"
+        >
+          <img src="@/assets/naver_logo.svg" alt="네이버 로고"/> 네이버로 가입하기
         </a>
       </div>
 
@@ -62,7 +65,11 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { sendEmailCode, signupApi, verifyEmailCode } from "@/api/authApi.js";
+
+const router = useRouter();  // 🔥 추가됨
 
 const email = ref("");
 const nickname = ref("");
@@ -82,7 +89,7 @@ const generatedCode = ref("");     // 실제 인증번호 (임시 생성)
 
 
 // 이메일 인증 요청
-const sendVerifyEmail = () => {
+const sendVerifyEmail = async () => {
   emailError.value = "";
 
   if (!email.value.includes("@")) {
@@ -90,61 +97,105 @@ const sendVerifyEmail = () => {
     return;
   }
 
-  generatedCode.value = Math.floor(100000 + Math.random() * 900000).toString();
-  console.log("📧 임시 인증코드:", generatedCode.value);
+  try {
+    const res = await sendEmailCode(email.value);
 
-  sent.value = true;
-  verifyMessage.value = "";
-  verifySuccess.value = false;
-  verifyFail.value = false;
+    sent.value = true;
+    verifyMessage.value = "";
+    verifyFail.value = false;
+    verifySuccess.value = false;
 
-  message.value = "인증번호가 이메일로 전송되었습니다! (콘솔에서 확인 가능)";
+    message.value = "인증번호가 이메일로 전송되었습니다!";
+  } catch (e) {
+    message.value = "인증 메일 전송 실패";
+  }
 };
 
-// 인증번호 검증 버튼
-const checkVerifyCode = () => {
-  verifyMessage.value = "";
-  verifySuccess.value = false;
-  verifyFail.value = false;
 
+// 이메일 인증번호 검증 버튼
+const checkVerifyCode = async () => {
   if (verifyCode.value.trim() === "") {
     verifyFail.value = true;
+    verifySuccess.value = false;
     verifyMessage.value = "인증번호를 입력하세요.";
     return;
   }
 
-  if (verifyCode.value === generatedCode.value) {
-    verifySuccess.value = true;
-    verifyMessage.value = "✔ 인증이 완료되었습니다!";
-  } else {
+  try {
+    const res = await verifyEmailCode(email.value, verifyCode.value);
+
+    if (res.data === "인증 성공!") {
+      verifySuccess.value = true;
+      verifyFail.value = false;
+      verifyMessage.value = "✔ 인증 완료!";
+    } else {
+      verifySuccess.value = false;
+      verifyFail.value = true;
+      verifyMessage.value = "❌ 인증 실패 또는 만료됨";
+    }
+  } catch (e) {
+    verifySuccess.value = false;
     verifyFail.value = true;
-    verifyMessage.value = "❌ 인증번호가 올바르지 않습니다.";
+    verifyMessage.value = "서버 오류: 인증 불가";
   }
 };
 
-// 단순 UI 검증만 수행
-const validateSignup = () => {
-  emailError.value = ""
-  message.value = ""
+
+// 회원가입 및 검증
+const validateSignup = async () => {
+  message.value = "";
+  emailError.value = "";
 
   if (!email.value.includes("@")) {
-    emailError.value = "올바른 이메일 형식이 아닙니다."
-    return
-  }
-
-  if (password.value !== confirm.value) {
-    message.value = "비밀번호가 일치하지 않습니다."
-    return
-  }
-
-  // 인증번호 확인까지 요구
-  if (sent.value && verifyCode.value !== generatedCode.value) {
-    message.value = "이메일 인증번호가 올바르지 않습니다.";
+    emailError.value = "올바른 이메일 형식이 아닙니다.";
     return;
   }
 
-  message.value = "회원가입 정보가 정상적으로 입력되었습니다. (백엔드 연결 X)"
-}
+  if (password.value !== confirm.value) {
+    message.value = "비밀번호가 일치하지 않습니다.";
+    return;
+  }
+
+  if (!verifySuccess.value) {
+    message.value = "이메일 인증을 완료해주세요.";
+    return;
+  }
+
+  // 실제 회원가입요청
+  const requestBody = {
+    userEmail: email.value,
+    userNickname: nickname.value,
+    userPassword: password.value
+  };
+
+  try {
+    const res = await signupApi(requestBody);
+
+    // 응답 문자열에 "완료" 포함되면 성공
+    if (typeof res.data === "string" && res.data.includes("완료")) {
+      alert("회원가입이 완료되었습니다!");
+      router.replace("/login");
+      return;
+    }
+
+    message.value = "회원가입 실패";
+
+  } catch (e) {
+    console.error("회원가입 실패:", e);
+
+    // catch로 와도 서버 응답 문자열이면 성공 처리
+    const data = e.response?.data;
+    if (typeof data === "string" && data.includes("완료")) {
+      alert("회원가입이 완료되었습니다!");
+      router.replace("/login");
+      return;
+    }
+
+    message.value =
+        e.response?.data?.message || "회원가입 중 오류가 발생했습니다.";
+  }
+};
+
 </script>
 
 <style scoped>
@@ -167,15 +218,19 @@ const validateSignup = () => {
   position: absolute;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.3), transparent 40%),
-  radial-gradient(circle at 80% 80%, rgba(255,255,255,0.25), transparent 40%);
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.3), transparent 40%),
+  radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.25), transparent 40%);
   animation: floatBg 15s infinite alternate;
   z-index: 0;
 }
 
 @keyframes floatBg {
-  0% { transform: translate(0, 0); }
-  100% { transform: translate(-10%, -10%); }
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(-10%, -10%);
+  }
 }
 
 /* 🧊 회원가입 카드 */
@@ -193,8 +248,14 @@ const validateSignup = () => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* 🔗 로고 */
@@ -363,7 +424,6 @@ input:focus {
 }
 
 
-
 /* 인증번호 입력창 */
 .verify-row input {
   flex: 1;
@@ -376,6 +436,7 @@ input:focus {
   font-size: 0.9rem;
   margin: 0;
 }
+
 .verify-row input:focus {
   border-color: #0094f6;
   box-shadow: 0 0 8px rgba(0, 148, 246, 0.3);

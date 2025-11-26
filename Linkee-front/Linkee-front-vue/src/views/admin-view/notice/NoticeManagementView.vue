@@ -38,7 +38,7 @@
 
         <tbody>
         <tr v-for="item in paginatedList" :key="item.id">
-          <td>{{ item.id }}</td>
+          <td>{{ item.displayId }}</td>
           <td>{{ item.title }}</td>
           <td>{{ item.admin }}</td>
           <td>{{ item.reg }}</td>
@@ -47,7 +47,6 @@
           <td>{{ item.active }}</td>
           <td class="manage-btn">
             <button class="btn-small" @click="goDetail(item.id)">✏️</button>
-            <button class="btn-small" @click="deleteNotice(item.id)">❌</button>
           </td>
         </tr>
         </tbody>
@@ -67,68 +66,104 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+//ref: 반응형 값 만들기, computed: 계산된 값(의존하는 값 바뀌면 자동 갱신), onMounted:컴포넌트가 화면에 처음 랜더링 된 시점에 실행
+//watch: 특정 값이 변할 때마다 어떤 함수를 실행
+import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import PaginationButton from "@/components/base/button/PaginationButton.vue";
 import BaseToast from "@/components/base/toast/BaseToast.vue";
+import { fetchNoticeList } from "@/api/noticeApi";
 
 const router = useRouter();
 const toastRef = ref(null);
 
-/* 전체 공지 데이터 */
-const originalList = ref([
-  { id: 1, title: "공지사항 1번임", admin: "관리자1번임", reg: "2025/11/10", mod: "2025/11/10", views: 23, active: "Y" },
-  { id: 2, title: "공지사항 2번임", admin: "관리자2번임", reg: "2025/11/10", mod: "2025/11/10", views: 12, active: "Y" },
-  { id: 3, title: "공지사항 3번임", admin: "관리자2번임", reg: "2025/11/10", mod: "2025/11/10", views: 19, active: "Y" },
-  { id: 4, title: "공지사항 4번임", admin: "관리자1번임", reg: "2025/11/10", mod: "2025/11/10", views: 8, active: "N" },
-  { id: 5, title: "공지사항 5번임", admin: "관리자1번임", reg: "2025/11/10", mod: "2025/11/10", views: 11, active: "Y" },
-]);
+/* Api에서 받아온 목록 저장*/
+const originalList = ref([]); //전체 데이터
+const filteredList = ref([]); //필터 적용 데이터
 
-/* 현재 보여줄 필터링된 리스트 */
-const filteredList = ref([...originalList.value]);
+/* 필터 상태 (Y / N / null) */
+const currentActive = ref(null);
+//페이지네이션
+const currentPage = ref(1);
+const pageSize = 10;
+const totalElements = ref(0);
 
-/* 상세페이지 이동 */
-const goDetail = (id) => {
-  router.push(`/admin/notices/${id}`);
+
+/* 공지 목록 Api 불러오기 */
+const loadNotices = async () => {
+  try {
+    const res = await fetchNoticeList({
+      page: currentPage.value - 1,
+      size: pageSize,
+      active: currentActive.value
+    });
+
+    console.log("API RESPONSE:", res);
+
+    // res.content = 실제 데이터 배열
+    originalList.value = res.content.map(n => ({
+      id: n.noticeId,
+      title: n.noticeTitle,
+      admin: n.adminName,
+      reg: n.createdAt,
+      mod: n.updatedAt,
+      views: n.noticeViews,
+      active: n.isActive
+    }));
+
+    // 필터 초기화
+    filteredList.value = [...originalList.value];
+
+    // 전체 갯수
+    totalElements.value = res.totalElements;
+
+  } catch (e) {
+    console.error(e);
+    toastRef.value.showToast("공지사항 불러오기에 실패했습니다");
+  }
 };
 
-/* 삭제 기능 */
-const deleteNotice = (id) => {
-  const confirmDelete = confirm("정말 삭제하시겠습니까?");
-  if (!confirmDelete) return;
+//페이지 변경 시 자동 reload
+//currentPage.value가 바뀔 때마다 loadNotices()실행
+watch(() => currentPage.value, () => {
+  loadNotices();
+})
 
-  originalList.value = originalList.value.filter(item => item.id !== id);
-  filteredList.value = filteredList.value.filter(item => item.id !== id);
+//첫 로딩
+onMounted(() => {
+  loadNotices();
+});
 
-  toastRef.value.showToast("삭제가 완료되었습니다.");
-
-  if (currentPage.value > totalPages.value) currentPage.value = totalPages.value;
-};
-
-/* 필터링 기능 */
+//필터링 기능
 const filterActive = (flag) => {
   filteredList.value = originalList.value.filter(item => item.active === flag);
   currentPage.value = 1;
-};
-
-/* 필터 초기화 */
+}
 const resetFilter = () => {
   filteredList.value = [...originalList.value];
   currentPage.value = 1;
 };
 
-/* 페이지네이션 */
-const currentPage = ref(1);
-const pageSize = 10;
+//상세 이동 및 삭제
+const goDetail = (id) => {
+  router.push(`/admin/notices/${id}`);
+};
+
+//페이지네이션
 
 const totalPages = computed(() =>
-    Math.ceil(filteredList.value.length / pageSize)
+    Math.ceil(totalElements.value / pageSize)
 );
 
-const paginatedList = computed(() => {
-  const start = (currentPage.value - 1) * pageSize;
-  return filteredList.value.slice(start, start + pageSize);
-});
+//순번은 displayId로 따로 부여
+//item에 index속성 추가
+const paginatedList = computed(() =>
+    filteredList.value.map((item, index) => ({
+      ...item,
+      displayId: (currentPage.value - 1) * pageSize + index + 1 // 화면용 번호(1부터 시작)
+    }))
+);
+
 </script>
 
 <style scoped>

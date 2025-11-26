@@ -3,14 +3,14 @@
     <div v-if="userData" class="form-container">
       <div class="form-group">
         <label for="role-select">역할</label>
-        <select id="role-select" v-model="editableUser.role" class="form-select">
+        <select id="role-select" v-model="editableUser.userRole" class="form-select">
           <option value="USER">USER</option>
           <option value="ADMIN">ADMIN</option>
         </select>
       </div>
       <div class="form-group">
         <label for="status-select">활성화 여부</label>
-        <select id="status-select" v-model="editableUser.status" class="form-select">
+        <select id="status-select" v-model="editableUser.userStatus" class="form-select">
           <option value="Y">Y</option>
           <option value="N">N</option>
         </select>

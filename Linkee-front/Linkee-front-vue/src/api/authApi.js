@@ -8,6 +8,11 @@ export function loginApi(userEmail, password) {
         password
     });
 }
+// 회원가입
+export function signupApi(formData) {
+    return api.post('/auth/signup', formData, { skipAuth: true });
+}
+
 
 // 토큰 재발급
 export function refreshApi() {
@@ -17,4 +22,14 @@ export function refreshApi() {
 // 로그아웃
 export function logoutApi() {
     return api.delete('/auth/logout');
+}
+
+// 인증번호 이메일 발송
+export function sendEmailCode(email) {
+    return api.post("/auth/email/send", { email } , { skipAuth: true } );
+}
+
+// 인증번호 검증
+export function verifyEmailCode(email, code) {
+    return api.post("/auth/email/verify", { email, code } , { skipAuth: true });
 }
