@@ -1,17 +1,39 @@
 <script setup>
-defineProps({
+import { computed } from 'vue';
+import { useRouter } from 'vue-router'; // useRouter import
+
+const props = defineProps({
   question: {
     type: Object,
     required: true,
   },
+  index: { // index prop 추가
+    type: Number,
+    required: true,
+  },
 });
+
+const router = useRouter(); // useRouter 초기화
+
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const goToProblemDetail = () => {
+  router.push(`/problem/${props.question.questionId}`);
+};
 </script>
 
 <template>
-  <div class="list-row">
-    <span class="row-item category">{{ question.category }}</span>
-    <span class="row-item title">{{ question.title }}</span>
-    <span class="row-item date">{{ question.date }}</span>
+  <div class="list-row" @click="goToProblemDetail">
+    <span class="row-item no">{{ index + 1 }}</span> <!-- NO 항목 추가 -->
+    <span class="row-item category">{{ question.categoryName }}</span>
+    <span class="row-item title">{{ question.questionTitle }}</span>
+    <span class="row-item date">{{ formatDate(question.createdAt) }}</span>
   </div>
 </template>
 
@@ -38,6 +60,9 @@ defineProps({
 }
 
 /* --- 컬럼 너비 수정 --- */
+.no {
+  flex: 1;
+}
 .category {
   flex: 3;
   color: #666;
@@ -46,7 +71,7 @@ defineProps({
 .title {
   flex: 4;
   text-align: left;
-  padding: 0 15px; 
+  padding: 0 15px;
   min-width: 0; /* 중요: flex 아이템이 내용보다 작아질 수 있도록 허용 */
 }
 
@@ -54,7 +79,6 @@ defineProps({
   flex: 3;
   color: #666;
 }
-
 
 /* 반응형 */
 @media (max-width: 768px) {
