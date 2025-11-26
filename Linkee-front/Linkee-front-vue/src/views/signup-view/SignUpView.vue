@@ -48,7 +48,10 @@
       <!-- SNS 회원가입 -->
       <div class="social-login">
         <p>또는 SNS로 간편 회원가입</p>
-        <a href="#" class="naver-btn">
+        <a
+            href="http://localhost:8080/oauth2/authorization/naver"
+            class="naver-btn"
+        >
           <img src="@/assets/naver_logo.svg" alt="네이버 로고"/> 네이버로 가입하기
         </a>
       </div>
