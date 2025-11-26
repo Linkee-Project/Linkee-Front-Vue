@@ -257,12 +257,13 @@ const createRoom = async () => {
 
     isModalOpen.value = false
 
-    // ✅ 방 생성 후 바로 대기실로 이동
-    //   상세 정보는 대기실 진입 시 백엔드에서 다시 조회
+    // 방 생성 후 바로 대기실로 이동
+    // 상세 정보는 대기실 진입 시 백엔드에서 다시 조회
     router.push({
-      path: '/quiz/rooms/waiting',
-      query: { roomId: quizRoomId },
+      name: 'QuizRoomWaiting',
+      params: { quizRoomId },
     })
+
   } catch (e) {
     console.error('방 생성 실패', e)
     alert('방 생성에 실패했습니다.')
@@ -374,8 +375,8 @@ const handleRoomClick = async (room) => {
     await joinQuizRoom(room.id)
 
     router.push({
-      path: '/quiz/rooms/waiting',
-      query: { roomId: room.id },
+      name: 'QuizRoomWaiting',
+      params: { quizRoomId: room.id },
     })
   } catch (e) {
     console.error('방 입장 실패', e)
@@ -389,8 +390,8 @@ const handleQuickStart = async () => {
     const room = await quickStart()
 
     router.push({
-      path: '/quiz/rooms/waiting',
-      query: { roomId: room.id },
+      name: 'QuizRoomWaiting',
+      params: { quizRoomId: room.id },
     })
   } catch (e) {
     alert('참여 가능한 방이 없습니다.')

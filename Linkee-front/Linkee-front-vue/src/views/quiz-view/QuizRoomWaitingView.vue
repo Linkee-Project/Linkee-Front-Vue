@@ -129,7 +129,7 @@ import BaseModal from "@/components/base/modal/BaseModal.vue";
 import ChoiceModal from "@/components/common/modal/ChoiceModal.vue";
 import ReportModal from "@/components/home/modal/ReportModal.vue";
 import ChattingModal from "@/components/home/modal/ChattingModal.vue";
-import { fetchQuizRoomDetail } from '@/api/quizRoomApi'
+import { fetchQuizRoomDetail,leaveQuizRoom,startQuizRoom  } from '@/api/quizRoomApi'
 
 const modalX = ref(0)
 const modalY = ref(0)
@@ -196,7 +196,7 @@ function handleReportSubmit(data) {
 const router = useRouter()
 const route = useRoute()
 
-const roomId = Number(route.query.roomId || route.params.roomId)
+const roomId = Number(route.params.quizRoomId)
 
 const showInviteModal = ref(false);
 
@@ -283,9 +283,48 @@ function toggleReady() {
   if (user) user.status = myInfo.value.isReady ? 'READY' : 'WAIT'
 }
 
-function startGame() { console.log('게임 시작') }
+async function startGame() {
+  if (!roomId) {
+    alert('잘못된 접근입니다.')
+    router.push('/quiz/rooms')
+    return
+  }
 
-function leaveRoom() { router.push('/quiz/rooms') }
+  try {
+    // 1) 백엔드에 "게임 시작" 요청
+    await startQuizRoom(roomId)
+
+    // 2) 퀴즈 플레이 화면으로 이동
+    router.push({
+      name: 'QuizInGameView',
+      params: { quizRoomId: roomId }
+    })
+
+  } catch (e) {
+    console.error('게임 시작 실패', e)
+    alert(e.response?.data?.message || '게임을 시작할 수 없습니다.')
+  }
+}
+
+
+
+async function leaveRoom() {
+  if (!roomId) {
+    router.push('/quiz/rooms')
+    return
+  }
+
+  try {
+
+    await leaveQuizRoom(roomId)
+
+    router.push('/quiz/rooms')
+  } catch (e) {
+    console.error('퀴즈방 나가기 실패', e)
+    alert('퀴즈방에서 나가는 데 실패했습니다.')
+  }
+}
+
 
 </script>
 

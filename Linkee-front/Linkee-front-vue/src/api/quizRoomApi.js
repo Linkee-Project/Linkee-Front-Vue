@@ -81,3 +81,18 @@ export async function createQuizRoom(payload) {
     const res = await api.post("/quiz/rooms", payload);
     return res.data.data;   // Long quizRoomId
 }
+/**
+ * 퀴즈방 나가기
+ * POST /api/v1/quiz/rooms/{quizRoomId}/leave
+ */
+// 방장/일반 유저 공통 엔드포인트
+export const leaveQuizRoom = (quizRoomId) => {
+    return api.post(`/quiz/rooms/${quizRoomId}/leave`)
+}
+/**
+ * 퀴즈방 시작
+ * POST /api/v1/quiz/rooms//{quizRoomId}/start
+ */
+export function startQuizRoom(quizRoomId) {
+    return api.post(`/quiz/rooms/${quizRoomId}/start`)
+}

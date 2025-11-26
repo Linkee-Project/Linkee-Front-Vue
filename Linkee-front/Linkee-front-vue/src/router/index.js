@@ -105,17 +105,15 @@ const routes = [
         component: QuizRoomListView
     },
     {
-        path: "/quiz/rooms/waiting",    //테스트 완료 후 /quiz/rooms/:quizRoomId 변경 필요
+        path: "/quiz/rooms/:quizRoomId/waiting",
         name: 'QuizRoomWaiting',
         component: QuizRoomWaitingView,
-
     },
     {
-        path: "/quiz/rooms/quizRoomId",     //테스트 완료 후 /quiz/rooms/:quizRoomId 변경 필요
+        path: "/quiz/rooms/:quizRoomId/play",
         name: 'QuizInGameView',
         component: QuizInGameView,
         meta: { hideLayout: true }
-
     },
 
     /* ------------------------------
