@@ -15,7 +15,7 @@ const fetchUsers = async () => {
   try {
     const response = await api.get('/users/user');
     if (response.data && response.data.content) {
-      allUsers.value = response.data.content;
+      allUsers.value = response.data.content.sort((a, b) => a.userId - b.userId); // userId 오름차순 정렬
       totalPages.value = response.data.totalPages;
     }
   } catch (error) {
