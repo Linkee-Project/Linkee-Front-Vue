@@ -1,21 +1,42 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import AdminButton from '@/components/base/button/AdminButton.vue';
 import AdminModal from '@/components/common/modal/AdminModal.vue';
-import PaginationButton from '@/components/base/button/PaginationButton.vue'; // Import PaginationButton
-import BaseButton from '@/components/base/button/BaseButton.vue'; // Import BaseButton
+import PaginationButton from '@/components/base/button/PaginationButton.vue';
+import BaseButton from '@/components/base/button/BaseButton.vue';
+import api from '@/api/axios.js';
+import { debounce } from '@/utils/debounce.js';
 
-const users = ref(
-  Array.from({ length: 10 }, (_, i) => ({
-    id: i + 1,
-    email: `user0${i + 1}@gmail.com`,
-    nickname: `유저${i + 1}번임`,
-    createdAt: '2025/11/10',
-    updatedAt: '2025/11/10',
-    role: 'USER',
-    status: 'Y',
-  }))
-);
+const allUsers = ref([]); // 전체 사용자 목록을 저장할 ref
+const activeFilter = ref('all'); // 현재 필터 상태 ('all', 'Y', 'N')
+
+// API 호출하여 전체 사용자 목록 가져오기
+const fetchUsers = async () => {
+  try {
+    const response = await api.get('/users/user');
+    if (response.data && response.data.content) {
+      allUsers.value = response.data.content;
+      totalPages.value = response.data.totalPages;
+    }
+  } catch (error) {
+    console.error('Failed to fetch users:', error);
+  }
+};
+
+onMounted(() => {
+  fetchUsers();
+});
+
+// 현재 필터에 따라 보여줄 사용자 목록을 계산하는 computed 속성
+const filteredUsers = computed(() => {
+  if (activeFilter.value === 'Y') {
+    return allUsers.value.filter(user => user.userStatus === 'Y');
+  }
+  if (activeFilter.value === 'N') {
+    return allUsers.value.filter(user => user.userStatus === 'N');
+  }
+  return allUsers.value; // 'all'일 경우 전체 목록 반환
+});
 
 const isModalVisible = ref(false);
 const selectedUser = ref(null);
@@ -25,32 +46,42 @@ const openModal = (user) => {
   isModalVisible.value = true;
 };
 
-const handleSave = (updatedUser) => {
-  const index = users.value.findIndex(u => u.id === updatedUser.id);
-  if (index !== -1) {
-    users.value[index] = { ...users.value[index], ...updatedUser };
-  }
+const _handleSave = async (updatedUser) => {
+  const originalUser = JSON.parse(JSON.stringify(selectedUser.value));
   isModalVisible.value = false;
+
+  try {
+    const payload = {
+      userId: updatedUser.userId,
+    };
+
+    if (originalUser.userRole !== updatedUser.userRole) {
+      payload.newRole = updatedUser.userRole;
+    }
+    if (originalUser.userStatus !== updatedUser.userStatus) {
+      payload.status = updatedUser.userStatus;
+    }
+
+    // Check if there are any changes to send to the API
+    if (Object.keys(payload).length > 1) { // userId is always present, so > 1 means role or status changed
+      await api.patch('/admin/users/user/role-status', payload);
+      await fetchUsers();
+    }
+  } catch (error) {
+    console.error('사용자 정보 업데이트 실패:', error);
+  }
 };
+
+const handleSave = debounce(_handleSave, 300);
 
 // Pagination logic
 const currentPage = ref(1);
-const totalPages = ref(5); // Assuming 5 total pages for now
+const totalPages = ref(5);
 
 const updateCurrentPage = (newPage) => {
   currentPage.value = newPage;
-  // In a real application, you would fetch data for the new page here
-  console.log('Current page:', currentPage.value);
 };
 
-// Placeholder functions for filter buttons (no functionality required yet)
-const showActiveUsers = () => {
-  console.log('Show active users');
-};
-
-const showInactiveUsers = () => {
-  console.log('Show inactive users');
-};
 </script>
 
 <template>
@@ -58,8 +89,9 @@ const showInactiveUsers = () => {
     <h2 class="page-title">회원관리</h2>
 
     <div class="filter-buttons-container">
-      <BaseButton label="활성화" color="blue" size="small" @click="showActiveUsers" />
-      <BaseButton label="비활성화" color="gray" size="small" @click="showInactiveUsers" />
+      <BaseButton label="전체" :color="activeFilter === 'all' ? 'blue' : 'gray'" size="small" @click="activeFilter = 'all'" />
+      <BaseButton label="활성화" :color="activeFilter === 'Y' ? 'blue' : 'gray'" size="small" @click="activeFilter = 'Y'" />
+      <BaseButton label="비활성화" :color="activeFilter === 'N' ? 'blue' : 'gray'" size="small" @click="activeFilter = 'N'" />
     </div>
 
     <div class="table-wrapper">
@@ -77,14 +109,14 @@ const showInactiveUsers = () => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in users" :key="user.id">
-            <td>{{ user.id }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.nickname }}</td>
+          <tr v-for="user in filteredUsers" :key="user.userId">
+            <td>{{ user.userId }}</td>
+            <td>{{ user.userEmail }}</td>
+            <td>{{ user.userNickname }}</td>
             <td>{{ user.createdAt }}</td>
             <td>{{ user.updatedAt }}</td>
-            <td>{{ user.role }}</td>
-            <td>{{ user.status }}</td>
+            <td>{{ user.userRole }}</td>
+            <td>{{ user.userStatus }}</td>
             <td>
               <AdminButton @click="openModal(user)">변경</AdminButton>
             </td>
