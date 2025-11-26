@@ -4,7 +4,7 @@
       <h1 class="logo">🔗 관리자 Linkee</h1>
       <p class="subtitle">계정으로 로그인하세요</p>
 
-      <form @submit.prevent>
+      <form @submit.prevent="handleLogin">
         <input v-model="email" type="email" placeholder="이메일" />
         <input v-model="password" type="password" placeholder="비밀번호" />
 
@@ -15,19 +15,50 @@
 
       <p class="message"></p>
 
-      <p class="signup-link">
-        아직 계정이 없나요?
-        <router-link to="/signup">회원가입</router-link>
-      </p>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore';
+
+const router = useRouter();
+const authStore = useAuthStore();
+
 
 const email = ref('');
 const password = ref('');
+const message = ref("");
+
+const handleLogin = async () => {
+  if (!email.value || !password.value) {
+    message.value = "이메일과 비밀번호를 입력해주세요.";
+    return;
+  }
+
+  const res = await authStore.login({
+    userEmail: email.value,
+    password: password.value,
+  });
+
+
+  if (res.success) {
+
+
+    if (authStore.isAdmin) {
+      message.value = "로그인 성공!";
+      router.replace("/admin/home");
+    } else {
+      alert('관리자 정보가 존재하지 않습니다, 일반 페이지로 이동합니다.')
+      router.push("/home");
+    }
+
+  } else {
+    message.value = res.message;
+  }
+};
 
 
 </script>
