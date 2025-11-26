@@ -56,6 +56,11 @@ const routes = [
         name: 'Login',
         component: LoginView
     },
+
+    {
+        path: "/admin",
+        redirect: '/admin/login'
+    },
     {
         path: "/admin/login",
         name: 'AdminLogin',
@@ -208,7 +213,7 @@ const routes = [
         component: AdminHomeView,
         children: [
             {
-                path: "",
+                path: "home",
                 name: "AdminDashboard",
                 component: AdminDashBoard
             },
@@ -284,17 +289,36 @@ router.beforeEach((to, from) => {
         return true;
     }
 
-    // 🔹 새로고침 대비 → localStorage 값 복원
-    if (!authStore.accessToken || !authStore.user) {
+    // 새로고침 대비 → localStorage 값 복원
+
+    // 기존에 이렇게 쓰면 로컬에서 엑세토큰을 지워버리면 피니아에 존재해도 isLoggedIn 이 false로나옴
+    // 그래서 ||  를 && 조건으로 바꿔서 피니아에 존재하면 로컬에서 지워도 갱신되게 만듬
+    // if (!authStore.accessToken || !authStore.user) {
+    //     authStore.loadFromStorage();
+    // }
+    if (!authStore.accessToken && !authStore.user) {
         authStore.loadFromStorage();
     }
+
 
     const isLoggedIn = authStore.isLoggedIn;
     const isAdmin = authStore.isAdmin;
 
-    // 🔹 로그인 페이지 / 회원가입 페이지만 비로그인 허용
+    // 로그인 페이지 / 회원가입 페이지만 비로그인 허용
     if (to.path === "/login" || to.path === "/signup" || to.path === "/admin/login" || to.path === "/oauth/callback") {
         return true;
+    }
+
+
+
+
+    // 로그인 상태라면 로그인 페이지 이동 x
+    if (isLoggedIn && (to.path === "/login" || to.path === "/signup" || to.path === "/admin/login")) {
+
+        if(isAdmin){
+            return {name:"AdminDashboard"}
+        }
+        return { name: "Home" };
     }
 
     // 1) 로그인 안 되어 있으면 → 로그인 페이지 강제 이동
@@ -307,6 +331,7 @@ router.beforeEach((to, from) => {
 
     // 2) /admin/** 접근 → 관리자만 허용
     if (to.path.startsWith("/admin") && !isAdmin) {
+        alert('관리자만 가능합니다');
         return { name: "Home" };
     }
 

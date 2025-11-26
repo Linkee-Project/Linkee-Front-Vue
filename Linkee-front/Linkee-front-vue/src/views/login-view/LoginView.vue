@@ -44,7 +44,7 @@ const message = ref("");
 const router = useRouter();
 const authStore = useAuthStore();
 
-// 🔥 로그인 실행
+// 로그인 실행
 const handleLogin = async () => {
   if (!email.value || !password.value) {
     message.value = "이메일과 비밀번호를 입력해주세요.";
