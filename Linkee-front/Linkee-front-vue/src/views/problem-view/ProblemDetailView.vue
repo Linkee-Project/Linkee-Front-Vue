@@ -35,10 +35,10 @@
             <button
                 v-if="!isOwner"
                 class="bookmark-btn"
-                :class="{ active: problemDetail.bookmarked }"
+                :class="{ active: isProblemBookmarked }"
                 @click="toggleBookmark"
             >
-              <img class="bookmark-icon" :src="problemBookMarkIcon" alt="북마크" />
+              <img class="bookmark-icon" :src="isProblemBookmarked ? problemBookMarkIcon : bookmarkCancelIcon" alt="북마크" />
             </button>
 
             <!-- 작성자일 때만 수정/삭제 -->
@@ -114,10 +114,12 @@ import { useProblemStore } from '@/stores/problemStore'
 import { useAuthStore } from '@/stores/authStore' // authStore 추가
 import BaseButton from '@/components/base/button/BaseButton.vue'
 import CommentList from '@/components/problem/CommentList.vue'; // CommentList 컴포넌트 추가
+import { addBookmark, removeBookmark, getBookmarkedQuestions } from '@/api/problemApi.js'; // 북마크 API 추가
 
 //icon
 import problemBackIcon from '@/assets/problem_back_icon.svg'
 import problemBookMarkIcon from '@/assets/problem_bookmark_icon.svg'
+import bookmarkCancelIcon from '@/assets/bookmark-cancel.svg'; // 북마크 취소 아이콘 추가
 import profileImg from '@/assets/profile_img.svg'
 
 
@@ -130,21 +132,23 @@ const authStore = useAuthStore() // authStore 인스턴스 생성
 const { problemDetail, detailLoading } = storeToRefs(problemStore)
 const { user: currentUser, isLoggedIn } = storeToRefs(authStore) // authStore에서 사용자 정보 가져오기
 
-// 🚨 중요: 백엔드 응답에 'writerId'가 있는지, authStore의 user 객체에 'userId'가 있는지 확인 필요
+// 🚨 중요: 백엔드 응답에 'userEmail'이 있는지, authStore의 user 객체에 'username'(email)이 있는지 확인 필요
 const isOwner = computed(
-  () => isLoggedIn.value && problemDetail.value?.userId === currentUser.value?.userId
+  () => isLoggedIn.value && problemDetail.value?.userEmail === currentUser.value?.username
 )
 
 // 댓글 작성자 이름으로 현재 로그인된 사용자 닉네임 사용
 const currentUserName = computed(() => currentUser.value?.nickname || '방문자')
 
+// 북마크 상태 (초기값은 false)
+const isProblemBookmarked = ref(false);
 
 // 🚨 권한 확인 디버깅용
 watchEffect(() => {
   if (problemDetail.value && currentUser.value) {
     console.log('--- 권한 확인 디버깅 ---');
-    console.log('문제 작성자 ID (userId):', problemDetail.value.userId, `(타입: ${typeof problemDetail.value.userId})`);
-    console.log('로그인 사용자 ID (userId):', currentUser.value.userId, `(타입: ${typeof currentUser.value.userId})`);
+    console.log('문제 작성자 이메일 (userEmail):', problemDetail.value.userEmail, `(타입: ${typeof problemDetail.value.userEmail})`);
+    console.log('로그인 사용자 이메일 (username):', currentUser.value.username, `(타입: ${typeof currentUser.value.username})`);
     console.log('isOwner 계산 결과:', isOwner.value);
     console.log('--------------------------');
   }
@@ -156,8 +160,25 @@ onMounted(() => {
   const questionId = route.params.id;
   if (questionId) {
     problemStore.fetchProblemDetail(questionId);
+    checkBookmarkStatus(questionId); // 북마크 상태 확인
   }
 })
+
+// 북마크 상태 확인 함수
+const checkBookmarkStatus = async (questionId) => {
+  if (!isLoggedIn.value) { // 로그인 안 했으면 북마크 상태 확인할 필요 없음
+    isProblemBookmarked.value = false;
+    return;
+  }
+  try {
+    const response = await getBookmarkedQuestions({ page: 0, size: 9999 }); // 모든 북마크 가져옴
+    const bookmarkedList = response.data.content;
+    isProblemBookmarked.value = bookmarkedList.some(bookmark => bookmark.questionId === Number(questionId));
+  } catch (error) {
+    console.error('북마크 상태 확인 실패:', error);
+    isProblemBookmarked.value = false;
+  }
+};
 
 // 날짜 포맷 함수
 const formatDate = (dateStr) => {
@@ -194,10 +215,30 @@ const goList = () => {
 }
 
 // 북마크 토글
-const toggleBookmark = () => {
-  // TODO: 북마크 API 연동
-  if (problemDetail.value) {
-    problemDetail.value.bookmarked = !problemDetail.value.bookmarked;
+const toggleBookmark = async () => {
+  if (!isLoggedIn.value) {
+    alert('로그인 후 이용해주세요.');
+    return;
+  }
+
+  const questionId = problemDetail.value?.questionId;
+  if (!questionId) {
+    alert('문제를 찾을 수 없습니다.');
+    return;
+  }
+
+  try {
+    if (isProblemBookmarked.value) {
+      await removeBookmark(questionId);
+      alert('북마크가 해제되었습니다.');
+    } else {
+      await addBookmark(questionId);
+      alert('북마크가 등록되었습니다.');
+    }
+    isProblemBookmarked.value = !isProblemBookmarked.value; // 상태 즉시 업데이트 (낙관적 UI)
+  } catch (error) {
+    console.error('북마크 토글 실패:', error);
+    alert('북마크 처리 중 오류가 발생했습니다.');
   }
 }
 </script>
