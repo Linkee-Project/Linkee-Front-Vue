@@ -19,7 +19,7 @@
       <div class="divider">또는</div>
 
       <!-- 네이버 로그인 -->
-      <button class="btn-naver">
+      <button class="btn-naver"  @click="goNaverLogin">
         <img src="https://static.nid.naver.com/oauth/small_g_in.PNG" alt="네이버 로고" />
         네이버로 로그인
       </button>
@@ -62,6 +62,11 @@ const handleLogin = async () => {
   } else {
     message.value = res.message;
   }
+};
+
+//네이버 로그인
+const goNaverLogin = () => {
+  window.location.href = "http://localhost:8080/oauth2/authorization/naver"
 };
 </script>
 
