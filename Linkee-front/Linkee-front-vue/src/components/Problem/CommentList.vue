@@ -1,48 +1,69 @@
 <template>
-  <div class="comment-list-container">
-    <h3>댓글</h3>
+  <section class="comment-section">
+    <h2 class="comment-title">댓글</h2>
 
-    <!-- 댓글 입력 폼 -->
-    <div class="comment-input-form">
-        <textarea v-model="newCommentContent" placeholder="댓글을 입력하세요..." rows="3"></textarea>
-        <button @click="addComment" :disabled="!newCommentContent.trim()">등록</button>
-    </div>
-
-    <div v-if="loading">댓글을 불러오는 중...</div>
-    <div v-if="error">{{ error }}</div>
-    <div v-if="comments.length > 0">
-      <CommentListItem
-        v-for="comment in topLevelComments"
-        :key="comment.commentId"
-        :comment="comment"
-        :question-id="questionId"
-        @commentUpdated="fetchComments"
-        @commentDeleted="fetchComments"
-        @commentAdded="fetchComments"
-      >
-        <div v-if="comment.childCount > 0" class="child-comments-container">
-          <CommentListItem
-            v-for="child in getChildComments(comment.commentId)"
-            :key="child.commentId"
-            :comment="child"
-            :question-id="questionId"
-            @commentUpdated="fetchComments"
-            @commentDeleted="fetchComments"
-            @commentAdded="fetchComments"
-          />
+    <!-- 상단 댓글 입력 폼 -->
+    <div class="comment-form">
+      <!-- 아바타 + 닉네임 묶음 -->
+      <div class="comment-user-block">
+        <div class="avatar">
+          <img :src="profileImg" alt="프로필" class="avatar-img" />
         </div>
-      </CommentListItem>
+        <div class="comment-user-name">
+          {{ currentUserName }}
+        </div>
+      </div>
+
+      <!-- 인풋 영역 -->
+      <input v-model="newCommentContent" type="text" placeholder="댓글을 입력하세요" @keyup.enter="addComment"/>
+      <BaseButton color="blue" size="small" class="comment-submit" @click="addComment" :disabled="!newCommentContent.trim()">등록</BaseButton>
     </div>
-    <div v-else>
-      아직 댓글이 없습니다.
+
+    <!-- 댓글 + 대댓글 목록 -->
+    <div class="comment-list">
+      <div v-if="loading">댓글을 불러오는 중...</div>
+      <div v-if="error">{{ error }}</div>
+      <div v-if="comments.length > 0">
+        <CommentListItem
+          v-for="comment in topLevelComments"
+          :key="comment.commentId"
+          :comment="comment"
+          :question-id="questionId"
+          @commentUpdated="fetchComments"
+          @commentDeleted="fetchComments"
+          @commentAdded="fetchComments"
+        >
+          <template #default>
+            <!-- 대댓글 리스트는 CommentListItem의 slot을 통해 전달 -->
+            <div v-if="comment.childCount > 0" class="comment-thread reply"> <!-- 대댓글은 comment-thread reply 클래스를 추가 -->
+              <CommentListItem
+                v-for="child in getChildComments(comment.commentId)"
+                :key="child.commentId"
+                :comment="child"
+                :question-id="questionId"
+                @commentUpdated="fetchComments"
+                @commentDeleted="fetchComments"
+                @commentAdded="fetchComments"
+              />
+            </div>
+          </template>
+        </CommentListItem>
+      </div>
+      <div v-else>
+        아직 댓글이 없습니다.
+      </div>
     </div>
-  </div>
+  </section>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { getCommentsByQuestionId, createComment } from '@/api/problemApi.js';
 import CommentListItem from './CommentListItem.vue';
+import BaseButton from '@/components/base/button/BaseButton.vue'; // BaseButton 추가
+import profileImg from '@/assets/profile_img.svg'; // 프로필 이미지 추가
+import { useAuthStore } from '@/stores/authStore'
+import { storeToRefs } from 'pinia'
 
 const props = defineProps({
   questionId: {
@@ -50,6 +71,11 @@ const props = defineProps({
     required: true,
   },
 });
+
+const authStore = useAuthStore()
+const { user: currentUser } = storeToRefs(authStore)
+const currentUserName = computed(() => currentUser.value?.nickname || '방문자')
+
 
 const comments = ref([]);
 const loading = ref(false);
@@ -76,7 +102,6 @@ const addComment = async () => {
     return;
   }
   try {
-    // TODO: parentCommentId 처리 (현재는 최상위 댓글만)
     await createComment(props.questionId, { commentContent: newCommentContent.value });
     newCommentContent.value = ''; // 입력 필드 초기화
     await fetchComments(); // 댓글 목록 새로고침
@@ -100,64 +125,319 @@ const getChildComments = (parentId) => {
 </script>
 
 <style scoped>
-.comment-list-container {
-  margin-top: 2rem;
-  background-color: #f9f9f9;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+/* 댓글 영역 */
+.comment-section {
+  margin-top: 32px;
 }
 
-.comment-input-form {
-    display: flex;
+/* 제목 */
+.comment-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* 상단 입력폼 */
+.comment-form {
+  background: #ffffff;
+  border-radius: 999px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+}
+
+/* 아바타 + 닉네임 묶음 */
+.comment-user-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 72px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar.small {
+  width: 32px;
+  height: 32px;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* 입력폼 안의 닉네임 */
+.comment-user-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* 입력 */
+.comment-form input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+
+/* 등록 버튼 */
+.comment-submit {
+  margin-left: 8px;
+}
+
+/* 댓글 전체 리스트 */
+.comment-list {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 한 쓰레드(부모 + 대댓글 묶음) */
+.comment-thread {
+  padding: 12px 0;
+  border-top: 1px solid #646568;
+}
+
+/* 첫 번째 댓글은 위에 선 없게 */
+.comment-thread:first-child {
+  border-top: none;
+}
+
+/* 부모 댓글 아래에도 선 */
+.comment-thread > .comment-item {
+  padding-bottom: 12px;
+  border-bottom: 1px solid #646568;
+}
+
+/* 대댓글 박스 전체 */
+.comment-thread .reply {
+  margin-left: 32px;
+  padding: 12px 0;
+  border-bottom: 1px solid #646568;
+}
+
+/* 마지막 대댓글은 선 제거  */
+.comment-thread .reply:last-child {
+  border-bottom: none;
+}
+
+/* 부모 + 대댓글 공통 */
+/* .comment-item { // CommentListItem.vue에서 관리
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-left: 18px;
+} */
+
+/* 대댓글 들여쓰기 */
+/* .comment-item.reply { // CommentListItem.vue에서 관리
+  margin-top: 12px;
+  margin-left: 32px;
+} */
+
+/* .comment-item.reply .comment-body { // CommentListItem.vue에서 관리
+  margin-left: 0;
+} */
+
+/* .comment-header { // CommentListItem.vue에서 관리
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  color: #6b7280;
+} */
+
+/* .comment-header .name { // CommentListItem.vue에서 관리
+  font-weight: 600;
+  color: #111827;
+} */
+
+/* .comment-content { // CommentListItem.vue에서 관리
+  margin-top: 4px;
+  font-size: 14px;
+} */
+
+/* 액션: 답글/수정 회색 */
+/* .comment-actions { // CommentListItem.vue에서 관리
+  margin-top: 4px;
+  font-size: 12px;
+  color: #6b7280;
+  display: flex;
+  gap: 8px;
+} */
+
+/* .comment-actions span { // CommentListItem.vue에서 관리
+  cursor: pointer;
+} */
+
+/* 삭제 빨간색 */
+/* .comment-actions .delete { // CommentListItem.vue에서 관리
+  color: #ef4444;
+} */
+
+/* 대댓글 입력창 */
+/* .reply-form { // CommentListItem.vue에서 관리
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+} */
+
+/* .reply-form input { // CommentListItem.vue에서 관리
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  padding: 6px 12px;
+  font-size: 14px;
+} */
+
+/* 수정 모드 */
+/* .edit-input { // CommentListItem.vue에서 관리
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  padding: 4px 8px;
+  margin-top: 4px;
+  font-size: 14px;
+} */
+
+/* .edit-actions { // CommentListItem.vue에서 관리
+  margin-top: 4px;
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+} */
+/* ====== 반응형 ====== */
+
+/* 태블릿 (<= 1024px) */
+@media (max-width: 1024px) {
+  /* .page-inner { // CommentList 외부 요소
+    max-width: 100%;
+    margin: 60px auto 60px;
+    padding: 0 16px;
+  } */
+
+  /* .problem-detail-card { // CommentList 외부 요소
+    padding: 20px 20px;
+  } */
+
+  .comment-form {
+    border-radius: 16px;
+  }
+}
+
+/* 모바일 (<= 768px) */
+@media (max-width: 768px) {
+  /* .page-inner { // CommentList 외부 요소
+    margin: 40px auto 40px;
+    padding: 0 12px;
+  } */
+
+  /* .problem-header { // CommentList 외부 요소
+    gap: 8px;
+    margin-bottom: 16px;
+  } */
+
+  /* .page-title { // CommentList 외부 요소
+    font-size: 20px;
+  } */
+
+
+  /* .problem-detail-card { // CommentList 외부 요소
+    padding: 16px 16px;
+  } */
+
+
+  /* .detail-header { // CommentList 외부 요소
     flex-direction: column;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background-color: #fff;
-    border-radius: 8px;
-    border: 1px solid #eee;
-}
+    align-items: flex-start;
+    gap: 8px;
+  } */
 
-.comment-input-form textarea {
-    width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-    resize: vertical;
-    min-height: 60px;
-    box-sizing: border-box; /* padding을 포함한 너비 */
-}
+  /* .detail-right { // CommentList 외부 요소
+    margin-top: 8px;
+  } */
 
-.comment-input-form textarea:focus {
-    outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
-}
+  /* .detail-title { // CommentList 외부 요소
+    font-size: 18px;
+  } */
 
-.comment-input-form button {
+  /* .detail-meta { // CommentList 외부 요소
+    font-size: 11px;
+    flex-wrap: wrap;
+    row-gap: 2px;
+  } */
+
+  /* .section-content { // CommentList 외부 요소
+    font-size: 13px;
+  } */
+
+
+  /* .option-box { // CommentList 외부 요소
+    padding: 12px 12px;
+  } */
+
+
+  .comment-form {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    border-radius: 12px;
+  }
+
+  .comment-user-block {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    min-width: auto;
+  }
+
+  .comment-user-name {
+    font-size: 13px;
+  }
+
+  .comment-form input {
+    font-size: 13px;
+  }
+
+  .comment-submit {
     align-self: flex-end;
-    padding: 0.5rem 1rem;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.2s ease;
-}
+    margin-left: 0;
+  }
 
-.comment-input-form button:hover:not(:disabled) {
-    background-color: #0056b3;
-}
 
-.comment-input-form button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-}
+  /* .comment-item { // CommentListItem.vue에서 관리
+    padding-left: 0;
+  } */
 
-.child-comments-container{
-    margin-top: 1rem;
+  .comment-thread .reply {
+    margin-left: 16px;
+  }
+
+  /* .comment-item.reply { // CommentListItem.vue에서 관리
+    margin-left: 16px;
+  } */
+
+  /* .comment-header { // CommentListItem.vue에서 관리
+    font-size: 11px;
+  } */
+
+  /* .comment-content { // CommentListItem.vue에서 관리
+    font-size: 13px;
+  } */
+
+  /* .reply-form input { // CommentListItem.vue에서 관리
+    font-size: 13px;
+  } */
 }
 </style>

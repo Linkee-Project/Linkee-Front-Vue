@@ -124,3 +124,30 @@ export const updateComment = (questionId, commentId, commentData) => {
 export const deleteComment = (questionId, commentId) => {
   return api.delete(`/question/questions/${questionId}/comments/${commentId}`);
 };
+
+/**
+ * 문제 북마크를 추가하는 API
+ * @param {Long} questionId - 북마크할 문제의 ID
+ * @returns {Promise<any>}
+ */
+export const addBookmark = (questionId) => {
+  return api.post(`/question/bookmarks/${questionId}`);
+};
+
+/**
+ * 문제 북마크를 삭제하는 API
+ * @param {Long} questionId - 북마크를 삭제할 문제의 ID
+ * @returns {Promise<any>}
+ */
+export const removeBookmark = (questionId) => {
+  return api.delete(`/question/bookmarks/${questionId}`);
+};
+
+/**
+ * 현재 사용자의 북마크된 문제 목록을 조회하는 API
+ * @param {object} params - { page: number, size: number, keyword: string }
+ * @returns {Promise<PageResponse<BookmarkListResponseDto>>}
+ */
+export const getBookmarkedQuestions = (params = { page: 0, size: 10 }) => {
+  return api.get(`/question/bookmarks/me`, { params });
+};
