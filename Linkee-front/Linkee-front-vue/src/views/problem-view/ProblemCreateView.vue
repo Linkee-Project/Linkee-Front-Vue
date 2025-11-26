@@ -12,54 +12,89 @@
       <!-- 공통 폼 컴포넌트 -->
       <ProblemForm
           v-model="problemForm"
-        :categories="categories"
-        mode="create"
-        @submit="handleSubmit"
-        @cancel="goList"
+          :categories="categories"
+          mode="create"
+          @submit="handleSubmit"
+          @cancel="goList"
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import ProblemForm from '@/views/problem-view/ProblemForm.vue'
-import problemBackIcon from '@/assets/problem_back_icon.svg'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useProblemStore } from '@/stores/problemStore';
+import ProblemForm from '@/views/problem-view/ProblemForm.vue';
+import problemBackIcon from '@/assets/problem_back_icon.svg';
 
-const router = useRouter()
+const router = useRouter();
+const problemStore = useProblemStore();
 
 // 카테고리 목록
-const categories = ['네트워크', '운영체제', '데이터베이스', '자료구조']
+const categories = ['운영체제', '네트워크', '자료구조', '데이터베이스'];
 
-// 폼 기본값
+const categoryMap = {
+  '운영체제': 1,
+  '네트워크': 2,
+  '자료구조': 3,
+  '데이터베이스': 4
+};
+
+// 폼 기본값 - DTO 구조에 맞게 초기화
 const problemForm = ref({
-  category: '',
+  category: '네트워크', // 기본 선택 카테고리
   title: '',
   content: '',
-  // 보기 4개
-  options: ['', '', '', ''],
+  // 보기 4개 - 객체 배열로 초기화
+  options: [
+    { index: 1, text: '' },
+    { index: 2, text: '' },
+    { index: 3, text: '' },
+    { index: 4, text: '' }
+  ],
   // 정답 번호 (1~4)
   answer: 1
-})
+});
 
 // 목록으로 이동
 const goList = () => {
-  router.push({ name: 'ProblemList' })
-}
+  router.push({ name: 'ProblemList' });
+};
 
 // 등록 버튼 눌렀을 때
 const handleSubmit = async (form) => {
-  // TODO: 실제 등록 API 연동
+  // 1. 카테고리 이름(string)을 categoryId(Long)로 변환
+  const categoryId = categoryMap[form.category];
+  if (!categoryId) {
+    alert('카테고리를 선택해주세요.');
+    return;
+  }
 
-  console.log('등록 요청 payload:', form)
-  router.push({ name: 'ProblemList' })
-}
+  // 2. API DTO 형식에 맞게 payload 구성
+  const payload = {
+    categoryId: categoryId,
+    questionTitle: form.title,
+    questionQuestion: form.content, // DTO에 맞게 필드 이름 변경
+    questionAnswer: form.answer,   // DTO에 맞게 필드 이름 변경
+    options: form.options.map(opt => ({
+      index: opt.index,
+      text: opt.text
+    }))
+  };
 
-// 취소 버튼 눌렀을 때
-const handleCancel = () => {
-  router.push({ name: 'ProblemList' })
-}
+  // 3. Store의 액션 호출
+  const result = await problemStore.createQuestionAction(payload);
+
+  // 4. 결과에 따라 처리
+  if (result.success) {
+    alert('문제가 성공적으로 등록되었습니다.');
+    router.push({ name: 'ProblemList' }); // 성공 시 목록으로 이동
+  } else {
+    alert(`문제 등록에 실패했습니다: ${result.message}`);
+  }
+};
+
 </script>
 
 <style scoped>
