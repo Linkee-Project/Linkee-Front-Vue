@@ -1,111 +1,60 @@
 <script setup>
-import { ref } from "vue";
+import {computed, ref} from "vue";
 import { useRouter } from "vue-router";
 import { inject } from "vue";
-import ProfileMenuModal from "@/components/home/modal/ProfileMenuModal.vue"; // ← 추가
+import { useAuthStore } from "@/stores/authStore"; // 👈 추가
+import ProfileMenuModal from "@/components/home/modal/ProfileMenuModal.vue";
 import InquiryModal from "@/components/home/modal/InquiryModal.vue";
 import NotificationModal from "@/components/home/modal/NotificationModal.vue";
-const router = useRouter();
 
-/* 프로필 모달 상태 */
+const router = useRouter();
+const auth = useAuthStore();
+
+const user = computed(() => auth.user || {});
+
+
+/* 모달 상태 */
 const isProfileModal = ref(false);
-/* 문의 모달 상태 */
 const isInquiryModal = ref(false);
-/* 알림 모달 상태 */
 const isNotificationModal = ref(false);
-/*성공 토스트*/
+
 const toast = inject("toast");
 
-/* 로그인한 유저 정보 */
-// TODO: 로그인한 유저 가져오기
-const user = {
-  name: "김명지니어스",
-  profile: "/src/assets/profile_img.svg"
-};
-
 /* 메뉴 선택 시 실행 */
-const handleProfileAction = (menu) => {
+const handleProfileAction = async (menu) => {
   console.log("선택한 메뉴:", menu);
 
   if (menu === "logout") {
-    // TODO: 로그아웃 처리
-    console.log("로그아웃");
+    await auth.logout();
     return;
   }
 
-  // 계정 관리
-  if (menu === "account") {
-    router.push("/mypage/profile");
-    return;
-  }
+  if (menu === "account") return router.push("/mypage/profile");
+  if (menu === "my-problem") return router.push("/mypage/questions");
+  if (menu === "my-question") return router.push("/mypage/inquiry");
+  if (menu === "my-bookmark") return router.push("/mypage/bookmark");
+  if (menu === "my-record") return router.push("/mypage/history");
 
-  // 나의 문제 조회
-  if (menu === "my-problem") {
-    router.push("/mypage/questions");
-    return;
-  }
-
-  // 나의 문의 조회
-  if (menu === "my-question") {
-    router.push("/mypage/inquiry");
-    return;
-  }
-
-  // 나의 북마크 조회
-  if (menu === "my-bookmark") {
-    router.push("/mypage/bookmark");
-    return;
-  }
-
-  // 나의 플레이 기록
-  if (menu === "my-record") {
-    router.push("/mypage/history");
-    return;
-  }
-
-  // "문의하기"
   if (menu === "inquiry") {
     isProfileModal.value = false;
     isInquiryModal.value = true;
   }
 };
+
 const handleInquirySubmit = (text) => {
   toast.show("문의가 정상적으로 제출되었습니다! 🙌");
 };
 
-/*알람 박스*/
-/* 알림 테스트 데이터 */
+/* 알림 리스트 */
 const notifications = ref([
-  {
-    user: "김 진",
-    message: "님이 친구 요청을 보냈습니다",
-    button: "수락"
-  },
-  {
-    user: "김 쪼푸기감자",
-    message: "님이 CS퀴즈대결방에 초대했습니다",
-    button: "수락"
-  },
-  {
-    user: "김 지니어스",
-    message: "님이 올리신",
-    title: "힌이라?",
-    button: "채택됨"
-  },
-  {
-    user: "김 지니어스",
-    message: "님이 문의하신",
-    title: "다크모드 어떻게 하면요?",
-    button: "답변 보기"
-  },
-  {
-    user: "김 지니어스",
-    message: "님이 올린",
-    title: "힌이라?",
-    button: "게시글 이동"
-  }
+  { user: "김 진", message: "님이 친구 요청을 보냈습니다", button: "수락" },
+  { user: "김 쪼푸기감자", message: "님이 CS퀴즈대결방에 초대했습니다", button: "수락" },
+  { user: "김 지니어스", message: "님이 올리신", title: "힌이라?", button: "채택됨" },
+  { user: "김 지니어스", message: "님이 문의하신", title: "다크모드 어떻게 하면요?", button: "답변 보기" },
+  { user: "김 지니어스", message: "님이 올린", title: "힌이라?", button: "게시글 이동" }
 ]);
 </script>
+
 
 <template>
   <header class="header-container">
@@ -141,7 +90,7 @@ const notifications = ref([
       <!-- 프로필 버튼 -->
       <button class="profile-btn" @click="isProfileModal = true">
         <img src="../../../../assets/profile_img.svg" class="profile-img" />
-        <span class="profile-name">{{ user.name }}</span>
+        <span class="profile-name">{{ user.userNickname || user.username  || "로그인" }}</span>
       </button>
     </div>
   </header>

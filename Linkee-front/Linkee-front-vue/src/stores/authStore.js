@@ -2,6 +2,7 @@ import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { jwtDecode } from 'jwt-decode';
 import { loginApi, refreshApi, logoutApi } from '@/api/authApi';
+import { getUserMe } from '@/api/authApi';
 
 import router from '@/router';
 
@@ -72,6 +73,28 @@ export const useAuthStore = defineStore('auth', () => {
         router.push("/login");
     };
 
+    //유한세가 추가 //닉네임도 같이 피니아 저장
+    const fetchUserMe = async () => {
+        try {
+            const res = await getUserMe();
+            const data = res.data;
+
+            // userNickname 포함해서 업데이트
+            user.value = {
+                ...user.value,
+                userId: data.userId,
+                userNickname: data.userNickname,
+                userEmail: data.userEmail,
+                userRole: data.userRole,
+                createdAt: data.createdAt
+            };
+
+            localStorage.setItem("user", JSON.stringify(user.value));
+        } catch (e) {
+            console.error("유저 정보 불러오기 실패", e);
+        }
+    };
+
     // ==================
     // 🔥 로그인
     // ==================
@@ -92,6 +115,9 @@ export const useAuthStore = defineStore('auth', () => {
             // accessToken 적용
             setAccessToken(data.accessToken);
             setUserFromToken(data.accessToken);
+
+            //유한세가 추가
+            await fetchUserMe();
 
             return { success: true };
 
@@ -117,6 +143,9 @@ export const useAuthStore = defineStore('auth', () => {
 
             setAccessToken(data.accessToken);
             setUserFromToken(data.accessToken);
+
+            //유한세가 추가
+            await fetchUserMe();
 
         } catch (e) {
             setAccessToken(null);
@@ -155,5 +184,7 @@ export const useAuthStore = defineStore('auth', () => {
         login,
         refreshTokens,
         logout,
+
+        fetchUserMe
     };
 });

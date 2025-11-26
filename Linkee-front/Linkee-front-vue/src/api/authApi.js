@@ -33,3 +33,8 @@ export function sendEmailCode(email) {
 export function verifyEmailCode(email, code) {
     return api.post("/auth/email/verify", { email, code } , { skipAuth: true });
 }
+
+// 내 정보 조회
+export function getUserMe() {
+    return api.get('/users/user/me');
+}
