@@ -4,11 +4,18 @@ import api from "./axios";
  * 퀴즈방 목록 조회
  * GET /api/v1/quiz/rooms
  */
-export async function fetchQuizRooms({ page = 1, size = 12 } = {}) {
-    const res = await api.get("/quiz/rooms", {
-        params: { page: page - 1, size },  // 백엔드는 0부터 시작
-    });
-
+export async function fetchQuizRooms({ page = 1, size = 12,keyword = null, categoryId = null } = {}) {
+    const params ={
+        'page':page-1,
+        'size':size
+    };
+    if(keyword){
+        params.keyword = keyword;
+    }
+    if(categoryId){
+        params.categoryId = categoryId;
+    }
+    const res = await api.get("/quiz/rooms",{ params });
     return res.data.data;  // PageResponse<QuizRoomListResponseDto>
 }
 
@@ -49,4 +56,28 @@ export async function fetchQuizResults(roomId, { page = 0, size = 10 } = {}) {
     });
 
     return res.data.data; // List<ResultRowResponseDto>
+}
+
+/**
+ * 퀴즈방 멤버 생성(입장)
+ * POST /api/v1/quiz/rooms/member
+ */
+export async function joinQuizRoom(quizRoomId) {
+    // 👉 roomId가 잘 넘어오는지만 먼저 콘솔로 체크
+    console.log('[joinQuizRoom] roomId = ', quizRoomId);
+
+    const res = await api.post('/quiz/rooms/member', {
+        quizRoomId: Number(quizRoomId)
+    });
+
+    return res.data.data;
+}
+
+/**
+ * 퀴즈방 생성
+ * POST /api/v1/quiz/rooms
+ */
+export async function createQuizRoom(payload) {
+    const res = await api.post("/quiz/rooms", payload);
+    return res.data.data;   // Long quizRoomId
 }
