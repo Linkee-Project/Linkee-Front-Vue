@@ -1,17 +1,26 @@
 <script setup>
-defineProps({
+import { useRouter } from 'vue-router'; // useRouter 임포트
+
+const props = defineProps({
   bookmark: {
     type: Object,
     required: true,
   },
 });
+
+const router = useRouter();
+
+const goToProblemDetail = () => {
+  router.push({ name: 'ProblemDetail', params: { id: props.bookmark.questionId } });
+};
 </script>
 
 <template>
-  <div class="list-row">
-    <span class="row-item category">{{ bookmark.category }}</span>
-    <span class="row-item title">{{ bookmark.title }}</span>
-    <span class="row-item date">{{ bookmark.date }}</span>
+  <div class="list-row" @click="goToProblemDetail">
+    <!-- category 필드는 DTO에 직접 없으므로, questionTitle을 메인으로 표시 -->
+    <span class="row-item title">{{ bookmark.questionTitle }}</span>
+    <!-- userNickname은 DTO에 있지만, 현재 UI에서는 표시되지 않으므로 생략 -->
+    <!-- date 필드는 DTO에 없으므로 생략 -->
   </div>
 </template>
 
@@ -38,21 +47,12 @@ defineProps({
 }
 
 /* --- 컬럼 너비 (카테고리, 제목, 등록일) --- */
-.category {
-  flex: 3;
-  color: #666;
-}
-
+/* category와 date를 제거하고 title이 전체 너비를 사용하도록 */
 .title {
-  flex: 4;
+  flex: 1; /* 전체 공간을 사용하도록 */
   text-align: left;
   padding: 0 15px;
   min-width: 0;
-}
-
-.date {
-  flex: 3;
-  color: #666;
 }
 
 /* 반응형 웹 */

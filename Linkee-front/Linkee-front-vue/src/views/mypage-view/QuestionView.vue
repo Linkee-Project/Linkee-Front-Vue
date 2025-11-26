@@ -1,28 +1,44 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import QuestionListItem from '@/components/mypage/question/QuestionListItem.vue';
 import PaginationButton from '@/components/base/button/PaginationButton.vue';
+import api from '@/api/axios.js'; // api import
 
-// 더미 데이터 추가 (페이지네이션 확인용)
-const allQuestions = ref([
-  { id: 1, category: '네트워크', title: 'TCP 3-way handshake 흐름을 묻는 문제', date: '2025-01-02' },
-  { id: 2, category: '자료구조', title: '연결 리스트 삽입 위치를 정하는 문제', date: '2025-01-02' },
-  { id: 3, category: '운영체제', title: '라운드 로빈 스케줄링에 대한 설명 문제', date: '2025-01-01' },
-  { id: 4, category: '데이터베이스', title: '트랜잭션 격리 수준을 비교하는 문제', date: '2024-12-30' },
-  { id: 5, category: '네트워크', title: 'HTTP와 HTTPS의 차이점에 대한 질문', date: '2024-12-29' },
-  { id: 6, category: '자료구조', title: '해시 테이블 충돌 해결 방안 문의', date: '2024-12-28' },
-  { id: 7, category: '운영체제', title: '세마포어와 뮤텍스의 차이', date: '2024-12-27' },
-]);
+const questions = ref([]); // API에서 가져온 질문 목록
+const currentPage = ref(1); // 현재 페이지 (1부터 시작)
+const totalPages = ref(1); // 전체 페이지 수
+const itemsPerPage = ref(10); // 페이지당 항목 수 (API 기본값 10)
 
-const currentPage = ref(1);
-const itemsPerPage = ref(4);
+// 나의 문제 목록을 API에서 가져오는 함수
+const fetchMyQuestions = async () => {
+  try {
+    // 백엔드는 페이지를 0부터 시작하므로 currentPage - 1
+    const response = await api.get(`/question/questions/my-questions`, {
+      params: {
+        page: currentPage.value - 1,
+        size: itemsPerPage.value,
+      },
+    });
+    const data = response.data;
+    if (data && data.content) {
+      questions.value = data.content;
+      totalPages.value = data.totalPages;
+    }
+  } catch (error) {
+    console.error('나의 문제 목록을 불러오는데 실패했습니다:', error);
+    questions.value = [];
+    totalPages.value = 1;
+  }
+};
 
-const totalPages = computed(() => Math.ceil(allQuestions.value.length / itemsPerPage.value));
+// 컴포넌트 마운트 시 데이터 로드
+onMounted(() => {
+  fetchMyQuestions();
+});
 
-const paginatedQuestions = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage.value;
-  const end = start + itemsPerPage.value;
-  return allQuestions.value.slice(start, end);
+// currentPage 변경 감지 및 데이터 재로드
+watch(currentPage, () => {
+  fetchMyQuestions();
 });
 </script>
 
@@ -32,6 +48,7 @@ const paginatedQuestions = computed(() => {
     <div class="list-content">
       <!-- 테이블 헤더 -->
       <div class="list-header">
+        <span class="header-item no">NO</span>
         <span class="header-item category">카테고리</span>
         <span class="header-item title">제목</span>
         <span class="header-item date">등록일</span>
@@ -39,11 +56,12 @@ const paginatedQuestions = computed(() => {
       <!-- 질문 목록 -->
       <div class="items-wrapper">
         <QuestionListItem
-          v-for="question in paginatedQuestions"
-          :key="question.id"
+          v-for="(question, index) in questions"
+          :key="question.questionId"
           :question="question"
+          :index="index"
         />
-        <div v-if="paginatedQuestions.length === 0" class="empty-list">
+        <div v-if="questions.length === 0" class="empty-list">
           조회된 문제가 없습니다.
         </div>
       </div>
@@ -96,6 +114,7 @@ const paginatedQuestions = computed(() => {
   text-align: center;
 }
 
+.no { flex: 1; } /* NO 컬럼 너비 */
 .category { flex: 3; }
 .title { flex: 4; text-align: left; padding: 0 15px; min-width: 0; }
 .date { flex: 3; }
