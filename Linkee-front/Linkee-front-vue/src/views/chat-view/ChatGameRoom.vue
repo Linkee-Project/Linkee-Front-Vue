@@ -267,8 +267,21 @@ const displayUsers = computed(() => {
 /* ---------------------------------------------------
    LIFECYCLE
 --------------------------------------------------- */
-onMounted(() => {
+onMounted(async () => {
+  // ⭐ 1) 방 입장 먼저 해야 함
+  await fetch(`http://localhost:8080/api/v1/chat/rooms/${roomId}/join`, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + auth.accessToken,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ roomCode: null }) // 비공개면 코드 넣고, 공개면 null
+  });
+
+  // 그 다음 WebSocket 연결
   chat.connectSocket();
+
+  //  메시지 / 멤버 조회
   chat.loadMessages();
   chat.loadMembers();
 });

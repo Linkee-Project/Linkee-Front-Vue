@@ -25,3 +25,14 @@ export async function fetchInquiryDetail(inquiryId) {
     const res = await api.get(`/board/inquiries/${inquiryId}`);
     return res.data;
 }
+
+//문의 등록
+// 문의 등록
+export async function createInquiry({ inquiryTitle, inquiryContent }) {
+    const res = await api.post("/board/inquiries/new", {
+        inquiryTitle,
+        inquiryContent
+    });
+
+    return res.data;
+}
