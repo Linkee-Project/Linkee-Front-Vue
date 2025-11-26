@@ -1,6 +1,9 @@
 <script setup>
 import { defineProps, defineEmits } from "vue";
 import router from "@/router/index.js";
+import { useAuthStore } from "@/stores/authStore";
+
+const authStore = useAuthStore();
 const props = defineProps({
   modelValue: Boolean,
   user: {
@@ -16,9 +19,10 @@ const emit = defineEmits(["update:modelValue", "select"]);
 
 const close = () => emit("update:modelValue", false);
 
-const onSelect = (menu) => {
+const onSelect = async (menu) => {
   if (menu === 'logout') {
-    router.push('/login');
+    await authStore.logout();
+    return;
   }
   emit("select", menu);
   close();
