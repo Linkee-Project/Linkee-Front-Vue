@@ -1,5 +1,4 @@
 import { defineStore } from "pinia";
-import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
 export const useChatGameStore = defineStore("chatGame", {
@@ -8,7 +7,6 @@ export const useChatGameStore = defineStore("chatGame", {
         roomId: null,
 
         stompClient: null,
-        subscription: null,
 
         messages: [],
         members: [],
@@ -28,39 +26,46 @@ export const useChatGameStore = defineStore("chatGame", {
         },
 
         /* -------------------------------------------
-           WebSocket 연결 (최신 Stomp Client 방식)
+           WebSocket 연결
         ------------------------------------------- */
         connectSocket() {
             console.log("🔌 WebSocket 연결 준비...");
 
             this.stompClient = new Client({
-                webSocketFactory: () =>
-                    new SockJS(`http://localhost:8080/ws-chat?token=${this.token}`),
-
-                connectHeaders: {
-                    Authorization: "Bearer " + this.token  // 이건 STOMP CONNECT 프레임용
-                },
-
+                brokerURL: `ws://localhost:8080/ws-stomp?token=${this.token}`,
                 reconnectDelay: 5000,
                 debug: msg => console.log("[STOMP]", msg)
             });
 
-            /* 연결 성공 시 */
+            /* 연결 성공 */
             this.stompClient.onConnect = () => {
                 console.log("🟢 WebSocket 연결됨!");
 
-                this.subscription = this.stompClient.subscribe(
+                // 1) 채팅 메시지 구독
+                this.stompClient.subscribe(
                     `/topic/chatroom/${this.roomId}`,
                     this.onSocketMessage.bind(this)
                 );
+
+                // 2) 멤버 목록 실시간 구독
+                this.stompClient.subscribe(
+                    `/topic/chatroom/${this.roomId}/members`,
+                    (raw) => {
+                        this.members = JSON.parse(raw.body);
+                    }
+                );
+
+                // 3) WebSocket 입장 메시지 알림
+                this.stompClient.publish({
+                    destination: "/app/chat.join",
+                    headers: { roomId: this.roomId }
+                });
             };
 
-            /* 연결 끊김 */
             this.stompClient.onStompError = (frame) => {
                 console.error("❌ STOMP ERROR:", frame);
             };
 
-            /* 연결 시작 */
             this.stompClient.activate();
         },
 
@@ -70,52 +75,73 @@ export const useChatGameStore = defineStore("chatGame", {
         onSocketMessage(raw) {
             const msg = JSON.parse(raw.body);
 
-            /* 문제 출제 */
-            if (msg.type === "QNA_QUESTION") {
-                this.currentQuestion = msg.question;
-                this.currentAnswer = null;
+            switch (msg.type) {
 
-                this.problems.push({
-                    id: this.problems.length + 1,
-                    title: msg.question,
-                    desc: "",
-                    answer: null,
-                    user: msg.senderNickname || "SYSTEM",
-                    revealed: false,
-                });
+                /* 일반 채팅 */
+                case "MESSAGE":
+                    this.messages.push({
+                        id: Date.now(),
+                        user: msg.senderNickname,
+                        text: msg.message,
+                    });
+                    break;
 
-                this.messages.push({
-                    id: Date.now(),
-                    user: "SYSTEM",
-                    text: `문제가 출제되었습니다: ${msg.question}`,
-                });
-                return;
+                /* 입장 메시지 */
+                case "ENTER":
+                    this.messages.push({
+                        id: Date.now(),
+                        user: "SYSTEM",
+                        text: msg.message,
+                    });
+                    break;
+
+                /* 퇴장 메시지 */
+                case "LEAVE":
+                    this.messages.push({
+                        id: Date.now(),
+                        user: "SYSTEM",
+                        text: msg.message,
+                    });
+                    break;
+
+                /* 문제 출제 */
+                case "QNA_QUESTION":
+                    this.currentQuestion = msg.question;
+                    this.currentAnswer = null;
+
+                    this.problems.push({
+                        id: this.problems.length + 1,
+                        title: msg.question,
+                        desc: "",
+                        answer: null,
+                        user: msg.senderNickname || "SYSTEM",
+                        revealed: false,
+                    });
+
+                    this.messages.push({
+                        id: Date.now(),
+                        user: "SYSTEM",
+                        text: `문제가 출제되었습니다: ${msg.question}`,
+                    });
+                    break;
+
+                /* 정답 공개 */
+                case "QNA_ANSWER":
+                    this.currentAnswer = msg.answer;
+
+                    const last = this.problems[this.problems.length - 1];
+                    if (last) {
+                        last.revealed = true;
+                        last.answer = msg.answer;
+                    }
+
+                    this.messages.push({
+                        id: Date.now(),
+                        user: "SYSTEM",
+                        text: `정답이 공개되었습니다: ${msg.answer}`,
+                    });
+                    break;
             }
-
-            /* 정답 공개 */
-            if (msg.type === "QNA_ANSWER") {
-                this.currentAnswer = msg.answer;
-
-                const last = this.problems[this.problems.length - 1];
-                if (last) {
-                    last.revealed = true;
-                    last.answer = msg.answer;
-                }
-
-                this.messages.push({
-                    id: Date.now(),
-                    user: "SYSTEM",
-                    text: `정답이 공개되었습니다: ${msg.answer}`,
-                });
-                return;
-            }
-
-            /* 일반 채팅 */
-            this.messages.push({
-                id: Date.now(),
-                user: msg.senderNickname,
-                text: msg.message,
-            });
         },
 
         /* -------------------------------------------
@@ -126,7 +152,6 @@ export const useChatGameStore = defineStore("chatGame", {
 
             this.stompClient.publish({
                 destination: "/app/chat.send",
-                headers: { Authorization: "Bearer " + this.token },
                 body: JSON.stringify({
                     roomId: this.roomId,
                     message: text,
@@ -187,7 +212,7 @@ export const useChatGameStore = defineStore("chatGame", {
         },
 
         /* -------------------------------------------
-           멤버 목록 가져오기
+           멤버 목록 가져오기 (초기 1회)
         ------------------------------------------- */
         async loadMembers() {
             const res = await fetch(
@@ -208,13 +233,10 @@ export const useChatGameStore = defineStore("chatGame", {
 
             this.stompClient.publish({
                 destination: "/app/chat.leave",
-                headers: { Authorization: "Bearer " + this.token },
                 body: JSON.stringify({ roomId: this.roomId }),
             });
 
-            this.subscription?.unsubscribe();
-
-            this.stompClient.deactivate(); // ⭐ 최신 문법
+            this.stompClient.deactivate();
             console.log("🔻 WebSocket 종료");
         },
     },
