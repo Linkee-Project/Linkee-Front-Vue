@@ -38,9 +38,9 @@ const fetchAdminProblems = async () => {
       page: currentPage.value - 1, // API는 0부터 시작하는 페이지 번호를 받음
       size: itemsPerPage.value,
       keyword: filters.value.keyword,
-      verified: filters.value.verified === 'ALL' ? null : filters.value.verified,
-      // "NORMAL" -> "N", "DELETED" -> "Y", "ALL" -> null로 변환
-      deleted: filters.value.deleted === 'NORMAL' ? 'N' : (filters.value.deleted === 'DELETED' ? 'Y' : null),
+      verified: filters.value.verified === 'ALL' ? '' : filters.value.verified,
+      // "NORMAL" -> "N", "DELETED" -> "Y", "ALL" -> "ALL"로 변환
+      deleted: filters.value.deleted === 'ALL' ? '' : (filters.value.deleted === 'NORMAL' ? 'N' : 'Y'),
     };
     const response = await getAdminProblemList(params);
     adminProblems.value = response.data.content;
