@@ -294,45 +294,6 @@ Linkee는 사용자가 CS 관련 퀴즈에 참여하고 문제를 풀며 다른 
   </details>
   
 - ### 🔁 화면 기능 단위 테스트
-  
-   <!-- 첫 번째 토글 세트 -->
-   <details>
-     <summary>📁 바깥 토글 1</summary>
-   
-     <details>
-       <summary>📂 안쪽 토글 1</summary>
-       안쪽 토글 1의 내용입니다.
-     </details>
-   
-   </details>
-   
-  
-   
-   <!-- 두 번째 토글 세트 -->
-   <details>
-     <summary>📁 바깥 토글 2</summary>
-   
-     <details>
-       <summary>📂 안쪽 토글 2</summary>
-       안쪽 토글 2의 내용입니다.
-     </details>
-   
-   </details>
+  화면 기능 단위 테스를 자세히 보려면 [여기](https://drive.google.com/drive/folders/1dFSrJe7ERnSbNdMgFND9wsYUytCJDg7_?usp=sharing)를 클릭하세요
+ 
 
-   <!-- 메인페이지 세트 -->
-   <details>
-     <summary>📁 메인페이지</summary>
-   
-     <details>
-       <summary>📂 MAIN-001 </summary>
-       안쪽 토글 1의 내용입니다.
-     </details>
-   
-   </details>
-
----
-## ⚠️ 5. Trouble Shooting
-
-
-
----
