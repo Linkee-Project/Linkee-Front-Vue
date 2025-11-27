@@ -1,12 +1,16 @@
 <script setup>
-import {computed, ref} from "vue";
+import {computed, ref, onMounted} from "vue";
 import { useRouter } from "vue-router";
 import { inject } from "vue";
 import { useAuthStore } from "@/stores/authStore";
 import { createInquiry } from "@/api/inquiryApi.js";
+import { getAlarmBoxesMe } from "@/api/alarmApi.js"; // alarmApi import
 import ProfileMenuModal from "@/components/home/modal/ProfileMenuModal.vue";
 import InquiryModal from "@/components/home/modal/InquiryModal.vue";
 import NotificationModal from "@/components/home/modal/NotificationModal.vue";
+
+import bellIcon from "@/assets/bell.svg";
+import bellCheckIcon from "@/assets/bell_check.svg";
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -59,13 +63,49 @@ const handleInquirySubmit = async ({ inquiryTitle, inquiryContent }) => {
 
 
 /* 알림 리스트 */
-const notifications = ref([
-  { user: "김 진", message: "님이 친구 요청을 보냈습니다", button: "수락" },
-  { user: "김 쪼푸기감자", message: "님이 CS퀴즈대결방에 초대했습니다", button: "수락" },
-  { user: "김 지니어스", message: "님이 올리신", title: "힌이라?", button: "채택됨" },
-  { user: "김 지니어스", message: "님이 문의하신", title: "다크모드 어떻게 하면요?", button: "답변 보기" },
-  { user: "김 지니어스", message: "님이 올린", title: "힌이라?", button: "게시글 이동" }
-]);
+const notifications = ref([]); // 알림 리스트 초기화
+
+const hasUnreadNotifications = computed(() => {
+  return notifications.value.some(n => !n.isChecked);
+});
+
+const fetchNotifications = async () => {
+  try {
+    const response = await getAlarmBoxesMe();
+    // 최신순으로 정렬
+    const sortedNotifications = response.sort((a, b) => {
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    notifications.value = sortedNotifications
+      .map(alarm => {
+        const date = new Date(alarm.createdAt);
+        const formattedTime = date.toLocaleString('ko-KR', {
+          year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      return {
+        id: alarm.alarmBoxId,
+        message: alarm.alarmBoxContent,
+        time: formattedTime,
+        isChecked: alarm.isChecked === 'Y',
+        original: alarm // 원본 데이터도 함께 저장 (필요 시 사용)
+      };
+    });
+  } catch (error) {
+    console.error('Failed to fetch notifications:', error);
+    // 에러 처리 로직 추가 (예: 토스트 메시지)
+  }
+};
+
+onMounted(() => {
+  if (auth.isLoggedIn) {
+    fetchNotifications();
+  }
+});
 </script>
 
 
@@ -97,7 +137,7 @@ const notifications = ref([
 
       <!-- 알림 -->
       <button class="icon-btn" @click="isNotificationModal = true">
-        <img src="../../../../assets/bell.svg" class="icon-img" />
+        <img :src="hasUnreadNotifications ? bellIcon : bellCheckIcon" class="icon-img" />
       </button>
 
       <!-- 프로필 버튼 -->
@@ -126,6 +166,7 @@ const notifications = ref([
       v-model="isNotificationModal"
       :notifications="notifications"
       @action="(item) => console.log('클릭한 알림:', item)"
+      @refreshNotifications="fetchNotifications"
   />
 
 </template>
