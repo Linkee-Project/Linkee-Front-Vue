@@ -8,10 +8,13 @@ import onlineIcon from "@/assets/online.svg";
 import offlineIcon from "@/assets/offline.svg";
 import ChoiceModal from "/src/components/common/modal/ChoiceModal.vue";
 import ReportModal from "@/components/home/modal/ReportModal.vue";
-import { ref, onMounted, computed } from "vue";
+import {ref, onMounted, computed, inject} from "vue";
 import { useAuthStore } from "@/stores/authStore.js";
 import { fetchMyRelations } from "@/api/relationApi.js";
 import {createChatRoom, fetchMyChatRooms} from "@/api/chatApi.js";
+import { inviteToChatRoom } from "@/api/chatApi.js";
+
+const toast = inject("toast");
 
 
 //채팅방 여러개 만들기
@@ -145,23 +148,30 @@ const addNewRoom = async (roomData) => {
 
 //------------------------------------------------------------------------------
 //친구 초대
+console.log("token:", authStore.accessToken);
+
 const isInviteModal = ref(false);
 const selectedRoom = ref(null);
-const handleInvite = ({ roomId, invited }) => {
-  const room = rooms.value.find(r => r.id === roomId);
-  if (!room.members) room.members = [];
+const handleInvite = async ({ roomId, invited }) => {
+  try {
+    await inviteToChatRoom(roomId, invited, authStore.accessToken);
 
-  invited.forEach(user => {
-    if (!room.members.some(m => m.id === user.id)) {
-      room.members.push(user);
+    const room = rooms.value.find(r => r.id === roomId);
+    if (room) {
+      if (!room.members) room.members = [];
+      invited.forEach(user => {
+        if (!room.members.some(m => m.id === user.id)) {
+          room.members.push(user);
+        }
+      });
     }
-  });
+    console.log("token:", authStore.accessToken);
 
-  if (currentRoom.value?.id === roomId) {
-    currentRoom.value = { ...room };
+    toast?.show("친구가 성공적으로 초대되었습니다!");
+  } catch (err) {
+    console.error("초대 실패:", err);
+    toast?.show("초대 중 오류가 발생했습니다.");
   }
-
-  console.log("초대 완료:", room);
 };
 //=================================================================================
 // 채팅 모달
@@ -264,7 +274,7 @@ const handleAction = async (type) => {
       }
 
       const memberRes = await api.get(`/chat/rooms/${roomId}/members`, {
-        headers: { Authorization: `Bearer ${authStore.token}` }
+        headers: { Authorization: `Bearer ${authStore.accessToken}` }
       });
 
       const members = memberRes.data.map(m => ({
