@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onBeforeUnmount } from 'vue'
+import { computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useQuizGameStore } from '@/stores/quizRoomStore.js'
 import { useAuthStore } from '@/stores/authStore.js'
@@ -107,6 +107,19 @@ onMounted(() => {
   quiz.connectSocket()
 })
 
+// 퀴즈 단계(phase)가 result가 되면 ５초 뒤 방 목록으로 이동
+watch(
+    () => quiz.phase,
+    (newPhase) => {
+      if (newPhase === 'result') {
+        // 5초 동안 최종 순위 보여준 뒤 퀴즈방 목록 조회로 이동
+        setTimeout(() => {
+          router.push('/quiz/rooms');
+        }, 5000);
+      }
+    }
+);
+
 /** ✅ 페이지 나갈 때 WebSocket 정리 **/
 onBeforeUnmount(() => {
   quiz.leaveRoom()
@@ -154,6 +167,7 @@ onBeforeUnmount(() => {
                 v-for="opt in questionData.options"
                 :key="opt.optionId || opt.optionIndex"
                 class="option"
+                :class="{ 'option--selected': quiz.myAnswerIndex === opt.optionIndex }"
                 @click="submitAnswer(opt.optionIndex)"
             >
               <span class="index">{{ opt.optionIndex }}.</span>
@@ -264,13 +278,6 @@ onBeforeUnmount(() => {
       </section>
 
     </main>
-
-  <!-- 개발용 테스트 버튼 (나중에 숨겨도 됨) -->
-  <footer class="debug-buttons">
-    <button @click="setPhase('question')">문제 화면</button>
-    <button @click="setPhase('answer')">정답 공개</button>
-    <button @click="setPhase('result')">최종 순위</button>
-  </footer>
   </div>
 </template>
 
@@ -378,19 +385,6 @@ onBeforeUnmount(() => {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px 18px;
-}
-
-.option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-radius: 18px;
-  border: none;
-  padding: 12px 18px;
-  background: #f5f7fb;
-  text-align: left;
-  cursor: pointer;
-  font-size: 15px;
 }
 
 .option .index {
@@ -515,24 +509,47 @@ onBeforeUnmount(() => {
   font-weight: 600;
 }
 
-/* 디버그 버튼 (phase 전환 버튼) */
-.debug-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin: 24px 0 16px;
+/* ===========================
+   보기 상태별 스타일
+   =========================== */
 
-  position: relative;
-  z-index: 2;
+/* 기본 보기 스타일에 살짝 인터랙션 추가 */
+.option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 18px;
+  border: none;
+  padding: 12px 18px;
+  background: #f5f7fb;
+  text-align: left;
+  cursor: pointer;
+  font-size: 15px;
+  transition:
+      background-color 0.15s ease,
+      box-shadow 0.15s ease,
+      transform 0.15s ease,
+      color 0.15s ease;
 }
 
-.debug-buttons button {
-  padding: 6px 10px;
+.option:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15, 104, 201, 0.18);
+}
+
+/* 내가 선택한 보기 (문제 푸는 중) */
+.option--selected {
+  background: #0f68c9;
+  color: #ffffff;
+  box-shadow:
+      0 0 0 2px #ffffff,
+      0 0 0 4px rgba(15, 104, 201, 0.55);
+}
+
+.option--selected .index {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
   border-radius: 999px;
-  border: 1px solid #ddd;
-  background: #fff;
-  font-size: 12px;
-  cursor: pointer;
 }
 
 </style>

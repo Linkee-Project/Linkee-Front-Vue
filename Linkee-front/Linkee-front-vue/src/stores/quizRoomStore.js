@@ -26,6 +26,9 @@ export const useQuizGameStore = defineStore("quizGame", {
         // 타이머 관련 상태
         timeLeft: 0,     // 화면에 보여줄 남은 시간(초)
         timerId: null,   // setInterval 핸들
+
+        // 내가 현재 문제에서 선택한 보기 번호
+        myAnswerIndex: null,
     }),
 
     actions: {
@@ -49,9 +52,12 @@ export const useQuizGameStore = defineStore("quizGame", {
 
             console.log("🔌 Quiz WebSocket 연결 준비...");
 
+            // 접속한 호스트 기준으로 WebSocket URL
+            const host = window.location.hostname;
+            const wsUrl = `ws://${host}:8080/ws-stomp?token=${this.token}`;
+
             this.stompClient = new Client({
-                // 팀원이 채팅에 쓴 것과 동일 패턴 사용
-                brokerURL: `ws://localhost:8080/ws-stomp?token=${this.token}`,
+                brokerURL: wsUrl,
                 reconnectDelay: 5000,
                 debug: (msg) => console.log("[QUIZ STOMP]", msg),
             });
@@ -93,6 +99,9 @@ export const useQuizGameStore = defineStore("quizGame", {
                     this.rankingData = null;
                     this.answerSubmittedUsers = [];
 
+                    // 새 문제 시작할 때 내 선택 초기화
+                    this.myAnswerIndex = null;
+
                     // 서버가 주는 timeLimit 사용 (없으면 20초)
                     this.startTimer(msg.data.timeLimit || 20);
                     break;
@@ -120,13 +129,16 @@ export const useQuizGameStore = defineStore("quizGame", {
                     break;
 
                 case "MEMBER_UPDATED": {
-                    const members = msg.data?.members || [];
+                    const members = msg.data?.members || []
 
                     this.players = members.map(m => ({
-                        userId: m.userId ?? m.memberId,
-                        userName: m.userName ?? m.memberNickname,
-                        grade: m.grade ?? "BRONZE",
+                        userId: m.memberId,
+                        userName: m.memberNickname,
+                        isReady: m.ready,
+                        isLeader: m.owner,
+                        roomMemberId: m.roomMemberId,
                     }));
+                    console.log("👥 MEMBER_UPDATED, players:", this.players)
                     break;
                 }
 
@@ -168,6 +180,9 @@ export const useQuizGameStore = defineStore("quizGame", {
         // 보기 선택 시 호출 (1,2,3,4 ...)
         submitAnswer(optionIndex) {
             this.sendMessage("SUBMIT_ANSWER", { answerIndex: optionIndex });
+
+            // 내가 고른 보기 기억 → 화면에서 하이라이트에 사용
+            this.myAnswerIndex = optionIndex;
         },
 
         // 준비 토글 (대기실용이라 퀴즈방보다는 waiting 화면에서 쓸 가능성이 크긴 함)
