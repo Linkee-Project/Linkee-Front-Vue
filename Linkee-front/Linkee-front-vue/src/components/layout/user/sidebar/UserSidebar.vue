@@ -239,73 +239,32 @@ const handleAction = async (type) => {
   // 1:1 채팅 (친구 대화하기)
   if (type === "chat") {
     const friend = selectedFriend.value;
-    const myId = authStore.user.userId;
 
-    // (1) 현재 방들의 멤버 조회해서 중복 1:1 방 있는지 확인
-    const findOneToOneRoom = async () => {
-      for (let room of rooms.value) {
-        try {
-          const res = await api.get(`/chat/rooms/${room.id}/members`, {
-            headers: {
-              Authorization: `Bearer ${authStore.token}`
-            }
-          });
+    const myName = authStore.user.userNickname;
+    const friendName = friend.name;
 
-          room.members = res.data.map(m => ({
-            id: m.userId,
-            name: m.nickname
-          }));
-
-          if (room.members.length !== 2) continue;
-
-          const ids = room.members.map(m => m.id);
-
-          if (ids.includes(myId) && ids.includes(friend.id)) {
-            return room;
-          }
-
-        } catch (err) {
-          console.error("멤버 조회 실패:", err);
-        }
-      }
-
-      return null;
-    };
-
-    const existingRoom = await findOneToOneRoom();
-
-    // (2) 이미 있는 1:1 방이면 바로 입장
-    if (existingRoom) {
-      currentRoom.value = { ...existingRoom };
-
-      const msgRes = await api.get(`/chat/rooms/${existingRoom.id}/messages`, {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`
-        }
-      });
-
-      roomMessages.value = msgRes.data || [];
-      isChatModal.value = true;
-      return;
-    }
-
-    // (3) 없으면 새로운 1:1 방 생성
     try {
       const request = {
-        chatRoomName: `${authStore.user.nickname} · ${friend.name}`,
+        chatRoomName: `${myName} · ${friendName}`,
         chatRoomType: "CHAT",
         isPrivate: "N",
         invitedUserIds: [friend.id]
       };
 
       const res = await createChatRoom(request);
-      const roomId = res.chatRoomId;
 
-      // 새 방 멤버 조회
+      console.log("createChatRoom response:", res);
+
+
+      const roomId = res.data.chatRoomId;
+
+      if (!roomId) {
+        console.error("❌ chatRoomId undefined!", res);
+        return;
+      }
+
       const memberRes = await api.get(`/chat/rooms/${roomId}/members`, {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`
-        }
+        headers: { Authorization: `Bearer ${authStore.token}` }
       });
 
       const members = memberRes.data.map(m => ({
