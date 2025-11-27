@@ -8,10 +8,14 @@ import onlineIcon from "@/assets/online.svg";
 import offlineIcon from "@/assets/offline.svg";
 import ChoiceModal from "/src/components/common/modal/ChoiceModal.vue";
 import ReportModal from "@/components/home/modal/ReportModal.vue";
-import { ref, onMounted, computed } from "vue";
+import {ref, onMounted, computed, inject} from "vue";
 import { useAuthStore } from "@/stores/authStore.js";
 import { fetchMyRelations } from "@/api/relationApi.js";
 import {createChatRoom, fetchMyChatRooms} from "@/api/chatApi.js";
+import { inviteToChatRoom } from "@/api/chatApi.js";
+import { fetchRoomMembers } from "@/api/chatApi.js";
+
+const toast = inject("toast");
 
 
 //채팅방 여러개 만들기
@@ -145,24 +149,37 @@ const addNewRoom = async (roomData) => {
 
 //------------------------------------------------------------------------------
 //친구 초대
+console.log("token:", authStore.accessToken);
+
 const isInviteModal = ref(false);
 const selectedRoom = ref(null);
-const handleInvite = ({ roomId, invited }) => {
-  const room = rooms.value.find(r => r.id === roomId);
-  if (!room.members) room.members = [];
+const handleInvite = async ({ roomId, invited }) => {
+  try {
+    await inviteToChatRoom(roomId, invited);
 
-  invited.forEach(user => {
-    if (!room.members.some(m => m.id === user.id)) {
-      room.members.push(user);
+    // 초대 성공 → 최신 멤버 다시 불러오기
+    const res = await fetchRoomMembers(roomId);
+
+    const updatedMembers = res.data.map(m => ({
+      id: m.userId,
+      name: m.userNickname,
+      joinedAt: m.joinedAt,
+      avatar: "/src/assets/profile_img.svg"
+    }));
+
+    const room = rooms.value.find(r => r.id === roomId);
+    if (room) {
+      room.members = updatedMembers;
     }
-  });
 
-  if (currentRoom.value?.id === roomId) {
-    currentRoom.value = { ...room };
+    toast?.show("친구가 성공적으로 초대되었습니다!");
+
+  } catch (err) {
+    console.error("초대 실패:", err);
+    toast?.show("초대 중 오류가 발생했습니다.");
   }
-
-  console.log("초대 완료:", room);
 };
+
 //=================================================================================
 // 채팅 모달
 
@@ -227,11 +244,26 @@ const handleAction = async (type) => {
   if (type === "enter") {
     const room = selectedFriend.value;
 
-    // ⭐ 객체를 새로 만들어야 반응형 전달됨
+    // 채팅 모달 열기 전 멤버 먼저 불러오기!!
+    try {
+      const res = await fetchRoomMembers(room.id);
+
+      const members = res.data.map(m => ({
+        id: m.userId,
+        name: m.userNickname,
+        joinedAt: m.joinedAt,
+        avatar: "/src/assets/profile_img.svg" // 기본 프로필
+      }));
+
+      room.members = members;  // 반응형으로 저장
+    } catch (e) {
+      console.error("멤버 조회 실패:", e);
+      room.members = [];
+    }
+
+    // 채팅 모달 오픈 로직
     currentRoom.value = { ...room };
-
     roomMessages.value = room.messages || [];
-
     isChatModal.value = true;
   }
 
@@ -239,73 +271,32 @@ const handleAction = async (type) => {
   // 1:1 채팅 (친구 대화하기)
   if (type === "chat") {
     const friend = selectedFriend.value;
-    const myId = authStore.user.userId;
 
-    // (1) 현재 방들의 멤버 조회해서 중복 1:1 방 있는지 확인
-    const findOneToOneRoom = async () => {
-      for (let room of rooms.value) {
-        try {
-          const res = await api.get(`/chat/rooms/${room.id}/members`, {
-            headers: {
-              Authorization: `Bearer ${authStore.token}`
-            }
-          });
+    const myName = authStore.user.userNickname;
+    const friendName = friend.name;
 
-          room.members = res.data.map(m => ({
-            id: m.userId,
-            name: m.nickname
-          }));
-
-          if (room.members.length !== 2) continue;
-
-          const ids = room.members.map(m => m.id);
-
-          if (ids.includes(myId) && ids.includes(friend.id)) {
-            return room;
-          }
-
-        } catch (err) {
-          console.error("멤버 조회 실패:", err);
-        }
-      }
-
-      return null;
-    };
-
-    const existingRoom = await findOneToOneRoom();
-
-    // (2) 이미 있는 1:1 방이면 바로 입장
-    if (existingRoom) {
-      currentRoom.value = { ...existingRoom };
-
-      const msgRes = await api.get(`/chat/rooms/${existingRoom.id}/messages`, {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`
-        }
-      });
-
-      roomMessages.value = msgRes.data || [];
-      isChatModal.value = true;
-      return;
-    }
-
-    // (3) 없으면 새로운 1:1 방 생성
     try {
       const request = {
-        chatRoomName: `${authStore.user.nickname} · ${friend.name}`,
+        chatRoomName: `${myName} · ${friendName}`,
         chatRoomType: "CHAT",
         isPrivate: "N",
         invitedUserIds: [friend.id]
       };
 
       const res = await createChatRoom(request);
-      const roomId = res.chatRoomId;
 
-      // 새 방 멤버 조회
+      console.log("createChatRoom response:", res);
+
+
+      const roomId = res.data.chatRoomId;
+
+      if (!roomId) {
+        console.error("❌ chatRoomId undefined!", res);
+        return;
+      }
+
       const memberRes = await api.get(`/chat/rooms/${roomId}/members`, {
-        headers: {
-          Authorization: `Bearer ${authStore.token}`
-        }
+        headers: { Authorization: `Bearer ${authStore.accessToken}` }
       });
 
       const members = memberRes.data.map(m => ({

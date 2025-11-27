@@ -14,3 +14,21 @@ export async function fetchMyChatRooms({ page = 0, size = 20 } = {}) {
 export async function createChatRoom(data) {
     return api.post("/chat/rooms", data);
 }
+
+// 친구 초대 API
+export async function inviteToChatRoom(roomId, invitedUsers, token) {
+    return api.post(
+        `/chat/rooms/${roomId}/invite`,
+        { userIds: invitedUsers.map(u => u.id) },
+        {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        }
+    );
+}
+
+export async function fetchRoomMembers(roomId) {
+    return api.get(`/chat/rooms/${roomId}/members`);
+}
+
