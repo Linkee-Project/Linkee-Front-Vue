@@ -245,6 +245,17 @@ Linkee는 사용자가 CS 관련 퀴즈에 참여하고 문제를 풀며 다른 
    
    </details>
 
+   <!-- 메인페이지 세트 -->
+   <details>
+     <summary>📁 메인페이지</summary>
+   
+     <details>
+       <summary>📂 MAIN-001 </summary>
+       안쪽 토글 1의 내용입니다.
+     </details>
+   
+   </details>
+
 ---
 ## ⚠️ 5. Trouble Shooting
 
