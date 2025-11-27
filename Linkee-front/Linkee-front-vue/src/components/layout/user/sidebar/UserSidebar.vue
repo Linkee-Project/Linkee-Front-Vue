@@ -8,50 +8,44 @@ import onlineIcon from "@/assets/online.svg";
 import offlineIcon from "@/assets/offline.svg";
 import ChoiceModal from "/src/components/common/modal/ChoiceModal.vue";
 import ReportModal from "@/components/home/modal/ReportModal.vue";
-import { ref, onMounted, computed } from "vue";
+import {ref, onMounted, computed, inject} from "vue";
 import { useAuthStore } from "@/stores/authStore.js";
 import { fetchMyRelations } from "@/api/relationApi.js";
+import {createChatRoom, fetchMyChatRooms} from "@/api/chatApi.js";
+import { inviteToChatRoom } from "@/api/chatApi.js";
+import { fetchRoomMembers } from "@/api/chatApi.js";
+
+const toast = inject("toast");
+
 
 //채팅방 여러개 만들기
-const rooms = ref([
-  { id: 1, title: "코딩 천재들, 알고리즘 스터디" },
-  { id: 2, title: "코딩 천재들, 알고리즘 스터디" },
-  { id: 3, title: "코딩 천재들, 알고리즘 스터디" },
-  { id: 4, title: "코딩 천재들, 알고리즘 스터디" }
-]);
+const rooms = ref([]);
 
 //회원 정보
 const authStore = useAuthStore();
 //친구
 const friends = ref([]);
 
+//친구조회
 const loadFriends = async () => {
   try {
+    const res = await fetchMyRelations();
+    const rows = res.data.content;
+
     const myId = authStore.user.userId;
 
-    let rows;
-
-    // 일반 로그인 → /my
-    if (!authStore.user.social) {
-      const res = await fetchMyRelations();
-      rows = res.data.content;
-
-      // 소셜 로그인 → by-id
-    } else {
-      const res = await api.get(`/api/v1/users/relations/by-id?userId=${myId}`);
-      rows = res.data.content;
-    }
-
     friends.value = rows.map(r => {
-      const isMeRequester = r.requesterId === myId;
+      const isRequester = r.requesterId === myId;
+
       return {
-        id: isMeRequester ? r.receiverId : r.requesterId,
-        name: isMeRequester ? r.receiverNickname : r.requesterNickname,
+        id: isRequester ? r.receiverId : r.requesterId,
+        name: isRequester ? r.receiverNickname : r.requesterNickname,
         online: true,
         status: "접속중",
         avatar: profileImg
       };
     });
+
   } catch (err) {
     console.error("친구 목록 조회 실패:", err);
   }
@@ -59,8 +53,27 @@ const loadFriends = async () => {
 const totalCount = computed(() => friends.value.length);
 const onlineCount = computed(() => friends.value.length);
 
+
+//빙조회
+const loadMyRooms = async () => {
+  try {
+    const res = await fetchMyChatRooms({ page: 0, size: 30 });
+
+    const rows = res.content;
+
+    rooms.value = rows.map(r => ({
+      id: r.chatRoomId,
+      title: r.chatRoomName,
+      members: [],
+    }));
+
+  } catch (e) {
+    console.error("내 채팅방 조회 실패: ", e);
+  }
+};
 onMounted(() => {
   loadFriends();
+  loadMyRooms();
 });
 
 // 모달 관련 상태
@@ -113,35 +126,60 @@ import CreateChatRoomModal from "@/components/home/modal/CreateChatRoomModal.vue
 import InviteChatRoomModal from "@/components/home/modal/InviteChatRoomModal.vue";
 //새 채팅방 만들기 상태 on/off
 const isCreateRoomModal = ref(false);
-const addNewRoom = (roomData) => {
-  rooms.value.push({
-    id: rooms.value.length + 1,
-    title: roomData.roomName,
-    members: [me, ...roomData.invited],
-    messages: []
-  });
+const addNewRoom = async (roomData) => {
+  try {
+    const invitedIds = roomData.invited.map(u => u.id);
+
+    const request = {
+      chatRoomName: roomData.roomName,
+      chatRoomType: "CHAT",
+      isPrivate: "N",
+      invitedUserIds: invitedIds
+    };
+
+    const res = await createChatRoom(request);
+
+    // 성공했으면 다시 목록 조회
+    await loadMyRooms();
+
+  } catch (err) {
+    console.error("방 생성 실패: ", err);
+  }
 };
 
 //------------------------------------------------------------------------------
 //친구 초대
+console.log("token:", authStore.accessToken);
+
 const isInviteModal = ref(false);
 const selectedRoom = ref(null);
-const handleInvite = ({ roomId, invited }) => {
-  const room = rooms.value.find(r => r.id === roomId);
-  if (!room.members) room.members = [];
+const handleInvite = async ({ roomId, invited }) => {
+  try {
+    await inviteToChatRoom(roomId, invited);
 
-  invited.forEach(user => {
-    if (!room.members.some(m => m.id === user.id)) {
-      room.members.push(user);
+    // 초대 성공 → 최신 멤버 다시 불러오기
+    const res = await fetchRoomMembers(roomId);
+
+    const updatedMembers = res.data.map(m => ({
+      id: m.userId,
+      name: m.userNickname,
+      joinedAt: m.joinedAt,
+      avatar: "/src/assets/profile_img.svg"
+    }));
+
+    const room = rooms.value.find(r => r.id === roomId);
+    if (room) {
+      room.members = updatedMembers;
     }
-  });
 
-  if (currentRoom.value?.id === roomId) {
-    currentRoom.value = { ...room };
+    toast?.show("친구가 성공적으로 초대되었습니다!");
+
+  } catch (err) {
+    console.error("초대 실패:", err);
+    toast?.show("초대 중 오류가 발생했습니다.");
   }
-
-  console.log("초대 완료:", room);
 };
+
 //=================================================================================
 // 채팅 모달
 
@@ -178,8 +216,8 @@ const sendMessage = (msg) => {
 
 //=================================================================================
 // 모달에서 선택한 버튼 실행
-const handleAction = (type) => {
-  console.log("선택한 기능:", type, selectedFriend.value.name);
+const handleAction = async (type) => {
+  console.log("선택한 기능:", type, selectedFriend.value?.name ?? selectedFriend.value?.title);
   isModalOpen.value = false;
 
   //신고
@@ -206,58 +244,89 @@ const handleAction = (type) => {
   if (type === "enter") {
     const room = selectedFriend.value;
 
-    // ⭐ 객체를 새로 만들어야 반응형 전달됨
+    // 채팅 모달 열기 전 멤버 먼저 불러오기!!
+    try {
+      const res = await fetchRoomMembers(room.id);
+
+      const members = res.data.map(m => ({
+        id: m.userId,
+        name: m.userNickname,
+        joinedAt: m.joinedAt,
+        avatar: "/src/assets/profile_img.svg" // 기본 프로필
+      }));
+
+      room.members = members;  // 반응형으로 저장
+    } catch (e) {
+      console.error("멤버 조회 실패:", e);
+      room.members = [];
+    }
+
+    // 채팅 모달 오픈 로직
     currentRoom.value = { ...room };
-
     roomMessages.value = room.messages || [];
-
     isChatModal.value = true;
   }
 
   //1:1채팅
+  // 1:1 채팅 (친구 대화하기)
   if (type === "chat") {
     const friend = selectedFriend.value;
 
-    // 이미 있는 1:1 채팅방 검사
-    const existingRoom = rooms.value.find(room => {
-      if (!room.members) return false;
+    const myName = authStore.user.userNickname;
+    const friendName = friend.name;
 
-      // 멤버가 정확히 2명
-      if (room.members.length !== 2) return false;
+    try {
+      const request = {
+        chatRoomName: `${myName} · ${friendName}`,
+        chatRoomType: "CHAT",
+        isPrivate: "N",
+        invitedUserIds: [friend.id]
+      };
 
-      // 두 명이 me와 friend인지 확인
-      const ids = room.members.map(m => m.id);
-      return ids.includes(me.id) && ids.includes(friend.id);
-    });
+      const res = await createChatRoom(request);
 
-    // 이미 존재하면 → 새 방 만들지 말고 바로 입장
-    if (existingRoom) {
-      currentRoom.value = { ...existingRoom };
-      roomMessages.value = existingRoom.messages || [];
+      console.log("createChatRoom response:", res);
+
+
+      const roomId = res.data.chatRoomId;
+
+      if (!roomId) {
+        console.error("❌ chatRoomId undefined!", res);
+        return;
+      }
+
+      const memberRes = await api.get(`/chat/rooms/${roomId}/members`, {
+        headers: { Authorization: `Bearer ${authStore.accessToken}` }
+      });
+
+      const members = memberRes.data.map(m => ({
+        id: m.userId,
+        name: m.nickname
+      }));
+
+      const newRoom = {
+        id: roomId,
+        title: request.chatRoomName,
+        members,
+        messages: []
+      };
+
+      rooms.value.push(newRoom);
+
+      currentRoom.value = newRoom;
+      roomMessages.value = [];
       isChatModal.value = true;
-      return;
+
+    } catch (err) {
+      console.error("1:1 채팅방 생성 실패:", err);
     }
-
-    // 존재하지 않는다면 새로운 방 생성
-    const newRoom = {
-      id: Date.now(),
-      title: `${me.name} · ${friend.name}`,
-      members: [me, friend],
-      messages: []
-    };
-
-    rooms.value.push(newRoom);
-
-    currentRoom.value = { ...newRoom };
-    roomMessages.value = [];
-
-    isChatModal.value = true;
   }
+};
 
-};
-const handleReportSubmit = (data) => {
-  console.log("신고 접수됨:", data);
-};
+  const handleReportSubmit = (data) => {
+    console.log("신고 접수됨:", data);
+  };
+
 
 </script>
 
