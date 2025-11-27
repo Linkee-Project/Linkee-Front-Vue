@@ -199,6 +199,28 @@ Linkee는 사용자가 CS 관련 퀴즈에 참여하고 문제를 풀며 다른 
     <img width="977" height="657" alt="Image" src="https://github.com/user-attachments/assets/2cf6bd3d-a41f-431f-bccd-4a92907bed69" />
   </details>
 
+- ### 🖼️ 화면 설계서
+  화면 설계서를 자세히 보려면 [여기](https://www.figma.com/design/Y8SJQTt8x9Wa7lGVFchw6g/Linkee-UI?node-id=0-1&t=w3rsJaUxyKJZ04V4-1)를 클릭하세요  
+    
+- ### 💻 화면 기능 명세서
+  화면 기능명세서를 자세히 보려면 [여기](https://docs.google.com/spreadsheets/d/1TNEo-AtHsYJsGsgus2CA8qv60TT7Qk2rOzpAlzFoUOs/edit?gid=0#gid=0)를 클릭하세요  
+
+    <details> 
+  <summary> 메인페이지</summary>
+    <img width="977" height="657" alt="스크린샷 2025-11-27 124213" src="https://github.com/user-attachments/assets/982af6fe-cdaa-4b9f-8345-aeed0006199f" />
+    <img width="977" height="657" alt="스크린샷 2025-11-27 124418" src="https://github.com/user-attachments/assets/e956caa9-8b5c-4a50-9095-ad7f8d499539" />
+    <img width="977" height="657" alt="스크린샷 2025-11-27 124500" src="https://github.com/user-attachments/assets/47ab7967-67b3-4bb2-9df3-9f1671771437" />
+    <img width="977" height="657" alt="스크린샷 2025-11-27 124536" src="https://github.com/user-attachments/assets/e82c8f0d-187d-4c5d-9ea5-e17a773e7aaf" />
+    <img width="977" height="657" alt="스크린샷 2025-11-27 124551" src="https://github.com/user-attachments/assets/cdd757f8-f849-4ad8-b85e-edae6cfb29b7" />
+    <img width="977" height="657" alt="스크린샷 2025-11-27 124601" src="https://github.com/user-attachments/assets/27460fec-8e25-4c82-9927-f2f32b934632" />
+    <img width="977" height="657" alt="스크린샷 2025-11-27 124623" src="https://github.com/user-attachments/assets/3020cde3-3a65-4826-9ad6-37f165e4f97e" />
+
+  </details>
+  
+- ### 🔁 화면 기능 단위 테스트
+   <details> 
+  <summary> 메인페이지</summary>
+
   </details>
   
 ---
