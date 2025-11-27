@@ -151,3 +151,30 @@ export const removeBookmark = (questionId) => {
 export const getBookmarkedQuestions = (params = { page: 0, size: 10 }) => {
   return api.get(`/question/bookmarks/me`, { params });
 };
+
+/**
+ * 관리자용 문제 목록을 조회하는 API (필터링 및 페이지네이션 포함)
+ * @param {object} params - { page: number, size: number, keyword: string, verified: string, deleted: string } (AdminQuestionSearchRequest DTO)
+ * @returns {Promise<PageResponse<QuestionListResponseDto>>}
+ */
+export const getAdminProblemList = (params) => {
+  return api.get(`/question/questions/admin/questions`, { params });
+};
+
+/**
+ * 관리자가 특정 문제를 검증 처리하는 API
+ * @param {Long} questionId - 검증할 문제의 ID
+ * @returns {Promise<any>}
+ */
+export const verifyProblem = (questionId) => {
+  return api.post(`/admin/question/questions/${questionId}/verify`);
+};
+
+/**
+ * 관리자가 특정 문제를 소프트 삭제 처리하는 API
+ * @param {Long} questionId - 삭제할 문제의 ID
+ * @returns {Promise<any>}
+ */
+export const adminDeleteProblem = (questionId) => {
+  return api.delete(`/admin/question/questions/${questionId}`);
+};

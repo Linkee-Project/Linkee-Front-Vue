@@ -130,14 +130,17 @@ const inner = ref(clone(props.modelValue))
 watch(
     () => props.modelValue,
     (val) => {
-      // options가 문자열 배열일 경우 객체 배열로 변환
-      if (Array.isArray(val.options) && val.options.every(opt => typeof opt === 'string')) {
-        inner.value = {
-          ...clone(val),
-          options: val.options.map((text, index) => ({ index: index + 1, text: text }))
-        };
-      } else {
-        inner.value = clone(val)
+      // 무한 루프 방지: 와부에서 받은 값과 내부 상태의 실제 내용이 다를 때만 업데이트
+      if (JSON.stringify(val) !== JSON.stringify(inner.value)) {
+        // options가 문자열 배열일 경우 객체 배열로 변환
+        if (Array.isArray(val.options) && val.options.every(opt => typeof opt === 'string')) {
+          inner.value = {
+            ...clone(val),
+            options: val.options.map((text, index) => ({index: index + 1, text: text}))
+          };
+        } else {
+          inner.value = clone(val)
+        }
       }
     },
     { deep: true, immediate: true } // immediate: true를 추가하여 컴포넌트 마운트 시 초기값 동기화
@@ -148,8 +151,10 @@ watch(
 // 부모의 v-model 값도 항상 최신 상태로 맞춰 줌
 watch(
     inner,
-    (val) => {
-      emit('update:modelValue', clone(val))
+    (val, prev) => {
+      if (JSON.stringify(val) !== JSON.stringify(prev)) {
+        emit('update:modelValue', clone(val))
+      }
     },
     { deep: true }
 )
