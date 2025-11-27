@@ -6,7 +6,10 @@ import PaginationButton from "@/components/base/button/PaginationButton.vue";
 import BaseModal from "@/components/base/modal/BaseModal.vue";
 import BaseInput from "@/components/base/input/BaseInput.vue";
 import {useRouter} from "vue-router";
-import { fetchGameRooms } from "@/api/chatRoomApi";
+import { fetchGameRooms, createGameRoom  } from "@/api/chatRoomApi";
+import { fetchCategories } from "@/api/categoryApi";
+import { useAuthStore } from "@/stores/authStore";
+const auth = useAuthStore();
 
 const router = useRouter();
 
@@ -15,15 +18,29 @@ const page = ref(1);           // 프론트 페이지는 1부터 시작
 const pageSize = 12;           // 한 페이지 12개
 const totalPages = ref(1);     // 서버에서 받은 totalPages 저장
 const isModalOpen = ref(false);
+const isPasswordModalOpen = ref(false);
+const targetRoom = ref(null);
+const inputPassword = ref("");
 
 const categories = ref([
-  {id: null, name: "ALL"},
-  {id: 1, name: "카테고리1"},
-  {id: 2, name: "카테고리2"},
-  {id: 3, name: "카테고리3"},
-  {id: 4, name: "카테고리4"},
-  {id: 5, name: "카테고리5"},
+  { id: null, name: "ALL" }
 ]);
+
+const loadCategories = async () => {
+  try {
+    const data = await fetchCategories();
+
+    // 서버 결과를 버튼 형태로 변환
+    const mapped = data.map(c => ({
+      id: c.categoryId,
+      name: c.categoryName
+    }));
+
+    categories.value = [{ id: null, name: "ALL" }, ...mapped];
+  } catch (e) {
+    console.error("카테고리 불러오기 실패:", e);
+  }
+};
 
 const selectedCategory = ref(null);
 
@@ -47,8 +64,8 @@ const loadGameRooms = async () => {
       title: room.chatRoomName,
       memberCount: room.joinedCount,
       maxMemberCount: room.roomCapacity,
-      categoryId: null,
-      categoryName: "자율방",
+      categoryId: room.categoryId,
+      categoryName: room.categoryName ?? "자율방",
       isPrivate: room.isPrivate,
       ownerId: room.ownerId
     }));
@@ -60,10 +77,14 @@ const loadGameRooms = async () => {
 };
 
 // 컴포넌트 로드시 실행
-onMounted(loadGameRooms);
+onMounted(() => {
+  loadCategories();
+  loadGameRooms();
+});
 
 // 🔥 페이지 값 변경될 때 자동 서버 재요청
 watch(page, () => {
+  loadCategories();
   loadGameRooms();
 });
 
@@ -84,18 +105,94 @@ const openCreateModal = () => {
   isModalOpen.value = true;
 };
 
-const createRoom = () => {
-  alert("방 만들기 기능은 서버 연동 필요!");
+const createRoom = async () => {
+  if (!newRoom.title.trim()) {
+    alert("방 제목을 입력해주세요!");
+    return;
+  }
+
+  try {
+    const payload = {
+      chatRoomName: newRoom.title,
+      chatRoomType: "GAME",
+      roomCode: newRoom.password ? Number(newRoom.password) : null,
+      isPrivate: newRoom.password ? "Y" : "N",
+      roomCapacity: 5,
+      categoryId: newRoom.categoryId,
+      invitedUserIds: []
+    };
+
+    // 1) 방 생성
+    const result = await createGameRoom(payload);
+
+    const roomId = result.chatRoomId;
+
+
+    // 2) 입장 페이지로 이동 → onMounted에서 join이 처리됨
+    router.push({
+      name: "ChatGameRoom",
+      params: { roomId },
+      query: {
+        title: newRoom.title,
+        roomCode: newRoom.password || ""
+      }
+    });
+
+    isModalOpen.value = false;
+
+  } catch (err) {
+    console.error("방 생성 실패:", err);
+    alert("방 생성 중 오류가 발생했습니다.");
+  }
 };
 
 // ==========================
 // 방 클릭
 // ==========================
 const handleRoomClick = (room) => {
+  // 내가 만든 방이면 (★ 여기서는 그냥 바로 이동, join은 ChatGameRoom에서 처리)
+  if (auth.user && room.ownerId === auth.user.id) {
+    return goToRoom(room);
+  }
+
+  // 비밀방이면 비밀번호 모달 열기
+  if (room.isPrivate === "Y") {
+    targetRoom.value = room;
+    inputPassword.value = "";
+    isPasswordModalOpen.value = true;
+    return;
+  }
+
+  // 공개방이면 바로 입장
+  goToRoom(room);
+};
+
+const goToRoom = (room) => {
   router.push({
     name: "ChatGameRoom",
     params: { roomId: room.id },
-    query: { title: room.title }
+    query: {
+      title: room.title
+      // 비밀번호방일 때는 submitPassword에서 roomCode를 같이 넘겨줌
+    }
+  });
+};
+
+const submitPassword = () => {
+  if (!inputPassword.value) {
+    alert("비밀번호를 입력해주세요.");
+    return;
+  }
+
+  isPasswordModalOpen.value = false;
+
+  router.push({
+    name: "ChatGameRoom",
+    params: { roomId: targetRoom.value.id },
+    query: {
+      title: targetRoom.value.title,
+      roomCode: inputPassword.value
+    }
   });
 };
 
@@ -172,6 +269,7 @@ const pagedRooms = computed(() => filteredRooms.value);
           <div class="room-card__header">
             <span class="room-card__badge">{{ room.id }}</span>
             <span class="room-card__category">{{ room.categoryName }}</span>
+            <span v-if="room.isPrivate === 'Y'">🔒</span>
           </div>
           <div class="room-card__title">{{ room.title }}</div>
           <div class="room-card__footer">
@@ -228,6 +326,32 @@ const pagedRooms = computed(() => filteredRooms.value);
       <BaseButton color="gray" size="small" @click="isModalOpen = false">취소</BaseButton>
     </template>
   </BaseModal>
+
+
+  <BaseModal v-model="isPasswordModalOpen" title="비밀번호 입력">
+    <div class="modal-form">
+      <label>
+        방 비밀번호
+        <BaseInput
+            v-model="inputPassword"
+            type="password"
+            placeholder="비밀번호 입력"
+        />
+      </label>
+    </div>
+
+    <template #footer>
+      <BaseButton color="orange" size="small" @click="submitPassword">
+        입장
+      </BaseButton>
+      <BaseButton color="gray" size="small" @click="isPasswordModalOpen = false">
+        취소
+      </BaseButton>
+    </template>
+  </BaseModal>
+
+
+
 </template>
 
 
