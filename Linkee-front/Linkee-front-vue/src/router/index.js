@@ -41,6 +41,7 @@ import NotificationTemplateView from "@/views/admin-view/NotificationTemplateVie
 import ProblemManagementView from "@/views/admin-view/ProblemManagementView.vue";
 
 import QuizRoomWaitingView from "@/views/quiz-view/QuizRoomWaitingView.vue";
+import QuizInGameView from "@/views/quiz-view/QuizInGameView.vue";
 import {useAuthStore} from "@/stores/authStore.js";
 
 const routes = [
@@ -104,11 +105,17 @@ const routes = [
         component: QuizRoomListView
     },
     {
-        path: "/quiz/rooms/waiting",
+        path: "/quiz/rooms/:quizRoomId/waiting",
         name: 'QuizRoomWaiting',
         component: QuizRoomWaitingView,
-
     },
+    {
+        path: "/quiz/rooms/:quizRoomId/play",
+        name: 'QuizInGameView',
+        component: QuizInGameView,
+        meta: { hideLayout: true }
+    },
+
     /* ------------------------------
        문제게시판 라우트
     ------------------------------ */

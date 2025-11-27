@@ -121,14 +121,15 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import {ref, computed, onMounted} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 import BaseButton from '@/components/base/button/BaseButton.vue'
 import QuizWaitingRoomUserCard from '@/components/quiz/QuizWaitingRoomUserCard.vue'
 import BaseModal from "@/components/base/modal/BaseModal.vue";
 import ChoiceModal from "@/components/common/modal/ChoiceModal.vue";
 import ReportModal from "@/components/home/modal/ReportModal.vue";
 import ChattingModal from "@/components/home/modal/ChattingModal.vue";
+import { fetchQuizRoomDetail,leaveQuizRoom,startQuizRoom  } from '@/api/quizRoomApi'
 
 const modalX = ref(0)
 const modalY = ref(0)
@@ -193,6 +194,9 @@ function handleReportSubmit(data) {
 }
 
 const router = useRouter()
+const route = useRoute()
+
+const roomId = Number(route.params.quizRoomId)
 
 const showInviteModal = ref(false);
 
@@ -207,38 +211,120 @@ const invite = (friend) => {
   showInviteModal.value = false;
 };
 
-/* 예시 데이터 */
 const roomInfo = ref({
-  title: '나를 죽이지 못하는 고통은 나를 더 강하게 만든다.',
-  category: 'DB',
-  problemCount: 5,
-  current: 2,
-  max: 5
+  title: '',
+  category: route.query.category || '',
+  problemCount: Number(route.query.problemCount || 0),
+  current: 0,
+  max: 0
 })
 
-/* 최소한의 상태만 유지 */
 const myInfo = ref({
-  id: 2,
+  id: null,
   isReady: false,
   isLeader: false
 })
 
-const users = ref([
-  { id: 1, nickname: '김이긴123', name: '김이긴123', grade: 'BRONZE', status: 'WAIT', isLeader: true },
-  { id: 2, nickname: '명지니어스33', name: '명지니어스33', grade: 'SILVER', status: 'WAIT', isLeader: false }
-])
+
+const users = ref([])
 
 const allReady = computed(() => users.value.every(u => u.status === 'READY'))
 
+/* ========= 대기실 데이터 로딩 ========= */
+const loadRoomDetail = async () => {
+  try {
+    const data = await fetchQuizRoomDetail(roomId);
+
+    // 1. 상단 정보 업데이트
+    roomInfo.value = {
+      title: data.roomTitle,
+      category: data.categoryName,
+      problemCount: data.roomQuizLimit,
+      current: data.members?.length || 0,
+      max: data.roomCapacity || 0
+    };
+
+    // 2. 내 정보 업데이트
+    myInfo.value.id = data.currentUserId;
+    myInfo.value.isReady = false; // 준비 상태는 항상 false로 시작
+    myInfo.value.isLeader = data.owner; // API의 isOwner로 방장 여부 판단
+
+    // 3. 멤버 리스트 정보 업데이트
+    users.value = (data.members || []).map(m => ({
+      id: m.memberId,
+      nickname: m.memberNickname,
+      name: m.memberNickname,
+      grade: 'BRONZE',
+      status: m.ready ? 'READY' : 'WAIT', // isReady 필드 사용
+      isLeader: m.owner,                 // isOwner 필드 사용
+      roomMemberId: m.roomMemberId
+    }));
+
+  } catch (e) {
+    console.error('대기실 정보 조회 실패', e);
+    alert('방 정보를 불러오지 못했습니다.');
+    router.push('/quiz/rooms');
+  }
+};
+
+
+onMounted(() => {
+  if (!roomId) {
+    alert('잘못된 접근입니다.')
+    router.push('/quiz/rooms')
+    return
+  }
+  loadRoomDetail()
+})
+//TODO : 웹소켓 구현 후 서버로 전송
 function toggleReady() {
   myInfo.value.isReady = !myInfo.value.isReady
   const user = users.value.find(u => u.id === myInfo.value.id)
   if (user) user.status = myInfo.value.isReady ? 'READY' : 'WAIT'
 }
 
-function startGame() { console.log('게임 시작') }
+async function startGame() {
+  if (!roomId) {
+    alert('잘못된 접근입니다.')
+    router.push('/quiz/rooms')
+    return
+  }
 
-function leaveRoom() { router.push('/quiz/rooms') }
+  try {
+    // 1) 백엔드에 "게임 시작" 요청
+    await startQuizRoom(roomId)
+
+    // 2) 퀴즈 플레이 화면으로 이동
+    router.push({
+      name: 'QuizInGameView',
+      params: { quizRoomId: roomId }
+    })
+
+  } catch (e) {
+    console.error('게임 시작 실패', e)
+    alert(e.response?.data?.message || '게임을 시작할 수 없습니다.')
+  }
+}
+
+
+
+async function leaveRoom() {
+  if (!roomId) {
+    router.push('/quiz/rooms')
+    return
+  }
+
+  try {
+
+    await leaveQuizRoom(roomId)
+
+    router.push('/quiz/rooms')
+  } catch (e) {
+    console.error('퀴즈방 나가기 실패', e)
+    alert('퀴즈방에서 나가는 데 실패했습니다.')
+  }
+}
+
 
 </script>
 
