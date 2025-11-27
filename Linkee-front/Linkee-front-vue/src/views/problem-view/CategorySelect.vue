@@ -1,21 +1,29 @@
+<template>
+  <div class="select-wrapper" ref="rootEl">
+    <div class="select-box" @click="toggle">
+      <span class="label">{{ displayLabel }}</span>
+      <span class="arrow">▼</span>
+    </div>
+
+    <ul v-if="isOpen" class="select-list">
+      <li
+          v-for="(opt, idx) in options"
+          :key="idx"
+          @click="selectOption(opt)"
+      >
+        {{ opt }}
+      </li>
+    </ul>
+  </div>
+</template>
+
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
 const props = defineProps({
-  /* v-model 값 */
-  modelValue: {
-    type: String,
-    default: ''
-  },
-  /* 옵션 목록 */
-  options: {
-    type: Array,
-    default: () => []
-  },
-  placeholder: {
-    type: String,
-    default: '카테고리를 선택하세요.'
-  }
+  modelValue: { type: String, default: '' },
+  options: { type: Array, default: () => [] },
+  placeholder: { type: String, default: '선택하세요' }
 })
 
 const emit = defineEmits(['update:modelValue'])
@@ -23,165 +31,75 @@ const emit = defineEmits(['update:modelValue'])
 const isOpen = ref(false)
 const rootEl = ref(null)
 
-
-const selected = ref(props.modelValue)
-
-/* 부모에서 값 바꾸는 경우(수정 페이지에서 초기값 주기 등) 동기화 */
-watch(
-    () => props.modelValue,
-    (val) => {
-      selected.value = val
-    }
-)
-
-const toggleOpen = () => {
+function toggle() {
   isOpen.value = !isOpen.value
 }
 
-const close = () => {
+// 🔥 옵션 선택 시 변경된 경우에만 emit
+function selectOption(value) {
+  if (props.modelValue !== value) {
+    emit('update:modelValue', value)
+  }
   isOpen.value = false
 }
 
-const selectOption = (option) => {
-  selected.value = option
-  emit('update:modelValue', option)
-  close()
-}
-
-const displayLabel = computed(() =>
-    selected.value ? selected.value : props.placeholder
-)
-
-/* 바깥 클릭하면 닫기 */
+// 화면 바깥 클릭 시 닫기
 const handleClickOutside = (e) => {
   if (!rootEl.value) return
   if (!rootEl.value.contains(e.target)) {
-    close()
+    isOpen.value = false
   }
 }
 
-onMounted(() => {
-  window.addEventListener('click', handleClickOutside)
-})
+onMounted(() => window.addEventListener('click', handleClickOutside))
+onBeforeUnmount(() => window.removeEventListener('click', handleClickOutside))
 
-onBeforeUnmount(() => {
-  window.removeEventListener('click', handleClickOutside)
-})
+// 🔍 라벨 표시 (선택값이 없으면 placeholder 표시)
+const displayLabel = computed(() =>
+    props.modelValue ? props.modelValue : props.placeholder
+)
 </script>
 
-<template>
-  <div class="category-select" ref="rootEl">
-    <!-- 상단 트리거 -->
-    <button
-        type="button"
-        class="category-trigger"
-        @click.stop="toggleOpen"
-    >
-      <span
-          class="category-label"
-          :class="{ placeholder: !selected }"
-      >
-        {{ displayLabel }}
-      </span>
-
-      <span class="category-arrow" :class="{ open: isOpen }">
-        ▲
-      </span>
-    </button>
-
-    <!-- 옵션 리스트 -->
-      <ul v-if="isOpen" class="category-list">
-        <li
-            v-for="option in options"
-            :key="option"
-            class="category-item"
-            :class="{
-            active: option === selected,
-          }"
-            @click.stop="selectOption(option)"
-        >
-          {{ option }}
-        </li>
-      </ul>
-  </div>
-</template>
-
 <style scoped>
-.category-select {
+.select-wrapper {
   width: 100%;
   position: relative;
 }
-
-/* 카테고리 박스 */
-.category-trigger {
+.select-box {
   width: 100%;
   height: 44px;
-  padding: 0 16px;
   border-radius: 16px;
   border: 1px solid #636464;
-  background: #ffffff;
+  padding: 0 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   cursor: pointer;
-}
-
-.category-label {
+  background: #fff;
   font-size: 14px;
-  color: #111827;
+  box-sizing: border-box;
 }
-
-.category-label.placeholder {
-  color: #9ca3af;
-}
-
-.category-arrow {
-  font-size: 10px;
-  color: #6b7280;
-  transform: rotate(180deg);
-  transition: transform 0.15s ease;
-}
-
-.category-arrow.open {
-  transform: rotate(0deg);
-}
-
-/* 카테고리 리스트 박스 */
-.category-list {
+.select-list {
   position: absolute;
-  top: 52px;
-  left: 0;
-  right: 0;
-  margin: 0;
-  padding: 10px 16px;
-  list-style: none;
-
-  background: #f9fafb;
+  width: 100%;
+  background: #fff;
+  border: 1px solid #636464;
   border-radius: 16px;
-  border: 1px solid #e5e7eb;
-
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  margin-top: 4px;
+  list-style: none;
+  padding: 6px 0;
+  box-sizing: border-box;
   z-index: 10;
 }
-
-.category-item {
-  font-size: 14px;
-  color: #374151;
-  padding: 6px 12px;
-  border-radius: 12px;
+.select-list li {
+  padding: 8px 16px;
   cursor: pointer;
+  font-size: 14px;
 }
-
-/* 마우스 올렸을 때 */
-.category-item:hover {
-  background: #e5f2ff;
+.select-list li:hover {
+  background: #f3f4f6;
 }
-
-/* 선택된 항목 */
-.category-item.active {
-  background: #dbefff;
-  font-weight: 600;
+.arrow {
+  font-size: 10px;
 }
 </style>
