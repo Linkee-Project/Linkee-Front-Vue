@@ -173,7 +173,8 @@ Linkee는 사용자가 CS 관련 퀴즈에 참여하고 문제를 풀며 다른 
   <img src="https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white"> 
   <img src="https://img.shields.io/badge/css-1572B6?style=for-the-badge&logo=css3&logoColor=white"> 
   <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black">
-  <img src="https://img.shields.io/badge/vue.js-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white">  
+  <img src="https://img.shields.io/badge/vue.js-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white">
+  <img src="https://img.shields.io/badge/Mongodb-47A248?style=for-the-badge&logo=mongodb&logoColor=white">   
   
 
     
@@ -207,7 +208,7 @@ Linkee는 사용자가 CS 관련 퀴즈에 참여하고 문제를 풀며 다른 
   WBS를 자세히 보려면 [여기](https://www.notion.so/28cedf2444d2802cb0e4dd3d5c2223a4?v=28cedf2444d28012915d000c570f6a05&source=copy_link)를 클릭하세요
 
   <details> <summary> WBS 이미지</summary>
-  <img width="1310" height="785" alt="Image" src="https://github.com/user-attachments/assets/e5bde1ad-5158-4867-93b5-dc5919ff4b2e" />
+  <img width="1146" height="877" alt="Image" src="https://github.com/user-attachments/assets/422417b3-886d-4444-9a1a-cb3c914a2285" />
   </details>
   
 
@@ -293,7 +294,109 @@ Linkee는 사용자가 CS 관련 퀴즈에 참여하고 문제를 풀며 다른 
 
   </details>
   
-- ### 🔁 화면 기능 단위 테스트
-  화면 기능 단위 테스를 자세히 보려면 [여기](https://drive.google.com/drive/folders/1dFSrJe7ERnSbNdMgFND9wsYUytCJDg7_?usp=sharing)를 클릭하세요
- 
+  <details>
+  <summary>회원</summary>
+  <img width="888" height="351" alt="Image" src="https://github.com/user-attachments/assets/5fa5e47f-7295-4caf-8bd5-0eb2a88aa795" />
+  <img width="887" height="368" alt="Image" src="https://github.com/user-attachments/assets/7d45caf6-deb0-4285-a1fb-57ccdcf85ea4" />
+  <img width="887" height="312" alt="Image" src="https://github.com/user-attachments/assets/edf725d4-81b3-4a1f-8822-6e9abde8711f" />
+  </details>
 
+  <details>
+  <summary>문제게시판</summary>
+  <img width="1237" height="498" alt="Image" src="https://github.com/user-attachments/assets/d96e242b-424a-499b-b3ec-1a9681c96399" />
+  <img width="1236" height="497" alt="Image" src="https://github.com/user-attachments/assets/ce4d795f-f875-4ded-98c0-b7376c61ef13" />
+  <img width="823" height="621" alt="Image" src="https://github.com/user-attachments/assets/0419f687-37c4-4f89-a765-5c75d12414d6" />
+  <img width="1322" height="448" alt="Image" src="https://github.com/user-attachments/assets/35789b4c-3d00-4030-a760-76911af3c970" />
+  </details>
+
+  <details>
+  <summary>공지사항</summary>
+  <img width="907" height="383" alt="Image" src="https://github.com/user-attachments/assets/9118e3fb-7204-47f9-9938-b7494b0e62ac" />
+  <img width="907" height="382" alt="Image" src="https://github.com/user-attachments/assets/a31a647a-9983-40d7-b816-3e20e26f57f5" />
+  </details>
+
+  <details>
+  <summary>퀴즈방</summary>
+  <img width="1035" height="570" alt="Image" src="https://github.com/user-attachments/assets/157e08b0-c0dc-4bab-8a15-b31751cc1ff2" />
+  <img width="1037" height="512" alt="Image" src="https://github.com/user-attachments/assets/da1be556-ee40-42b3-96ab-81e792ca66b0" />
+  <img width="917" height="641" alt="Image" src="https://github.com/user-attachments/assets/de05ebc7-c193-4acb-86ae-09f60a6e6b98" />
+  <img width="915" height="550" alt="Image" src="https://github.com/user-attachments/assets/af169f83-a79f-4116-882b-d024a5dd1425" />
+  <img width="917" height="451" alt="Image" src="https://github.com/user-attachments/assets/8960d069-ffba-4bab-bdf0-a572fcf69812" />
+  <img width="912" height="445" alt="Image" src="https://github.com/user-attachments/assets/aff4cc44-72f4-401d-92bb-75a0b6d3a961" />
+  </details>
+
+  <details>
+  <summary>마이페이지</summary>
+  <img width="1292" height="653" alt="Image" src="https://github.com/user-attachments/assets/fff6c4cd-c76e-4a1f-a550-523910b9f40c" />
+  <img width="1292" height="428" alt="Image" src="https://github.com/user-attachments/assets/f4339550-2e76-4c42-b04d-f0462c725017" />
+  <img width="1292" height="426" alt="Image" src="https://github.com/user-attachments/assets/80362b9a-a693-494a-ae86-a83f44765bae" />
+  <img width="1291" height="430" alt="Image" src="https://github.com/user-attachments/assets/fa041597-22f7-49c4-9f3d-9a0750752b97" />
+  <img width="1290" height="426" alt="Image" src="https://github.com/user-attachments/assets/6bbeb152-4756-48e7-b5b3-8e1a9a770003" />
+  <img width="1292" height="430" alt="Image" src="https://github.com/user-attachments/assets/22aa9104-7475-4bdc-8b62-d742c16bd2a0" />
+  <img width="1291" height="427" alt="Image" src="https://github.com/user-attachments/assets/745e6ea7-cb7a-4e9f-9ef1-193774cbcaeb" />
+  <img width="1291" height="427" alt="Image" src="https://github.com/user-attachments/assets/a9e8436c-ff42-4de8-a5c7-230c559ef334" />
+  
+  </details>
+
+  <details>
+  <summary>자율방</summary>
+  <img width="872" height="681" alt="Image" src="https://github.com/user-attachments/assets/69df213a-e6b7-4149-8434-0cce367c54a0" />
+  <img width="872" height="686" alt="Image" src="https://github.com/user-attachments/assets/d22a82d5-2c12-41c4-8057-139ff7519370" />
+  img width="872" height="298" alt="Image" src="https://github.com/user-attachments/assets/d16917cb-0f06-4f8e-b084-72e99114f95f" />
+  
+  </details>
+
+  <details>
+  <summary>관리자</summary>
+  <img width="912" height="367" alt="Image" src="https://github.com/user-attachments/assets/f51265da-f4b9-4c01-b20a-4bf7f49c4e63" />
+  <img width="908" height="525" alt="Image" src="https://github.com/user-attachments/assets/49d08cbe-dcf7-4005-b8e0-c482dee67ed9" />
+  <img width="913" height="597" alt="Image" src="https://github.com/user-attachments/assets/5874ab40-3d6e-40a8-a99a-32cd27f30525" />
+  <img width="912" height="526" alt="Image" src="https://github.com/user-attachments/assets/c1a4ca5c-2b91-4d7d-99c2-cef482743477" />
+  <img width="910" height="242" alt="Image" src="https://github.com/user-attachments/assets/064f3210-e131-4056-99dd-d5d6b96695b9" />
+  <img width="457" height="642" alt="Image" src="https://github.com/user-attachments/assets/6d244d76-0e65-496a-87ca-6b4b975e047a" />
+  <img width="457" height="587" alt="Image" src="https://github.com/user-attachments/assets/29b0acd6-80de-4363-9ed1-4720957d8103" />
+  </details>
+  
+- ### 🔁 화면 기능 단위 테스트
+  
+   <!-- 첫 번째 토글 세트 -->
+   <details>
+     <summary>📁 바깥 토글 1</summary>
+   
+     <details>
+       <summary>📂 안쪽 토글 1</summary>
+       안쪽 토글 1의 내용입니다.
+     </details>
+   
+   </details>
+   
+  
+   
+   <!-- 두 번째 토글 세트 -->
+   <details>
+     <summary>📁 바깥 토글 2</summary>
+   
+     <details>
+       <summary>📂 안쪽 토글 2</summary>
+       안쪽 토글 2의 내용입니다.
+     </details>
+   
+   </details>
+
+   <!-- 메인페이지 세트 -->
+   <details>
+     <summary>📁 메인페이지</summary>
+   
+     <details>
+       <summary>📂 MAIN-001 </summary>
+       안쪽 토글 1의 내용입니다.
+     </details>
+   
+   </details>
+
+---
+## ⚠️ 5. Trouble Shooting
+
+
+
+---
