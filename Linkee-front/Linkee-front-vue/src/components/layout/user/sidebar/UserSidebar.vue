@@ -13,6 +13,7 @@ import { useAuthStore } from "@/stores/authStore.js";
 import { fetchMyRelations } from "@/api/relationApi.js";
 import {createChatRoom, fetchMyChatRooms} from "@/api/chatApi.js";
 import { inviteToChatRoom } from "@/api/chatApi.js";
+import { fetchRoomMembers } from "@/api/chatApi.js";
 
 const toast = inject("toast");
 
@@ -154,25 +155,31 @@ const isInviteModal = ref(false);
 const selectedRoom = ref(null);
 const handleInvite = async ({ roomId, invited }) => {
   try {
-    await inviteToChatRoom(roomId, invited, authStore.accessToken);
+    await inviteToChatRoom(roomId, invited);
+
+    // 초대 성공 → 최신 멤버 다시 불러오기
+    const res = await fetchRoomMembers(roomId);
+
+    const updatedMembers = res.data.map(m => ({
+      id: m.userId,
+      name: m.userNickname,
+      joinedAt: m.joinedAt,
+      avatar: "/src/assets/profile_img.svg"
+    }));
 
     const room = rooms.value.find(r => r.id === roomId);
     if (room) {
-      if (!room.members) room.members = [];
-      invited.forEach(user => {
-        if (!room.members.some(m => m.id === user.id)) {
-          room.members.push(user);
-        }
-      });
+      room.members = updatedMembers;
     }
-    console.log("token:", authStore.accessToken);
 
     toast?.show("친구가 성공적으로 초대되었습니다!");
+
   } catch (err) {
     console.error("초대 실패:", err);
     toast?.show("초대 중 오류가 발생했습니다.");
   }
 };
+
 //=================================================================================
 // 채팅 모달
 
@@ -237,11 +244,26 @@ const handleAction = async (type) => {
   if (type === "enter") {
     const room = selectedFriend.value;
 
-    // ⭐ 객체를 새로 만들어야 반응형 전달됨
+    // 채팅 모달 열기 전 멤버 먼저 불러오기!!
+    try {
+      const res = await fetchRoomMembers(room.id);
+
+      const members = res.data.map(m => ({
+        id: m.userId,
+        name: m.userNickname,
+        joinedAt: m.joinedAt,
+        avatar: "/src/assets/profile_img.svg" // 기본 프로필
+      }));
+
+      room.members = members;  // 반응형으로 저장
+    } catch (e) {
+      console.error("멤버 조회 실패:", e);
+      room.members = [];
+    }
+
+    // 채팅 모달 오픈 로직
     currentRoom.value = { ...room };
-
     roomMessages.value = room.messages || [];
-
     isChatModal.value = true;
   }
 

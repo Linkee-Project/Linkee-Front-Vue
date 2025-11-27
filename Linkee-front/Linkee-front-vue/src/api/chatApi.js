@@ -27,3 +27,8 @@ export async function inviteToChatRoom(roomId, invitedUsers, token) {
         }
     );
 }
+
+export async function fetchRoomMembers(roomId) {
+    return api.get(`/chat/rooms/${roomId}/members`);
+}
+
