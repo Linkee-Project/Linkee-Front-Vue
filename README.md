@@ -24,8 +24,75 @@
 ## 📂 프로젝트 파일 구조
 
 ```
-linkee
-\
+Linkee-front-vue
+│
+├── .env                       # 환경 변수 설정 파일 (API URL, 모드 등)
+├── .gitignore                 # Git에서 제외할 파일/폴더 정의
+├── index.html                 # Vue 앱 진입점 HTML 파일
+├── jsconfig.json              # VSCode용 JS 경로/자동완성 설정
+├── package-lock.json          # 패키지 버전 잠금 파일
+├── package.json               # 프로젝트 메타정보 및 의존성/스크립트
+├── README.md                  # 프로젝트 설명 문서
+├── vite.config.js             # Vite 개발/빌드 설정
+│
+├── .idea/                     # IntelliJ/WebStorm 환경 설정
+├── .vscode/                   # VSCode 환경 설정 (권장 확장 포함)
+│   └── extensions.json
+│
+├── dist/                      # 빌드 결과물(배포용)
+├── node_modules/              # 패키지 의존성 폴더
+├── public/                    # 정적 파일 폴더 (빌드 시 그대로 복사)
+│   └── favicon.ico            # 파비콘
+│
+└── src/                       # Vue 앱의 모든 소스 코드
+    ├── App.vue                # 최상위 루트 컴포넌트
+    ├── main.js                # 앱 생성, 라우터/스토어 모듈 추가
+    │
+    ├── api/                   # 백엔드 API 호출 모음
+    │   ├── alarmApi.js        # 알림 API
+    │   ├── authApi.js         # 로그인/인증 API
+    │   ├── axios.js           # Axios 인스턴스 및 인터셉터 설정
+    │   ├── chatRoomApi.js     # 채팅방 관련 API
+    │   ├── inquiryApi.js      # 문의 API
+    │   ├── noticeApi.js       # 공지사항 API
+    │   ├── problemApi.js      # 문제(게시판) API
+    │   ├── relationApi.js     # 친구/팔로우 API
+    │   └── reportApi.js       # 신고 API
+    │
+    ├── assets/                # 이미지/아이콘 등 정적 파일
+    │   ├── bell.svg
+    │   ├── bell_check.svg
+    │   ├── logo.svg
+    │   ├── profile_img.svg
+    │   └── icon/
+    │       ├── invite.png
+    │       └── ...
+    │
+    ├── components/            # 재사용 컴포넌트
+    │   ├── base/              # 기본 UI 컴포넌트(버튼, 폼, 모달 등)
+    │   ├── common/            # 공용 모달 등 프로젝트 전역 컴포넌트
+    │   ├── home/              # 홈 화면 카드/모달
+    │   ├── layout/            # 레이아웃 관련(UI 틀 구조)
+    │   │   ├── admin/navbar/
+    │   │   │   └── AdminNavbar.vue
+    │   │   └── user/
+    │   │       ├── navbar/
+    │   │       │   └── UserNavbar.vue
+    │   │       └── sidebar/
+    │   │           └── UserSidebar.vue
+    │   ├── mypage/            # 마이페이지 관련 (북마크, 등급, 기록 등)
+    │   ├── Problem/           # 문제 게시판 관련 UI
+    │   └── quiz/              # 퀴즈/대기실 관련 UI
+    │
+    ├── router/                # Vue Router 설정 (페이지 라우팅)
+    │   └── index.js
+    │
+    ├── stores/                # Pinia 스토어 (상태 관리)
+    │   ├── authStore.js       # 인증/유저 상태
+    │   ├── chatgameStore.js   # 채팅 및 게임 상태
+    │   └── ...
+    │
+    └── utils/                 # 유틸 함수 모음 (필요 시)
 
 ```
 
