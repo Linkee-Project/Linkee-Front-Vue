@@ -1,7 +1,6 @@
 # Linkee-api
 
 ---
----
 # 🌟링키 Linkee
 <div align="center">
 <img width="600" height="600" alt="ChatGPT Image 2025년 10월 15일 오후 05_09_11 (1) (1)" src="https://github.com/user-attachments/assets/ab453c50-5f3a-4732-baf8-25057305de24" />
@@ -171,6 +170,13 @@ Linkee는 사용자가 CS 관련 퀴즈에 참여하고 문제를 풀며 다른 
   <img src="https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=mariadb&logoColor=white"/>
   <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white"/>
   <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"/>
+  <img src="https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white"> 
+  <img src="https://img.shields.io/badge/css-1572B6?style=for-the-badge&logo=css3&logoColor=white"> 
+  <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black">
+  <img src="https://img.shields.io/badge/vue.js-4FC08D?style=for-the-badge&logo=vue.js&logoColor=white">  
+  
+
+    
 </p>
 
 
@@ -182,6 +188,7 @@ Linkee는 사용자가 CS 관련 퀴즈에 참여하고 문제를 풀며 다른 
 <img src="https://img.shields.io/badge/DBeaver-382923?style=for-the-badge&logo=dbeaver&logoColor=white"/>
 <img src="https://img.shields.io/badge/IntelliJ_IDEA-000000?style=for-the-badge&logo=intellij-idea&logoColor=white"/>
 <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white"/>
+<img src="https://img.shields.io/badge/Figma-E34F26?style=for-the-badge&logo=figma&logoColor=white"> 
 </p>
 
 ### 👥  Collaboration      
