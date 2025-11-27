@@ -1,5 +1,6 @@
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { defineProps, defineEmits, inject } from "vue";
+import { checkAlarmBox, deleteAlarmBox } from "@/api/alarmApi.js"; // Import API functions
 
 const props = defineProps({
   modelValue: Boolean,
@@ -9,12 +10,32 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(["update:modelValue", "action"]);
+const emit = defineEmits(["update:modelValue", "action", "refreshNotifications"]); // Add refreshNotifications event
+
+const toast = inject("toast");
 
 const close = () => emit("update:modelValue", false);
 
-const handleAction = (item) => {
-  emit("action", item);
+const handleCheck = async (alarmBoxId) => {
+  try {
+    await checkAlarmBox(alarmBoxId);
+    toast.show("알림을 읽음 처리했습니다.");
+    emit("refreshNotifications"); // 알림 목록 새로고침 요청
+  } catch (error) {
+    console.error("Failed to mark notification as read:", error);
+    toast.show("알림 읽음 처리 실패 😢");
+  }
+};
+
+const handleDelete = async (alarmBoxId) => {
+  try {
+    await deleteAlarmBox(alarmBoxId);
+    toast.show("알림을 삭제했습니다.");
+    emit("refreshNotifications"); // 알림 목록 새로고침 요청
+  } catch (error) {
+    console.error("Failed to delete notification:", error);
+    toast.show("알림 삭제 실패 😢");
+  }
 };
 </script>
 
@@ -31,20 +52,13 @@ const handleAction = (item) => {
         <div v-for="(n, i) in props.notifications" :key="i" class="noti-item">
 
           <div class="noti-text">
-            <!-- 동적으로 바뀌는 파란 부분 -->
-            <span class="highlight">{{ n.user }}</span>
-
-            <!-- 고정 문구 -->
-            <span class="fixed">{{ n.message }}</span>
-
-            <!-- 문제/문의 등 제목도 파란색 -->
-            <span v-if="n.title" class="highlight">“{{ n.title }}”</span>
+            <span :class="['message', n.isChecked ? 'read' : 'unread']">{{ n.message }}</span>
+            <span class="time">{{ n.time }}</span>
           </div>
-
-          <!-- 우측 버튼 -->
-          <button class="noti-btn" @click="handleAction(n)">
-            {{ n.button }}
-          </button>
+          <div class="noti-actions">
+            <button v-if="!n.isChecked" class="action-btn check-btn" @click="handleCheck(n.id)">✔</button>
+            <button class="action-btn delete-btn" @click="handleDelete(n.id)">✖</button>
+          </div>
         </div>
       </div>
 
@@ -121,10 +135,10 @@ const handleAction = (item) => {
   background: #f7faff;
   border: 1px solid #d9e6ff;
   border-radius: 14px;
-  padding: 18px 16px;
+  padding: 10px 16px; /* 패딩 조정 */
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: center; /* 세로 중앙 정렬 */
   gap: 12px;
   transition: 0.2s;
 }
@@ -135,41 +149,68 @@ const handleAction = (item) => {
   transform: translateX(4px);
 }
 
+/* 알림 액션 버튼 컨테이너 */
+.noti-actions {
+  display: flex;
+  gap: 5px; /* 버튼 사이 간격 */
+}
+
+.action-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.check-btn {
+  background-color: #5cb85c; /* 초록색 */
+  color: white;
+}
+
+.check-btn:hover {
+  background-color: #4cae4c;
+}
+
+.delete-btn {
+  background-color: #f0ad4e; /* 주황색 */
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #ec971f;
+}
+
 /* 🔵 텍스트 영역 */
 .noti-text {
   font-size: 14px;
   line-height: 1.45;
   display: flex;
   flex-direction: column;
+  flex-grow: 1; /* 메시지가 공간을 채우도록 */
 }
 
-.highlight {
-  color: #1b4bb7;
-  font-weight: 600;
+.message {
+  font-weight: 500;
+  margin-bottom: 4px; /* 메시지와 시간 사이 간격 */
 }
 
-.fixed {
-  color: #2c2c2c;
-  margin-left: 4px;
+.message.unread {
+  color: #0094F6; /* 파란색 */
 }
 
-/* 🔵 우측 버튼 */
-.noti-btn {
-  min-width: 80px;
-  background: linear-gradient(135deg, #478aff, #61b1ff);
-  border: none;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  transition: 0.2s;
-  white-space: nowrap;
+.message.read {
+  color: #2c2c2c; /* 검정색 */
 }
 
-.noti-btn:hover {
-  background: #1e72ff;
-  transform: translateY(-1px);
+.time {
+  color: #888;
+  font-size: 12px;
 }
 </style>

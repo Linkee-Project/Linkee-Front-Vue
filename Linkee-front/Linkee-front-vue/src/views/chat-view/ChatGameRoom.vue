@@ -198,6 +198,10 @@ const auth = useAuthStore();
 const roomId = route.params.roomId;
 const roomTitle = route.query.title;
 
+const roomCode = route.query.roomCode
+    ? Number(route.query.roomCode)
+    : null;
+
 chat.init(auth.accessToken, roomId);
 
 /* ---------------------------------------------------
@@ -268,22 +272,63 @@ const displayUsers = computed(() => {
    LIFECYCLE
 --------------------------------------------------- */
 onMounted(async () => {
-  // ⭐ 1) 방 입장 먼저 해야 함
-  await fetch(`http://localhost:8080/api/v1/chat/rooms/${roomId}/join`, {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + auth.accessToken,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ roomCode: null }) // 비공개면 코드 넣고, 공개면 null
-  });
 
-  // 그 다음 WebSocket 연결
-  chat.connectSocket();
+  console.log("🔥 ChatGameRoom 초기화");
+  console.log("roomId:", roomId, "roomCode:", roomCode);
 
-  //  메시지 / 멤버 조회
-  chat.loadMessages();
-  chat.loadMembers();
+  // 🔥 1) 스토어 토큰 초기화 (새로고침 대비)
+  if (!auth.accessToken) {
+    console.log("⚠ accessToken 없음 → localStorage에서 복구");
+    await auth.loadFromStorage();
+  }
+
+  if (!auth.accessToken) {
+    alert("로그인이 필요합니다.");
+    return router.replace("/login");
+  }
+
+  // 🔥 2) 채팅 스토어 초기화
+  chat.init(auth.accessToken, roomId);
+
+  try {
+    // 🔥 3) 방 입장 (비밀번호는 리스트에서 전달된 roomCode 사용)
+    console.log("REST Join Call 시작");
+
+    const joinRes = await fetch(
+        `http://localhost:8080/api/v1/chat/rooms/${roomId}/join`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + auth.accessToken,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ roomCode }),
+        }
+    );
+
+    if (!joinRes.ok) {
+      const msg = await joinRes.text();
+      alert("입장 실패: " + msg);
+      return router.replace("/chat/game/rooms");
+    }
+
+    // 🔥 4) WebSocket 연결
+    console.log("WebSocket Connect 시작");
+    await chat.connectSocket();
+
+    // 🔥 5) 기존 메시지 로드
+    console.log("Messages Load");
+    await chat.loadMessages();
+
+    // 🔥 6) 참여자 목록 로드
+    console.log("Members Load");
+    await chat.loadMembers();
+
+  } catch (err) {
+    console.error("방 진입 중 오류:", err);
+    alert("방 입장 중 문제가 발생했습니다.");
+    router.replace("/chat/game/rooms");
+  }
 });
 
 onBeforeUnmount(() => {
@@ -317,8 +362,25 @@ const invite = (friend) => {
   showInviteModal.value = false;
 };
 
-const leaveRoom = () => {
+const leaveRoom = async () => {
+  try {
+    // 1) REST 퇴장
+    await fetch(`http://localhost:8080/api/v1/chat/rooms/${roomId}/leave`, {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + auth.accessToken,
+        "Content-Type": "application/json"
+      }
+    });
+
+  } catch(e) {
+    console.warn("REST 퇴장 실패 (소켓으로만 처리됨)");
+  }
+
+  // 2) WebSocket 퇴장
   chat.leaveRoom();
+
+  // 3) 방 목록 화면으로 이동
   router.replace("/chat/game/rooms");
 };
 

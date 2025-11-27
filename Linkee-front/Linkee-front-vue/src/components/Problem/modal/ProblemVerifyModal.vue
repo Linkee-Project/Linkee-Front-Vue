@@ -35,8 +35,8 @@
       <section class="section">
         <h3 class="section-title">보기</h3>
         <ul class="option-list">
-          <li v-for="(opt, idx) in questionData.options" :key="idx">
-            <strong>{{ idx + 1 }}번</strong> {{ opt }}
+          <li v-for="opt in questionData.options" :key="opt.optionId">
+            <strong>{{ opt.optionIndex }}번</strong> {{ opt.optionText }}
           </li>
         </ul>
       </section>
@@ -44,7 +44,7 @@
       <!-- 정답 -->
       <section class="section answer-section">
         <span class="answer-label">정답 :</span>
-        <span class="answer-value">{{ questionData.answer }}번</span>
+        <span class="answer-value">{{ correctAnswerIndex }}번</span>
       </section>
     </div>
 
@@ -67,7 +67,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
+import { defineProps, defineEmits, computed } from 'vue'
 import BaseModal from '@/components/base/modal/BaseModal.vue';
 import AdminButton from '@/components/base/button/AdminButton.vue';
 
@@ -78,13 +78,22 @@ const props = defineProps({
 
 const emit = defineEmits(['update:visible', 'verify']);
 
-const closeModal = () => {
+const correctAnswerIndex = computed(() => {
+  if (!props.questionData || !props.questionData.options) {
+    return null;
+  }
+  const correctOption = props.questionData.options.find(opt => opt.isCorrected === 'Y');
+  return correctOption ? correctOption.optionIndex : null;
+});
+
+
+  const closeModal = () => {
   emit('update:visible', false);
 };
 
 const onVerifyClick = () => {
   if (props.questionData) {
-    emit('verify', props.questionData.id);
+    emit('verify', props.questionData.questionId);
   }
 };
 </script>

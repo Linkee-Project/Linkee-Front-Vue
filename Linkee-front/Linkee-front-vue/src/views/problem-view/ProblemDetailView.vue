@@ -75,11 +75,18 @@
             </div>
           </div>
 
-          <!-- 정답 표시: options 배열에서 isCorrected가 'Y'인 항목을 찾아 표시 -->
+          <!-- 정답 표시: problemDetail.questionAnswer 사용 -->
           <div class="answer-text">
             정답 :
-            <template v-for="(opt, idx) in problemDetail.options">
-                <span v-if="opt.isCorrected === 'Y'">{{ opt.optionIndex }}번 {{ opt.optionText }}</span>
+            <template v-if="problemDetail.questionAnswer && problemDetail.options">
+                <span v-for="(opt) in problemDetail.options" :key="opt.optionId">
+                    <template v-if="opt.optionIndex === problemDetail.questionAnswer">
+                        {{ opt.optionIndex }}번 {{ opt.optionText }}
+                    </template>
+                </span>
+            </template>
+            <template v-else>
+                <span>정답 정보 없음</span>
             </template>
           </div>
         </section>
